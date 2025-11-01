@@ -1,0 +1,11 @@
+# 中文表格会被 prettier 对齐成大片补白，改一次整张表全变
+*.md
+
+# 规格文档不进版本库，也没必要格式化
+docs/
+
+# 锁文件和产物不碰
+pnpm-lock.yaml
+dist/
+coverage/
+node_modules/

@@ -1,0 +1,35 @@
+# 依赖
+node_modules/
+.pnpm-store/
+
+# 构建产物
+dist/
+dist-electron/
+out/
+build/
+release/
+*.tsbuildinfo
+
+# 环境变量（真实值只在本地）
+.env
+.env.local
+.env.*.local
+
+# 规格文档只在本地看，不进仓库
+docs/
+
+# 本地产物
+uploads/
+coverage/
+.turbo/
+*.log
+
+# 编辑器 / 系统
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# 提交卡口产生的临时备份
+*.orig
+*.rej
