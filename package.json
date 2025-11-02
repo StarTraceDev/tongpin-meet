@@ -12,6 +12,9 @@
     "test": "pnpm -r --if-present test"
   },
   "devDependencies": {
+    "@tongpin/config": "workspace:*",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
     "typescript": "catalog:"
   }
 }

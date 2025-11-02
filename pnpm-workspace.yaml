@@ -22,6 +22,7 @@ catalog:
   vue-eslint-parser: ^10.4.1
   globals: ^16.0.0
   prettier: ^3.9.0
+  eslint-config-prettier: ^10.1.8
   husky: ^9.1.7
   lint-staged: ^17.6.0
   '@commitlint/cli': ^20.5.3
