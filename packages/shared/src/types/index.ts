@@ -1,0 +1,49 @@
+/**
+ * 全部从 zod schema 推导（04 §4.1），不手写两遍类型。
+ * 前端不许自己写 interface 描述接口返回，一律从这里取。
+ */
+import type { z } from 'zod'
+
+import type {
+  loginByPasswordSchema,
+  loginBySmsSchema,
+  qrConfirmSchema,
+  refreshSessionSchema,
+  sendSmsSchema,
+} from '../schemas/auth'
+import type { paginationQuerySchema, problemSchema } from '../schemas/common'
+import type {
+  claimHostSchema,
+  createMeetingSchema,
+  joinAsGuestSchema,
+  joinMeetingSchema,
+  updateMeetingSchema,
+} from '../schemas/meeting'
+import type { mediaStateSchema } from '../schemas/participant'
+import type { wsEnvelopeSchema, wsTicketSchema } from '../schemas/ws'
+
+export type LoginByPasswordInput = z.infer<typeof loginByPasswordSchema>
+export type LoginBySmsInput = z.infer<typeof loginBySmsSchema>
+export type SendSmsInput = z.infer<typeof sendSmsSchema>
+export type QrConfirmInput = z.infer<typeof qrConfirmSchema>
+export type RefreshSessionInput = z.infer<typeof refreshSessionSchema>
+
+export type PaginationQuery = z.infer<typeof paginationQuerySchema>
+export type Problem = z.infer<typeof problemSchema>
+
+export type CreateMeetingInput = z.infer<typeof createMeetingSchema>
+export type UpdateMeetingInput = z.infer<typeof updateMeetingSchema>
+export type JoinMeetingInput = z.infer<typeof joinMeetingSchema>
+export type JoinAsGuestInput = z.infer<typeof joinAsGuestSchema>
+export type ClaimHostInput = z.infer<typeof claimHostSchema>
+
+export type MediaState = z.infer<typeof mediaStateSchema>
+export type WsEnvelope = z.infer<typeof wsEnvelopeSchema>
+export type WsTicket = z.infer<typeof wsTicketSchema>
+
+export type Paginated<T> = {
+  items: T[]
+  total: number
+  page: number
+  pageSize: number
+}

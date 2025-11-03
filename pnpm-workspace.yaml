@@ -2,14 +2,15 @@ packages:
   - apps/*
   - packages/*
 
-# pnpm 10+ 默认不跑依赖的安装脚本，这几个装成空壳就跑不起来
-onlyBuiltDependencies:
-  - argon2
-  - electron
-  - esbuild
-  - prisma
-  - '@prisma/client'
-  - '@prisma/engines'
+# pnpm 11 用 allowBuilds 逐包放行安装脚本（v11 已移除 onlyBuiltDependencies）；
+# 未列出的包默认不跑脚本，且 strictDepBuilds 会让 install 直接失败
+allowBuilds:
+  argon2: true
+  electron: true
+  esbuild: true
+  prisma: true
+  '@prisma/client': true
+  '@prisma/engines': true
 
 # 全仓唯一版本出处：子包一律写 catalog:，不在各自 package.json 里写版本号
 catalog:
