@@ -1,0 +1,79 @@
+# 本地基础设施，四个服务全部可选：
+#   docker compose up -d                   # 只起 PostgreSQL（唯一硬依赖）
+#   docker compose --profile full up -d    # PG + Redis + MinIO + LiveKit 全起
+#
+# Redis / MinIO / LiveKit 默认不需要：服务端分别走内存 Map / 本地 ./uploads / RTC_PROVIDER=mock，
+# 要接真实现时，在 server/.env 里把 *_PROVIDER 切过去并填下面的连接串。
+name: tongpin-meet
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tongpin-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123456}
+      POSTGRES_DB: ${POSTGRES_DB:-tongpin}
+    ports:
+      - '5432:5432'
+    volumes:
+      - tongpin-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-tongpin}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ---- 以下三个都在 profile "full" 里，默认不启动 ----
+
+  redis:
+    image: redis:7-alpine
+    container_name: tongpin-redis
+    profiles: ['full']
+    restart: unless-stopped
+    # 只当缓存用，不落盘；CACHE_PROVIDER=redis 时填 REDIS_URL=redis://localhost:6379
+    command: ['redis-server', '--appendonly', 'no']
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    container_name: tongpin-minio
+    profiles: ['full']
+    restart: unless-stopped
+    # STORAGE_PROVIDER=s3 时：S3_ENDPOINT=http://localhost:9000，控制台在 http://localhost:9001
+    # 镜像 tag 在 M12 发版前固定成 release，不要一直跟 latest
+    command: ['server', '/data', '--console-address', ':9001']
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minioadmin}
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - tongpin-minio-data:/data
+
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: tongpin-livekit
+    profiles: ['full']
+    restart: unless-stopped
+    # RTC_PROVIDER=livekit 时：LIVEKIT_URL=ws://localhost:7880 加同一组 key/secret
+    # --dev 只适合本机；生产要挂 livekit.yaml（TLS / turn / 外部 IP）
+    command: ['--dev', '--bind', '0.0.0.0']
+    environment:
+      LIVEKIT_KEYS: '${LIVEKIT_API_KEY:-devkey}: ${LIVEKIT_API_SECRET:-devsecret}'
+    ports:
+      - '7880:7880'
+      - '7881:7881'
+      - '50000-50100:50000-50100/udp'
+
+volumes:
+  tongpin-pg-data:
+  tongpin-minio-data:
