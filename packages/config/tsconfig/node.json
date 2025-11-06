@@ -7,6 +7,7 @@
     "types": ["node"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
     "verbatimModuleSyntax": false,
     "noEmit": false,
     "sourceMap": true

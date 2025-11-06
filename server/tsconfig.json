@@ -1,0 +1,14 @@
+{
+  "extends": "@tongpin/config/tsconfig/node.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": ".",
+    "outDir": "./dist",
+    "paths": {
+      "@app/common": ["libs/common/src/index.ts"],
+      "@app/common/*": ["libs/common/src/*"]
+    }
+  },
+  "include": ["apps/**/*.ts", "libs/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

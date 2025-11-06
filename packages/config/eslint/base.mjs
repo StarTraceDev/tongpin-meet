@@ -1,6 +1,6 @@
-import js from '@eslint/js';
-import prettier from 'eslint-config-prettier';
-import tseslint from 'typescript-eslint';
+import js from '@eslint/js'
+import prettier from 'eslint-config-prettier'
+import tseslint from 'typescript-eslint'
 
 // 与平台无关的通用规则，node / vue 预设都在此基础上叠加
 export default tseslint.config(
@@ -32,6 +32,13 @@ export default tseslint.config(
       'prefer-const': 'error',
     },
   },
+  {
+    // 纯 JS 文件没法写类型注解，TS 专用的返回类型规则对它们没有意义
+    files: ['**/*.{js,mjs,cjs}'],
+    rules: {
+      '@typescript-eslint/explicit-function-return-type': 'off',
+    },
+  },
   // 必须放最后：关掉所有与 prettier 冲突的格式类规则
   prettier,
-);
+)

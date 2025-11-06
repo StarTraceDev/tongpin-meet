@@ -1,0 +1,38 @@
+{
+  "name": "@tongpin/server",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build api && nest build gateway && nest build ai",
+    "dev": "node scripts/dev.mjs",
+    "start": "node dist/apps/api/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/platform-express": "catalog:",
+    "@nestjs/platform-ws": "catalog:",
+    "@nestjs/websockets": "catalog:",
+    "@tongpin/shared": "workspace:*",
+    "reflect-metadata": "catalog:",
+    "rxjs": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "catalog:",
+    "@nestjs/testing": "catalog:",
+    "@tongpin/config": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/supertest": "catalog:",
+    "eslint": "catalog:",
+    "supertest": "catalog:",
+    "ts-loader": "catalog:",
+    "unplugin-swc": "catalog:",
+    "@swc/core": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
