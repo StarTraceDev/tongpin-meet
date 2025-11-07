@@ -30,6 +30,13 @@ jobs:
       - name: 安装依赖
         run: pnpm install --frozen-lockfile
 
+      # 生成的 Prisma Client 不进版本库，typecheck / build 前必须先产出来
+      - name: 生成 Prisma Client
+        if: hashFiles('server/prisma/schema.prisma') != ''
+        env:
+          DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/tongpin_test
+        run: pnpm --filter @tongpin/server db:generate
+
       # 根脚本内部是 `pnpm -r --if-present`：M0 还没有任何包带 build 脚本，
       # 直接写 `pnpm -r build` 会以 ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT 失败
       - name: 类型检查

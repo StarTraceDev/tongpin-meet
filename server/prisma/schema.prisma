@@ -1,0 +1,194 @@
+// 03 §5：Prisma 7，provider = "prisma-client"，输出到 libs/infra/src/generated/prisma。
+// 起步先落核心 8 张表（组织 5 + 会议 2 + 会议事件 1），其余域随 M3/M4/M5 的迁移增量补。
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../libs/infra/src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================================
+// 组织域：User / Dept / Role / UserRole / DeviceSession
+// ============================================================================
+
+model User {
+  id           String     @id @default(cuid()) // 主键（cuid，禁止数字自增）
+  legacyId     Int?       @unique // 存量系统数字 ID（迁移对照用）
+  phone        String     @unique // 手机号：唯一登录凭据
+  passwordHash String? // argon2 哈希；null = 未设密码
+  name         String // 昵称
+  avatarUrl    String? // 头像地址
+  email        String? // 邮箱
+  deptId       String? // 主部门 ID（超管可为空）
+  tokenVersion Int        @default(0) // +1 即让所有已签发 access 失效
+  status       UserStatus @default(ACTIVE) // 账号状态
+  lastLoginAt  DateTime? // 最近登录时间
+  createdAt    DateTime   @default(now()) // 创建时间
+  updatedAt    DateTime   @updatedAt // 更新时间
+  deletedAt    DateTime? // 软删标记
+
+  dept           Dept?                @relation(fields: [deptId], references: [id])
+  roles          UserRole[]
+  sessions       DeviceSession[]
+  participations MeetingParticipant[]
+  hostedMeetings Meeting[]            @relation("MeetingHost")
+
+  @@index([deptId])
+  @@map("users")
+}
+
+model Dept {
+  id        String    @id @default(cuid()) // 主键
+  legacyId  Int?      @unique // 存量系统数字 ID
+  name      String // 部门名称
+  parentId  String? // 上级部门 ID（树形，顶级为空）
+  sort      Int       @default(0) // 排序值（小在前）
+  createdAt DateTime  @default(now()) // 创建时间
+  updatedAt DateTime  @updatedAt // 更新时间
+  deletedAt DateTime? // 软删标记
+
+  parent   Dept?  @relation("DeptTree", fields: [parentId], references: [id])
+  children Dept[] @relation("DeptTree")
+  users    User[]
+
+  @@index([parentId])
+  @@map("depts")
+}
+
+model Role {
+  id          String    @id @default(cuid()) // 主键
+  code        String    @unique // 角色编码（SUPER_ADMIN / ADMIN / MEMBER ...）
+  name        String // 角色名称
+  permissions Json      @default("[]") // 权限点数组
+  builtin     Boolean   @default(false) // 内置角色不可删
+  createdAt   DateTime  @default(now()) // 创建时间
+  updatedAt   DateTime  @updatedAt // 更新时间
+  deletedAt   DateTime? // 软删标记
+
+  users UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  id        String   @id @default(cuid()) // 主键
+  userId    String // 用户 ID
+  roleId    String // 角色 ID
+  grantedAt DateTime @default(now()) // 授予时间
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+model DeviceSession {
+  id              String    @id // jti，由签发方生成
+  userId          String // 所属用户
+  deviceId        String // 客户端设备标识
+  refreshHash     String // refresh token 哈希（只存哈希）
+  prevRefreshHash String? // 上一次 refresh 哈希：检测 token 复用
+  ua              String? // User-Agent
+  ip              String? // 登录 IP
+  expiresAt       DateTime // refresh 过期时间
+  revokedAt       DateTime? // 吊销时间
+  createdAt       DateTime  @default(now()) // 登录时间
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("device_sessions")
+}
+
+// ============================================================================
+// 会议域：Meeting / MeetingParticipant / MeetingEvent
+// ============================================================================
+
+model Meeting {
+  id            String        @id @default(cuid()) // 主键
+  meetingNo     String        @unique // 9 位随机数字，对外可见
+  title         String // 会议主题
+  hostId        String // 主持人用户 ID（可转移）
+  roomName      String        @unique // RTC 房间名（服务端生成 lk_{id}_{rand}）
+  status        MeetingStatus @default(SCHEDULED) // 会议状态
+  startAt       DateTime // 计划开始时间
+  endAt         DateTime // 计划结束时间
+  timezone      String        @default("Asia/Shanghai") // 时区（IANA）
+  passwordHash  String? // 会议密码哈希（永不明文返回）
+  settings      Json // 会议设置（muteOnJoin / watermark / allowGuest / autoRecord）
+  actualStartAt DateTime? // 实际开始时间
+  actualEndAt   DateTime? // 实际结束时间
+  createdAt     DateTime      @default(now()) // 创建时间
+  updatedAt     DateTime      @updatedAt // 更新时间
+  deletedAt     DateTime? // 软删标记
+
+  host         User                 @relation("MeetingHost", fields: [hostId], references: [id])
+  participants MeetingParticipant[]
+  events       MeetingEvent[]
+
+  @@index([hostId, startAt])
+  @@index([status, startAt])
+  @@map("meetings")
+}
+
+enum MeetingStatus {
+  SCHEDULED // 已预定（未开始）
+  ONGOING // 进行中
+  ENDED // 已结束
+  CANCELLED // 已取消
+  EXPIRED // 超时未开始而失效
+}
+
+model MeetingParticipant {
+  id          String          @id @default(cuid()) // 主键
+  legacyId    Int?            @unique // 存量系统数字 ID
+  meetingId   String // 会议 ID
+  userId      String? // 成员用户 ID（游客为空）
+  guestName   String? // 游客昵称（用户为空时必填）
+  role        ParticipantRole @default(ATTENDEE) // 会中角色
+  joinedAt    DateTime? // 实际入会时间
+  leftAt      DateTime? // 离会时间
+  mediaState  Json // { audioOn, videoOn, screenSharing }
+  createdAt   DateTime        @default(now()) // 加入名单时间
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
+
+  @@unique([meetingId, userId])
+  @@index([userId])
+  @@map("meeting_participants")
+}
+
+enum ParticipantRole {
+  HOST // 主持人
+  COHOST // 联席主持人
+  ATTENDEE // 普通参会人
+  GUEST // 游客
+}
+
+/// C1 权威事件落库，供重连 lastSeq 增量回放
+model MeetingEvent {
+  id        String   @id @default(cuid()) // 主键
+  meetingId String // 会议 ID
+  seq       Int // 会议内自增序号（服务端生成）
+  type      String // 事件类型（meeting.member.joined ...）
+  fromUid   String? // 触发者用户 ID
+  data      Json // 事件负载（业务字段一律放 data）
+  ts        DateTime @default(now()) // 服务端时间戳
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+
+  @@unique([meetingId, seq])
+  @@map("meeting_events")
+}
+
+enum UserStatus {
+  ACTIVE // 正常
+  DISABLED // 已禁用
+}

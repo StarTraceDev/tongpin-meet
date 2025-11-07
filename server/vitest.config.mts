@@ -7,5 +7,9 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['{apps,libs}/**/*.spec.ts'],
+    // PrismaService 构造时要求 DATABASE_URL；测试不查库，给个不会被连的占位值
+    env: {
+      DATABASE_URL: 'postgresql://prisma:prisma@127.0.0.1:5432/tongpin_test',
+    },
   },
 })

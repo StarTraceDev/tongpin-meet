@@ -1,6 +1,7 @@
 import { type INestApplication, Logger, type Type } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 
+import { loadEnvFile } from './env'
 import { ProblemJsonFilter } from './filters/problem-json.filter'
 import { ZodValidationPipe } from './pipes/zod-validation.pipe'
 
@@ -28,6 +29,7 @@ export async function bootstrap({
   port,
   configure,
 }: BootstrapOptions): Promise<void> {
+  loadEnvFile()
   const app = await NestFactory.create(module)
   configureApp(app)
   configure?.(app)

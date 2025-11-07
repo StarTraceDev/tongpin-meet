@@ -33,3 +33,6 @@ coverage/
 # 提交卡口产生的临时备份
 *.orig
 *.rej
+
+# Prisma 生成的客户端（CI 里 pnpm db:generate 现生成）
+server/libs/infra/src/generated/

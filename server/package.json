@@ -8,7 +8,11 @@
     "start": "node dist/apps/api/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@nestjs/common": "catalog:",
@@ -19,7 +23,9 @@
     "@tongpin/shared": "workspace:*",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@prisma/client": "catalog:",
+    "@prisma/adapter-pg": "catalog:"
   },
   "devDependencies": {
     "@nestjs/cli": "catalog:",
@@ -33,6 +39,7 @@
     "unplugin-swc": "catalog:",
     "@swc/core": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "prisma": "catalog:"
   }
 }

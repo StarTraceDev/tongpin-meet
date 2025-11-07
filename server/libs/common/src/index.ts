@@ -9,5 +9,6 @@ export {
   statusTitle,
 } from './errors/problem'
 export { bootstrap, configureApp, envPort, type BootstrapOptions } from './bootstrap'
+export { loadEnvFile } from './env'
 export { ProblemJsonFilter } from './filters/problem-json.filter'
 export { ZodValidationPipe } from './pipes/zod-validation.pipe'
