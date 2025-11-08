@@ -25,7 +25,8 @@
     "rxjs": "catalog:",
     "zod": "catalog:",
     "@prisma/client": "catalog:",
-    "@prisma/adapter-pg": "catalog:"
+    "@prisma/adapter-pg": "catalog:",
+    "nestjs-zod": "catalog:"
   },
   "devDependencies": {
     "@nestjs/cli": "catalog:",

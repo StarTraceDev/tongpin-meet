@@ -53,6 +53,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/infra/tsconfig.lib.json"
       }
+    },
+    "meeting": {
+      "type": "library",
+      "root": "libs/meeting",
+      "entryFile": "index",
+      "sourceRoot": "libs/meeting/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/meeting/tsconfig.lib.json"
+      }
     }
   }
 }

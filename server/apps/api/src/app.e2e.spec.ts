@@ -2,32 +2,38 @@ import { type INestApplication, Body, Controller, Module, Post } from '@nestjs/c
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { z } from 'zod'
 
 import { configureApp } from '../../../libs/common/src/bootstrap'
+// 必须值导入：emitDecoratorMetadata 要在运行时拿到类，才能让全局管道取到 static schema
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { CreateMeetingDto } from '../../../libs/meeting/src'
 import { AppModule } from './app.module'
 
-/** 只在测试里用的回显接口，用来验证全局 ZodValidationPipe 真的接上了 */
-class EchoDto {
-  static readonly schema = z.object({ name: z.string().min(1) })
-}
-
-@Controller('_echo')
-class EchoController {
-  @Post()
-  echo(@Body() body: EchoDto): EchoDto {
+/** 只在测试里用的探针接口：验证 createZodDto + 全局 ZodValidationPipe 跑通 shared schema */
+@Controller('_probe')
+class ProbeController {
+  @Post('meetings')
+  create(@Body() body: CreateMeetingDto): CreateMeetingDto {
     return body
   }
 }
 
-@Module({ controllers: [EchoController] })
-class EchoModule {}
+@Module({ controllers: [ProbeController] })
+class ProbeModule {}
+
+const VALID_MEETING = {
+  title: '项目周会',
+  startAt: '2026-11-06T10:00:00+08:00',
+  endAt: '2026-11-06T11:00:00+08:00',
+}
 
 describe('api 进程', () => {
   let app: INestApplication
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule, EchoModule] }).compile()
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule, ProbeModule],
+    }).compile()
     app = moduleRef.createNestApplication()
     configureApp(app)
     await app.init()
@@ -57,20 +63,38 @@ describe('api 进程', () => {
     })
   })
 
-  it('全局管道拦住非法入参：400 / 10001，且 detail 指出字段', async () => {
-    const res = await request(app.getHttpServer()).post('/api/v1/_echo').send({ name: '' })
-
-    expect(res.status).toBe(400)
-    expect(res.body).toMatchObject({ status: 400, code: 10001 })
-    expect(String(res.body.detail)).toContain('name')
-  })
-
-  it('合法入参被 schema 解析，多余字段被剔除', async () => {
+  it('createZodDto 跑 shared 的 createMeetingSchema：默认值补齐、多余字段剔除', async () => {
     const res = await request(app.getHttpServer())
-      .post('/api/v1/_echo')
-      .send({ name: '周会', extra: 'stripped' })
+      .post('/api/v1/_probe/meetings')
+      .send({ ...VALID_MEETING, audioOn: true, extra: 'stripped' })
 
     expect(res.status).toBe(201)
-    expect(res.body).toEqual({ name: '周会' })
+    expect(res.body).toMatchObject({
+      title: '项目周会',
+      settings: { muteOnJoin: true, watermark: false, allowGuest: false, autoRecord: false },
+      inviteeIds: [],
+    })
+    expect(res.body).not.toHaveProperty('extra')
+    expect(res.body).not.toHaveProperty('audioOn')
+  })
+
+  it('refine 失败也走 problem+json：400 / 10001，detail 指到 endAt', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/_probe/meetings')
+      .send({ ...VALID_MEETING, endAt: '2026-11-06T09:00:00+08:00' })
+
+    expect(res.status).toBe(400)
+    expect(res.body).toMatchObject({ status: 400, code: 10001, title: '请求参数不合法' })
+    expect(String(res.body.detail)).toContain('endAt')
+    expect(String(res.body.detail)).toContain('结束时间必须晚于开始时间')
+  })
+
+  it('必填字段缺失：400，detail 指到 title', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/_probe/meetings')
+      .send({ startAt: VALID_MEETING.startAt, endAt: VALID_MEETING.endAt })
+
+    expect(res.status).toBe(400)
+    expect(String(res.body.detail)).toContain('title')
   })
 })
