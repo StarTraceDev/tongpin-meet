@@ -1,5 +1,5 @@
 // 03 §5：Prisma 7，provider = "prisma-client"，输出到 libs/infra/src/generated/prisma。
-// 起步先落核心 8 张表（组织 5 + 会议 2 + 会议事件 1），其余域随 M3/M4/M5 的迁移增量补。
+// 全量 29 张表：组织 5 + 会议 3 + 互动 8 + 内容 4 + 反馈 1 + 平台 5 + 03 §5.7 新增 3。
 
 generator client {
   provider     = "prisma-client"
@@ -124,16 +124,30 @@ model Meeting {
   settings      Json // 会议设置（muteOnJoin / watermark / allowGuest / autoRecord）
   actualStartAt DateTime? // 实际开始时间
   actualEndAt   DateTime? // 实际结束时间
+  seriesId      String? // 周期会议实例共享的系列 ID
+  recurrenceRule String? // RFC 5545 RRULE，仅系列首条有值
+  hostKey       String? // 6 位主持人密钥（哈希存）
+  lockedAt      DateTime? // 锁定时间，非空即锁定
+  allowWaitingRoom Boolean @default(false) // 是否开等候室（与 settings 二选一，定死读这里）
   createdAt     DateTime      @default(now()) // 创建时间
   updatedAt     DateTime      @updatedAt // 更新时间
   deletedAt     DateTime? // 软删标记
 
-  host         User                 @relation("MeetingHost", fields: [hostId], references: [id])
-  participants MeetingParticipant[]
-  events       MeetingEvent[]
+  host          User                 @relation("MeetingHost", fields: [hostId], references: [id])
+  participants  MeetingParticipant[]
+  events        MeetingEvent[]
+  checkins      Checkin[]
+  votes         Vote[]
+  breaks        Break[]
+  files         MeetingFile[]
+  minutes       MeetingMinutes?
+  recordings    Recording[]
+  operations    Operation[]
+  waitingEntries WaitingRoomEntry[]
 
   @@index([hostId, startAt])
   @@index([status, startAt])
+  @@index([seriesId])
   @@map("meetings")
 }
 
@@ -191,4 +205,429 @@ model MeetingEvent {
 enum UserStatus {
   ACTIVE // 正常
   DISABLED // 已禁用
+}
+
+// ============================================================================
+// 会中互动：Checkin / Vote / Break（03 §5.4 状态机，共享 INTERACTION_STATUS）
+// ============================================================================
+
+model Checkin {
+  id          String            @id @default(cuid()) // 主键
+  meetingId   String // 会议 ID
+  title       String // 签到主题
+  status      InteractionStatus @default(ONGOING) // 进行中 / 已关闭（单向）
+  anonymous   Boolean           @default(false) // 是否匿名（结果不展示实名）
+  createdById String // 发起人用户 ID
+  createdAt   DateTime          @default(now()) // 发起时间
+  closedAt    DateTime? // 关闭时间
+
+  meeting Meeting         @relation(fields: [meetingId], references: [id])
+  records CheckinRecord[]
+
+  @@index([meetingId])
+  @@map("checkins")
+}
+
+enum InteractionStatus {
+  ONGOING // 进行中
+  CLOSED // 已关闭（终态，不可重开）
+}
+
+model CheckinRecord {
+  id          String   @id @default(cuid()) // 主键
+  checkinId   String // 签到 ID
+  userId      String // 签到人用户 ID
+  respondedAt DateTime @default(now()) // 签到时间
+
+  checkin Checkin @relation(fields: [checkinId], references: [id])
+
+  @@unique([checkinId, userId])
+  @@map("checkin_records")
+}
+
+model Vote {
+  id          String     @id @default(cuid()) // 主键
+  meetingId   String // 会议 ID
+  title       String // 投票标题
+  status      VoteStatus @default(DRAFT) // 草稿→进行中→已关闭→已公布
+  anonymous   Boolean    @default(false) // 是否匿名投票
+  createdById String // 发起人用户 ID
+  createdAt   DateTime   @default(now()) // 创建时间
+  startedAt   DateTime? // 开始时间（:start）
+  closedAt    DateTime? // 截止时间（:close）
+  publishedAt DateTime? // 结果公布时间（:publish）
+
+  meeting   Meeting        @relation(fields: [meetingId], references: [id])
+  questions VoteQuestion[]
+  records   VoteRecord[]
+
+  @@index([meetingId])
+  @@map("votes")
+}
+
+enum VoteStatus {
+  DRAFT // 草稿（可编辑）
+  ONGOING // 进行中（可提交）
+  CLOSED // 已截止（不可提交，结果未公布）
+  PUBLISHED // 已公布（终态）
+}
+
+model VoteQuestion {
+  id      String           @id @default(cuid()) // 主键
+  voteId  String // 投票 ID
+  index   Int // 题序（从 1 开始）
+  content String // 题干
+  type    VoteQuestionType @default(SINGLE) // 题型
+
+  vote    Vote         @relation(fields: [voteId], references: [id])
+  options VoteOption[]
+
+  @@unique([voteId, index])
+  @@map("vote_questions")
+}
+
+enum VoteQuestionType {
+  SINGLE // 单选
+  MULTI // 多选
+  RATING // 评分
+}
+
+model VoteOption {
+  id         String @id @default(cuid()) // 主键
+  questionId String // 题目 ID
+  index      Int // 选项序号
+  content    String // 选项内容
+
+  question VoteQuestion @relation(fields: [questionId], references: [id])
+
+  @@unique([questionId, index])
+  @@map("vote_options")
+}
+
+model VoteRecord {
+  id          String   @id @default(cuid()) // 主键
+  voteId      String // 投票 ID
+  userId      String // 投票人用户 ID
+  answers     Json // 作答内容（题目 ID → 选项 ID 数组）
+  submittedAt DateTime @default(now()) // 提交时间
+
+  vote Vote @relation(fields: [voteId], references: [id])
+
+  @@unique([voteId, userId])
+  @@map("vote_records")
+}
+
+model Break {
+  id          String            @id @default(cuid()) // 主键
+  meetingId   String // 会议 ID
+  title       String? // 休息说明（如「茶歇 10 分钟」）
+  status      InteractionStatus @default(ONGOING) // 休息中 / 已结束（单向）
+  plannedSec  Int? // 计划时长（秒，仅展示倒计时）
+  createdById String // 发起人用户 ID
+  startedAt   DateTime          @default(now()) // 开始时间
+  endedAt     DateTime? // 结束时间（:close）
+
+  meeting Meeting       @relation(fields: [meetingId], references: [id])
+  records BreakRecord[]
+
+  @@index([meetingId])
+  @@map("breaks")
+}
+
+model BreakRecord {
+  id        String   @id @default(cuid()) // 主键
+  breakId   String // 休息 ID
+  userId    String // 成员用户 ID
+  resting   Boolean  @default(true) // true 去休息 / false 回来
+  changedAt DateTime @default(now()) // 状态变更时间
+
+  break_ Break @relation(fields: [breakId], references: [id])
+
+  @@unique([breakId, userId])
+  @@map("break_records")
+}
+
+// ============================================================================
+// 内容域：MeetingFile / MeetingMinutes / Recording / RecordingSegment
+// ============================================================================
+
+model MeetingFile {
+  id         String     @id @default(cuid()) // 主键
+  meetingId  String // 所属会议 ID
+  uploaderId String // 上传人用户 ID
+  name       String // 文件名（展示用）
+  mime       String? // MIME 类型
+  sizeBytes  Int        @default(0) // 文件大小（字节）
+  storageKey String // 存储键（内部路径，不对外暴露）
+  status     FileStatus @default(UPLOADING) // 上传状态
+  createdAt  DateTime   @default(now()) // 创建时间
+  deletedAt  DateTime? // 软删标记（DELETE /files/{id}）
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+
+  @@index([meetingId])
+  @@map("meeting_files")
+}
+
+enum FileStatus {
+  UPLOADING // 上传中（已创建上传凭证）
+  READY // 可下载
+}
+
+/// 会议纪要：每会一份（GET/PATCH /meetings/{id}/minutes）
+model MeetingMinutes {
+  id          String        @id @default(cuid()) // 主键
+  meetingId   String        @unique // 会议 ID（一个会议一份纪要）
+  content     String        @default("") // 纪要内容（Markdown）
+  transcript  Json? // 语音转写原文（AI 纪要的输入）
+  status      MinutesStatus @default(PENDING) // 纪要状态
+  version     Int           @default(0) // 内容版本号（ETag 依据）
+  updatedById String? // 最后编辑人用户 ID
+  createdAt   DateTime      @default(now()) // 创建时间
+  updatedAt   DateTime      @updatedAt // 更新时间
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+
+  @@map("meeting_minutes")
+}
+
+enum MinutesStatus {
+  PENDING // 未生成
+  GENERATING // 生成中
+  READY // 已就绪
+}
+
+model Recording {
+  id          String          @id @default(cuid()) // 主键
+  legacyId    Int?            @unique // 存量系统录制 ID
+  meetingId   String // 会议 ID
+  startedById String // 发起录制人用户 ID
+  status      RecordingStatus @default(REQUESTED) // 录制状态（任一步可 FAILED）
+  durationSec Int? // 总时长（秒）
+  sizeBytes   Int? // 总大小（字节）
+  startedAt   DateTime        @default(now()) // 开始时间
+  stoppedAt   DateTime? // 停止时间（:stop）
+
+  meeting  Meeting            @relation(fields: [meetingId], references: [id])
+  segments RecordingSegment[]
+
+  @@index([meetingId])
+  @@map("recordings")
+}
+
+enum RecordingStatus {
+  REQUESTED // 已请求
+  RECORDING // 录制中
+  PROCESSING // 转码/切片处理中
+  READY // 可下载
+  FAILED // 处理失败
+}
+
+model RecordingSegment {
+  id          String   @id @default(cuid()) // 主键
+  recordingId String // 录制 ID
+  index       Int // 分片序号（从 1 开始）
+  storageKey  String // 存储键（内部路径）
+  sizeBytes   Int? // 分片大小（字节）
+  startSec    Int? // 分片起点（相对录制开始，秒）
+  endSec      Int? // 分片终点（秒）
+  createdAt   DateTime @default(now()) // 创建时间
+
+  recording Recording @relation(fields: [recordingId], references: [id])
+
+  @@unique([recordingId, index])
+  @@map("recording_segments")
+}
+
+// ============================================================================
+// 反馈域：Feedback（2026-11-03 新增，docs/03 §4 / §5 反馈段）
+// ============================================================================
+
+/// 投诉反馈：管理台代录 + 处理闭环（GET/POST /admin/feedbacks、PATCH 处理）
+model Feedback {
+  id         String           @id @default(cuid()) // 主键
+  category   FeedbackCategory @default(OTHER) // 建议 / 投诉 / 故障 / 其他
+  content    String // 反馈正文
+  contact    String? // 联系方式（可空）
+  status     FeedbackStatus   @default(PENDING) // 状态机见 §5.4
+  source     FeedbackSource   @default(ADMIN) // 管理台代录 / 用户自助
+  reporterId String? // 自助提交人 userId（代录为空）
+  handledBy  String? // 处理人 userId
+  reply      String? // 处理回复
+  handledAt  DateTime? // 处理完成时间
+  createdAt  DateTime         @default(now()) // 创建时间
+  updatedAt  DateTime         @updatedAt // 更新时间
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("feedbacks")
+}
+
+enum FeedbackStatus {
+  PENDING
+  PROCESSING
+  RESOLVED
+  REJECTED
+}
+
+enum FeedbackCategory {
+  SUGGESTION
+  COMPLAINT
+  ISSUE
+  OTHER
+}
+
+enum FeedbackSource {
+  ADMIN
+  USER
+}
+
+// ============================================================================
+// 平台域：Operation / AuditLog / LoginLog / SysConfig / FeatureFlag
+// ============================================================================
+
+/// 异步操作：导出/生成类任务统一返回 202 + 本表 ID
+model Operation {
+  id            String          @id @default(cuid()) // 主键
+  kind          String // 操作类型（checkin-records-export / participants-export ...）
+  status        OperationStatus @default(PENDING) // 处理状态
+  meetingId     String? // 关联会议（可空）
+  requestedById String // 发起人用户 ID
+  progress      Int             @default(0) // 进度百分比（0-100）
+  result        Json? // 结果（下载地址 / 统计摘要）
+  error         String? // 失败原因（内部诊断用）
+  createdAt     DateTime        @default(now()) // 创建时间
+  finishedAt    DateTime? // 完成时间
+
+  meeting Meeting? @relation(fields: [meetingId], references: [id])
+
+  @@index([requestedById])
+  @@index([status])
+  @@map("operations")
+}
+
+enum OperationStatus {
+  PENDING // 排队中
+  RUNNING // 执行中
+  SUCCEEDED // 成功
+  FAILED // 失败
+}
+
+/// 审计日志：管理台关键操作留痕
+model AuditLog {
+  id         String   @id @default(cuid()) // 主键
+  actorId    String // 操作者用户 ID
+  action     String // 动作（meeting.force-end / config.update ...）
+  targetType String? // 目标类型（meeting / user / config）
+  targetId   String? // 目标 ID
+  detail     Json? // 变更详情（差异快照）
+  ip         String? // 操作者 IP
+  ua         String? // 操作者 User-Agent
+  createdAt  DateTime @default(now()) // 发生时间
+
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+/// 登录日志：每次登录尝试一条（成功 / 失败都记）
+model LoginLog {
+  id        String   @id @default(cuid()) // 主键
+  userId    String? // 用户 ID（自动注册首登前可能为空）
+  phone     String // 登录手机号
+  channel   String // 登录方式（password / sms / qr）
+  success   Boolean // 是否成功
+  reason    String? // 失败原因（code_invalid / rate_limited ...）
+  ip        String? // 登录 IP
+  ua        String? // 登录设备 User-Agent
+  createdAt DateTime @default(now()) // 发生时间
+
+  @@index([phone])
+  @@index([createdAt])
+  @@map("login_logs")
+}
+
+/// 系统配置：管理台可视化配置
+model SysConfig {
+  id          String   @id @default(cuid()) // 主键
+  key         String   @unique // 配置键
+  value       Json // 配置值
+  description String? // 说明
+  updatedById String? // 最后修改人
+  updatedAt   DateTime @updatedAt // 更新时间
+  createdAt   DateTime @default(now()) // 创建时间
+
+  @@map("sys_configs")
+}
+
+/// 功能开关：灰度/实验开关（按用户 ID 或百分比放量）
+model FeatureFlag {
+  id          String   @id @default(cuid()) // 主键
+  key         String   @unique // 开关键
+  enabled     Boolean  @default(false) // 总开关
+  description String? // 说明
+  rolloutPct  Int      @default(0) // 放量百分比（0-100）
+  payload     Json? // 附加配置（客户端按需读取）
+  updatedAt   DateTime @updatedAt // 更新时间
+  createdAt   DateTime @default(now()) // 创建时间
+
+  @@map("feature_flags")
+}
+
+// ============================================================================
+// 03 §5.7 新增：Notification / Announcement / WaitingRoomEntry
+// ============================================================================
+
+model Notification {
+  id        String           @id @default(cuid()) // 主键
+  userId    String // 收件人
+  type      NotificationType // 通知类型
+  title     String // 标题
+  body      String? // 正文
+  link      String? // 点击跳转的路由
+  readAt    DateTime? // 已读时间
+  createdAt DateTime         @default(now()) // 创建时间
+
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  MEETING_INVITE // 会议邀请
+  MEETING_START // 会议即将开始
+  SYSTEM // 系统通知
+  FEEDBACK_REPLY // 反馈回复
+}
+
+model Announcement {
+  id        String   @id @default(cuid()) // 主键
+  title     String // 标题
+  content   String // 正文（Markdown）
+  pinned    Boolean  @default(false) // 是否置顶
+  publishAt DateTime // 定时发布时间
+  expireAt  DateTime? // 过期时间
+  createdBy String // 创建人用户 ID
+  createdAt DateTime @default(now()) // 创建时间
+
+  @@map("announcements")
+}
+
+model WaitingRoomEntry {
+  id        String        @id @default(cuid()) // 主键
+  meetingId String // 会议 ID
+  guestName String? // 游客昵称（登录用户可为空）
+  userId    String? // 登录用户 ID
+  status    WaitingStatus @default(PENDING) // PENDING / ADMITTED / DENIED
+  createdAt DateTime      @default(now()) // 创建时间
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+
+  @@index([meetingId, status])
+  @@map("waiting_room_entries")
+}
+
+enum WaitingStatus {
+  PENDING // 等待中
+  ADMITTED // 已准入
+  DENIED // 已拒绝
 }
