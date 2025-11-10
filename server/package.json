@@ -12,7 +12,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "catalog:",
@@ -20,27 +21,29 @@
     "@nestjs/platform-express": "catalog:",
     "@nestjs/platform-ws": "catalog:",
     "@nestjs/websockets": "catalog:",
+    "@prisma/adapter-pg": "catalog:",
+    "@prisma/client": "catalog:",
     "@tongpin/shared": "workspace:*",
+    "argon2": "catalog:",
+    "nestjs-zod": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
-    "zod": "catalog:",
-    "@prisma/client": "catalog:",
-    "@prisma/adapter-pg": "catalog:",
-    "nestjs-zod": "catalog:"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@nestjs/cli": "catalog:",
     "@nestjs/testing": "catalog:",
+    "@swc/core": "catalog:",
     "@tongpin/config": "workspace:*",
     "@types/node": "catalog:",
     "@types/supertest": "catalog:",
     "eslint": "catalog:",
+    "prisma": "catalog:",
     "supertest": "catalog:",
     "ts-loader": "catalog:",
-    "unplugin-swc": "catalog:",
-    "@swc/core": "catalog:",
+    "tsx": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "prisma": "catalog:"
+    "unplugin-swc": "catalog:",
+    "vitest": "catalog:"
   }
 }

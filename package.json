@@ -14,7 +14,8 @@
     "db:generate": "pnpm --filter @tongpin/server db:generate",
     "db:migrate": "pnpm --filter @tongpin/server db:migrate",
     "db:deploy": "pnpm --filter @tongpin/server db:deploy",
-    "db:studio": "pnpm --filter @tongpin/server db:studio"
+    "db:studio": "pnpm --filter @tongpin/server db:studio",
+    "db:seed": "pnpm --filter @tongpin/server db:seed"
   },
   "devDependencies": {
     "@commitlint/cli": "catalog:",
