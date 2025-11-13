@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { phoneSchema } from './common'
+import { isoDateTimeSchema, phoneSchema } from './common'
 
 /**
  * 04 §6.1 的认证入参。
@@ -27,4 +27,27 @@ export const qrConfirmSchema = z.object({
 
 export const refreshSessionSchema = z.object({
   refreshToken: z.string().min(1),
+})
+
+/** 登录返回的当前用户（04 §6.1 GET /auth/me 同形） */
+export const authUserSchema = z.object({
+  id: z.string().min(1),
+  phone: phoneSchema,
+  name: z.string().min(1),
+  avatarUrl: z.string().nullable(),
+  roles: z.array(z.string()),
+  permissions: z.array(z.string()),
+})
+
+export const sessionTokensSchema = z.object({
+  accessToken: z.string().min(1),
+  accessExpiresAt: isoDateTimeSchema,
+  refreshToken: z.string().min(1),
+  refreshExpiresAt: isoDateTimeSchema,
+})
+
+/** 登录 / 刷新统一返回：`{ user, tokens }`（响应形状文档未给，见 PROGRESS §5） */
+export const sessionResponseSchema = z.object({
+  user: authUserSchema,
+  tokens: sessionTokensSchema,
 })

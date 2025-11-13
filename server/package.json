@@ -18,6 +18,7 @@
   "dependencies": {
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
+    "@nestjs/jwt": "catalog:",
     "@nestjs/platform-express": "catalog:",
     "@nestjs/platform-ws": "catalog:",
     "@nestjs/websockets": "catalog:",

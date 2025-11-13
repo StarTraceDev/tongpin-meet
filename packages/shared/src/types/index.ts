@@ -5,11 +5,14 @@
 import type { z } from 'zod'
 
 import type {
+  authUserSchema,
   loginByPasswordSchema,
   loginBySmsSchema,
   qrConfirmSchema,
   refreshSessionSchema,
   sendSmsSchema,
+  sessionResponseSchema,
+  sessionTokensSchema,
 } from '../schemas/auth'
 import type { paginationQuerySchema, problemSchema } from '../schemas/common'
 import type {
@@ -27,6 +30,9 @@ export type LoginBySmsInput = z.infer<typeof loginBySmsSchema>
 export type SendSmsInput = z.infer<typeof sendSmsSchema>
 export type QrConfirmInput = z.infer<typeof qrConfirmSchema>
 export type RefreshSessionInput = z.infer<typeof refreshSessionSchema>
+export type AuthUser = z.infer<typeof authUserSchema>
+export type SessionTokens = z.infer<typeof sessionTokensSchema>
+export type SessionResponse = z.infer<typeof sessionResponseSchema>
 
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>
 export type Problem = z.infer<typeof problemSchema>

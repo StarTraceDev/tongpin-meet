@@ -20,6 +20,10 @@ export const ERROR_CODES = {
   ACCESS_EXPIRED: 20101,
   /** 401：refresh 失效，前端立即登出，不重试 */
   REFRESH_EXPIRED: 20102,
+  /** 401：手机号或密码错误（文档未点名，按 20xxx 段自补，见 PROGRESS §5） */
+  AUTH_INVALID_CREDENTIALS: 20103,
+  /** 403：账号已禁用 */
+  AUTH_ACCOUNT_DISABLED: 20104,
   /** 409：会议已结束 */
   MEETING_ENDED: 30402,
 } as const
