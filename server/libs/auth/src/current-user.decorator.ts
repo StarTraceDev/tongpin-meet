@@ -11,3 +11,12 @@ export const CurrentUser = createParamDecorator(
     return request.user
   },
 )
+
+export const CurrentSessionId = createParamDecorator(
+  (_data: unknown, context: ExecutionContext): string => {
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>()
+    if (request.sessionId === undefined)
+      throw new Error('CurrentSessionId 用在 JwtAuthGuard 之前了')
+    return request.sessionId
+  },
+)

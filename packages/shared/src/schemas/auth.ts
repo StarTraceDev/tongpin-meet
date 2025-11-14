@@ -51,3 +51,14 @@ export const sessionResponseSchema = z.object({
   user: authUserSchema,
   tokens: sessionTokensSchema,
 })
+
+/** 我的登录设备（04 §6.1 GET /auth/sessions） */
+export const authSessionSchema = z.object({
+  id: z.string().min(1),
+  deviceId: z.string(),
+  ip: z.string().nullable(),
+  ua: z.string().nullable(),
+  createdAt: isoDateTimeSchema,
+  expiresAt: isoDateTimeSchema,
+  current: z.boolean(),
+})

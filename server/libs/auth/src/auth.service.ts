@@ -5,7 +5,9 @@ import argon2 from 'argon2'
 
 import { ERROR_CODES } from '../../../../packages/shared/src/constants'
 import type {
+  AuthSession,
   LoginByPasswordInput,
+  LoginBySmsInput,
   RefreshSessionInput,
   SessionResponse,
 } from '@tongpin/shared/types'
@@ -15,6 +17,8 @@ import { ApiError } from '../../common/src/errors/api-error'
 import { PrismaService } from '../../infra/src/prisma/prisma.service'
 
 import { toAuthUser, type UserWithRoles } from './auth-user'
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- Nest 构造函数注入需要运行时类
+import { SmsCodeStore } from './sms/sms-code.store'
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- Nest 构造函数注入需要运行时类
 import { refreshTtl, TokenService } from './token.service'
 
@@ -31,6 +35,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tokens: TokenService,
+    private readonly smsCodes: SmsCodeStore,
   ) {}
 
   async loginWithPassword(
@@ -107,7 +112,7 @@ export class AuthService {
       },
     })
 
-    const access = await this.tokens.signAccessToken(user.id, user.tokenVersion)
+    const access = await this.tokens.signAccessToken(user.id, user.tokenVersion, session.id)
     return {
       user: toAuthUser(user),
       tokens: {
@@ -117,6 +122,86 @@ export class AuthService {
         refreshExpiresAt: rotated.expiresAt.toISOString(),
       },
     }
+  }
+
+  async sendSmsCode(phone: string, ip: string | undefined): Promise<void> {
+    await this.smsCodes.send(phone, ip)
+  }
+
+  async loginWithSms(input: LoginBySmsInput, ctx: RequestContext): Promise<SessionResponse> {
+    this.smsCodes.verify(input.phone, input.code)
+
+    let user = await this.prisma.user.findFirst({
+      where: { phone: input.phone, deletedAt: null },
+      include: USER_WITH_ROLES,
+    })
+
+    if (user === null) {
+      if (process.env.AUTH_AUTO_REGISTER === 'false') {
+        await this.recordLogin(null, input.phone, false, 'auto_register_disabled', ctx, 'sms')
+        throw new ApiError(ERROR_CODES.AUTH_INVALID_CREDENTIALS, '账号不存在，请联系管理员', 401)
+      }
+      user = await this.registerByPhone(input.phone)
+    }
+
+    if (user.status !== 'ACTIVE') {
+      await this.recordLogin(user.id, input.phone, false, 'account_disabled', ctx, 'sms')
+      throw new ApiError(ERROR_CODES.AUTH_ACCOUNT_DISABLED, '账号已被禁用', 403)
+    }
+
+    const session = await this.createSession(user, ctx)
+    await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
+    await this.recordLogin(user.id, input.phone, true, undefined, ctx, 'sms')
+    return session
+  }
+
+  async listSessions(userId: string): Promise<AuthSession[]> {
+    const sessions = await this.prisma.deviceSession.findMany({
+      where: { userId, revokedAt: null, expiresAt: { gt: new Date() } },
+      orderBy: { createdAt: 'desc' },
+    })
+    return sessions.map((session) => ({
+      id: session.id,
+      deviceId: session.deviceId,
+      ip: session.ip,
+      ua: session.ua,
+      createdAt: session.createdAt.toISOString(),
+      expiresAt: session.expiresAt.toISOString(),
+      current: false,
+    }))
+  }
+
+  async revokeSession(userId: string, sessionId: string, currentSessionId: string): Promise<void> {
+    const session = await this.prisma.deviceSession.findUnique({ where: { id: sessionId } })
+    if (session === null || session.userId !== userId) {
+      throw new ApiError(ERROR_CODES.COMMON_NOT_FOUND, '会话不存在', 404)
+    }
+    if (session.revokedAt === null) {
+      await this.prisma.deviceSession.update({
+        where: { id: sessionId },
+        data: { revokedAt: new Date() },
+      })
+    }
+    // 踢掉的是当前设备时顺带 +tokenVersion，确保手里的 access 立刻失效
+    if (sessionId === currentSessionId) {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { tokenVersion: { increment: 1 } },
+      })
+    }
+  }
+
+  private async registerByPhone(phone: string): Promise<UserWithRoles> {
+    const member = await this.prisma.role.findUnique({ where: { code: 'MEMBER' } })
+    return this.prisma.user.create({
+      data: {
+        phone,
+        name: `用户${phone.slice(-4)}`,
+        status: 'ACTIVE',
+        roles: member === null ? undefined : { create: { roleId: member.id } },
+      },
+      include: USER_WITH_ROLES,
+    })
   }
 
   private async createSession(user: UserWithRoles, ctx: RequestContext): Promise<SessionResponse> {
@@ -133,7 +218,7 @@ export class AuthService {
         expiresAt: refresh.expiresAt,
       },
     })
-    const access = await this.tokens.signAccessToken(user.id, user.tokenVersion)
+    const access = await this.tokens.signAccessToken(user.id, user.tokenVersion, sessionId)
     return {
       user: toAuthUser(user),
       tokens: {
@@ -166,9 +251,10 @@ export class AuthService {
     success: boolean,
     reason: string | undefined,
     ctx: RequestContext,
+    channel = 'password',
   ): Promise<void> {
     await this.prisma.loginLog.create({
-      data: { userId, phone, channel: 'password', success, reason, ip: ctx.ip, ua: ctx.ua },
+      data: { userId, phone, channel, success, reason, ip: ctx.ip, ua: ctx.ua },
     })
   }
 }

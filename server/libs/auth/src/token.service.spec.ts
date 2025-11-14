@@ -20,15 +20,16 @@ describe('parseDuration', () => {
 
 describe('access token', () => {
   it('签发后能验回 sub / ver，并带出 ISO 过期时间', async () => {
-    const { token, expiresAt } = await tokens.signAccessToken('user_1', 3)
+    const { token, expiresAt } = await tokens.signAccessToken('user_1', 3, 'session_1')
     const payload = await tokens.verifyAccessToken(token)
     expect(payload.sub).toBe('user_1')
     expect(payload.ver).toBe(3)
+    expect(payload.sid).toBe('session_1')
     expect(Number.isNaN(Date.parse(expiresAt))).toBe(false)
   })
 
   it('篡改后按 20101 拒绝', async () => {
-    const { token } = await tokens.signAccessToken('user_1', 0)
+    const { token } = await tokens.signAccessToken('user_1', 0, 'session_1')
     await expect(tokens.verifyAccessToken(`${token}x`)).rejects.toMatchObject({ code: 20101 })
   })
 })

@@ -6,6 +6,7 @@ import type { PrismaService } from '../../infra/src/prisma/prisma.service'
 
 import type { UserWithRoles } from './auth-user'
 import { AuthService } from './auth.service'
+import type { SmsCodeStore } from './sms/sms-code.store'
 import { TokenService } from './token.service'
 
 const PASSWORD = 'admin123'
@@ -61,6 +62,8 @@ function makePrisma(): {
     sessionUpdate: ReturnType<typeof vi.fn>
     sessionUpdateMany: ReturnType<typeof vi.fn>
     loginLogCreate: ReturnType<typeof vi.fn>
+    roleFind: ReturnType<typeof vi.fn>
+    userCreate: ReturnType<typeof vi.fn>
   }
 } {
   const mocks = {
@@ -72,9 +75,17 @@ function makePrisma(): {
     sessionUpdate: vi.fn().mockResolvedValue({}),
     sessionUpdateMany: vi.fn().mockResolvedValue({ count: 1 }),
     loginLogCreate: vi.fn().mockResolvedValue({}),
+    roleFind: vi.fn(),
+    userCreate: vi.fn(),
   }
   const prisma = {
-    user: { findFirst: mocks.findFirst, findUnique: mocks.findUnique, update: mocks.userUpdate },
+    user: {
+      findFirst: mocks.findFirst,
+      findUnique: mocks.findUnique,
+      update: mocks.userUpdate,
+      create: mocks.userCreate,
+    },
+    role: { findUnique: mocks.roleFind },
     deviceSession: {
       create: mocks.sessionCreate,
       findUnique: mocks.sessionFind,
@@ -93,7 +104,7 @@ describe('AuthService.loginWithPassword', () => {
 
   beforeEach(async () => {
     ctx = makePrisma()
-    service = new AuthService(ctx.prisma, tokens)
+    service = new AuthService(ctx.prisma, tokens, { verify: vi.fn() } as unknown as SmsCodeStore)
     hash = await argon2.hash(PASSWORD, { type: argon2.argon2id })
   })
 
@@ -148,7 +159,7 @@ describe('AuthService.loginWithPassword', () => {
 describe('AuthService.refresh', () => {
   it('正常刷新：旋转 refresh，并把上一次哈希挪到 prevRefreshHash', async () => {
     const { prisma, mocks } = makePrisma()
-    const service = new AuthService(prisma, tokens)
+    const service = new AuthService(prisma, tokens, { verify: vi.fn() } as unknown as SmsCodeStore)
     const old = tokens.createRefreshToken('session_1', '30d')
     const parsed = tokens.parseRefreshToken(old.token)
 
@@ -178,7 +189,7 @@ describe('AuthService.refresh', () => {
 
   it('旧 refresh 二次使用：吊销全部会话 + tokenVersion+1 + 20102', async () => {
     const { prisma, mocks } = makePrisma()
-    const service = new AuthService(prisma, tokens)
+    const service = new AuthService(prisma, tokens, { verify: vi.fn() } as unknown as SmsCodeStore)
     const old = tokens.createRefreshToken('session_1', '30d')
     const parsed = tokens.parseRefreshToken(old.token)
 
@@ -204,6 +215,59 @@ describe('AuthService.refresh', () => {
     expect(mocks.userUpdate).toHaveBeenCalledWith({
       where: { id: 'user_1' },
       data: { tokenVersion: { increment: 1 } },
+    })
+  })
+})
+
+describe('AuthService.loginWithSms', () => {
+  it('用户不存在且允许自动注册：建 MEMBER 用户、按 sms 记成功日志', async () => {
+    const { prisma, mocks } = makePrisma()
+    const verify = vi.fn()
+    const service = new AuthService(prisma, tokens, { verify } as unknown as SmsCodeStore)
+
+    mocks.findFirst.mockResolvedValue(null)
+    mocks.roleFind.mockResolvedValue({ id: 'role_member' })
+    const memberUser = makeUser('unused', {
+      id: 'user_new',
+      phone: '13800000002',
+      name: '用户0002',
+      roles: [
+        {
+          id: 'ur_2',
+          userId: 'user_new',
+          roleId: 'role_member',
+          grantedAt: new Date(),
+          role: {
+            id: 'role_member',
+            code: 'MEMBER',
+            name: '普通成员',
+            permissions: ['meeting:read'],
+            builtin: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            deletedAt: null,
+          },
+        },
+      ],
+    })
+    mocks.userCreate.mockResolvedValue(memberUser)
+
+    const result = await service.loginWithSms(
+      { phone: '13800000002', code: '123456' },
+      { ip: '127.0.0.1' },
+    )
+
+    expect(verify).toHaveBeenCalledWith('13800000002', '123456')
+    expect(mocks.userCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        phone: '13800000002',
+        roles: { create: { roleId: 'role_member' } },
+      }),
+      include: expect.any(Object),
+    })
+    expect(result.user.roles).toEqual(['MEMBER'])
+    expect(mocks.loginLogCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({ channel: 'sms', success: true }),
     })
   })
 })

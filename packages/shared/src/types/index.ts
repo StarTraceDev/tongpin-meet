@@ -5,6 +5,7 @@
 import type { z } from 'zod'
 
 import type {
+  authSessionSchema,
   authUserSchema,
   loginByPasswordSchema,
   loginBySmsSchema,
@@ -31,6 +32,7 @@ export type SendSmsInput = z.infer<typeof sendSmsSchema>
 export type QrConfirmInput = z.infer<typeof qrConfirmSchema>
 export type RefreshSessionInput = z.infer<typeof refreshSessionSchema>
 export type AuthUser = z.infer<typeof authUserSchema>
+export type AuthSession = z.infer<typeof authSessionSchema>
 export type SessionTokens = z.infer<typeof sessionTokensSchema>
 export type SessionResponse = z.infer<typeof sessionResponseSchema>
 

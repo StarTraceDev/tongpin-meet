@@ -42,6 +42,8 @@ export const LIMITS = {
   SMS_HOURLY_PER_IP: 20,
   /** 验证码错误次数，超过即作废 */
   SMS_CODE_MAX_ATTEMPTS: 5,
+  /** 验证码有效期（文档未点名，按常见 5 分钟，见 PROGRESS §5） */
+  SMS_CODE_TTL_SECONDS: 300,
 
   /** 登录失败锁定（SysConfig 可配） */
   LOGIN_MAX_FAILURES: 5,

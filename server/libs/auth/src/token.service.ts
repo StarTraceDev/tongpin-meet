@@ -45,6 +45,8 @@ export function jwtSecret(): string {
 export interface AccessPayload {
   sub: string
   ver: number
+  /** 会话 id：踢设备时按它会话吊销，不影响同用户其它设备 */
+  sid: string
 }
 
 @Injectable()
@@ -54,8 +56,9 @@ export class TokenService {
   async signAccessToken(
     userId: string,
     tokenVersion: number,
+    sessionId: string,
   ): Promise<{ token: string; expiresAt: string }> {
-    const token = await this.jwt.signAsync({ sub: userId, ver: tokenVersion })
+    const token = await this.jwt.signAsync({ sub: userId, ver: tokenVersion, sid: sessionId })
     const payload = this.jwt.decode(token) as { exp?: number } | null
     if (payload?.exp === undefined) throw new Error('签发的 access token 缺少 exp')
     return { token, expiresAt: new Date(payload.exp * 1000).toISOString() }
@@ -64,7 +67,11 @@ export class TokenService {
   async verifyAccessToken(token: string): Promise<AccessPayload> {
     try {
       const payload = await this.jwt.verifyAsync<AccessPayload>(token)
-      if (typeof payload.sub !== 'string' || typeof payload.ver !== 'number') {
+      if (
+        typeof payload.sub !== 'string' ||
+        typeof payload.ver !== 'number' ||
+        typeof payload.sid !== 'string'
+      ) {
         throw new Error('payload 形状不对')
       }
       return payload

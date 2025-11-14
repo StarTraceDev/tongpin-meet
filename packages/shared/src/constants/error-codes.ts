@@ -16,6 +16,8 @@ export const ERROR_CODE_RANGES = {
 export type ErrorCodeDomain = keyof typeof ERROR_CODE_RANGES
 
 export const ERROR_CODES = {
+  /** 404：资源不存在（文档未点名，通用段兜底码） */
+  COMMON_NOT_FOUND: 10000,
   /** 401：access 失效，前端单飞刷新后重放 */
   ACCESS_EXPIRED: 20101,
   /** 401：refresh 失效，前端立即登出，不重试 */
@@ -24,6 +26,8 @@ export const ERROR_CODES = {
   AUTH_INVALID_CREDENTIALS: 20103,
   /** 403：账号已禁用 */
   AUTH_ACCOUNT_DISABLED: 20104,
+  /** 429：短信验证码触发频控（文档未点名，按 20xxx 段自补） */
+  AUTH_SMS_RATE_LIMITED: 20105,
   /** 409：会议已结束 */
   MEETING_ENDED: 30402,
 } as const

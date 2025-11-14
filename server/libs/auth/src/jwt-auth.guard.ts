@@ -14,6 +14,7 @@ import { TokenService } from './token.service'
 export interface AuthenticatedRequest {
   headers: Record<string, string | string[] | undefined>
   user?: AuthUser
+  sessionId?: string
 }
 
 @Injectable()
@@ -46,7 +47,22 @@ export class JwtAuthGuard implements CanActivate {
       throw new ApiError(ERROR_CODES.ACCESS_EXPIRED, '登录状态已失效', 401)
     }
 
+    // 单设备吊销：refresh 被踢或用户主动踢设备后，这把 access 立刻失效
+    const session = await this.prisma.deviceSession.findUnique({
+      where: { id: payload.sid },
+      select: { userId: true, revokedAt: true, expiresAt: true },
+    })
+    if (
+      session === null ||
+      session.userId !== user.id ||
+      session.revokedAt !== null ||
+      session.expiresAt.getTime() <= Date.now()
+    ) {
+      throw new ApiError(ERROR_CODES.ACCESS_EXPIRED, '登录状态已失效', 401)
+    }
+
     request.user = toAuthUser(user)
+    request.sessionId = payload.sid
     return true
   }
 }
