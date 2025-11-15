@@ -39,6 +39,7 @@ model User {
 
   @@index([deptId])
   @@map("users")
+  qrSessions       QrSession[] // 该用户确认过的设备码会话
 }
 
 model Dept {
@@ -630,4 +631,33 @@ enum WaitingStatus {
   PENDING // 等待中
   ADMITTED // 已准入
   DENIED // 已拒绝
+}
+
+// ============================================================================
+// 认证：设备码 / 扫码登录会话（04 §6.1：本期用设备码替代手机扫码）
+// ============================================================================
+
+enum QrSessionStatus {
+  PENDING // 已创建，等已登录浏览器确认
+  CONFIRMED // 已确认，等 PC 拉取一次 token
+  CONSUMED // token 已被 PC 取走，不能再用
+  REJECTED // 确认方拒绝
+  EXPIRED // 超过有效期
+}
+
+model QrSession {
+  id              String          @id @default(cuid())
+  code            String // 6 位设备码，PENDING 期间唯一
+  status          QrSessionStatus @default(PENDING)
+  userId          String? // 确认者；创建时为空
+  deviceSessionId String? // 取 token 时签发的会话，防止重复发
+  expiresAt       DateTime // 创建后 5 分钟
+  confirmedAt     DateTime?
+  createdAt       DateTime        @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([code, status])
+  @@index([expiresAt])
+  @@map("qr_sessions")
 }

@@ -16,6 +16,7 @@ import type {
   sessionTokensSchema,
 } from '../schemas/auth'
 import type { paginationQuerySchema, problemSchema } from '../schemas/common'
+import type { qrSessionSchema, qrPollSchema } from '../schemas/qr'
 import type {
   claimHostSchema,
   createMeetingSchema,
@@ -33,6 +34,8 @@ export type QrConfirmInput = z.infer<typeof qrConfirmSchema>
 export type RefreshSessionInput = z.infer<typeof refreshSessionSchema>
 export type AuthUser = z.infer<typeof authUserSchema>
 export type AuthSession = z.infer<typeof authSessionSchema>
+export type QrSession = z.infer<typeof qrSessionSchema>
+export type QrPoll = z.infer<typeof qrPollSchema>
 export type SessionTokens = z.infer<typeof sessionTokensSchema>
 export type SessionResponse = z.infer<typeof sessionResponseSchema>
 

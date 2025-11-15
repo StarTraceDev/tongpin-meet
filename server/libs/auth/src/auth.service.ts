@@ -204,7 +204,11 @@ export class AuthService {
     })
   }
 
-  private async createSession(user: UserWithRoles, ctx: RequestContext): Promise<SessionResponse> {
+  /** 签发一次设备会话；设备码登录也要拿 sessionId 回填 qr_sessions，故单独暴露 */
+  async issueSession(
+    user: UserWithRoles,
+    ctx: RequestContext,
+  ): Promise<{ session: SessionResponse; sessionId: string }> {
     const sessionId = randomUUID()
     const refresh = this.tokens.createRefreshToken(sessionId, refreshTtl())
     await this.prisma.deviceSession.create({
@@ -220,14 +224,21 @@ export class AuthService {
     })
     const access = await this.tokens.signAccessToken(user.id, user.tokenVersion, sessionId)
     return {
-      user: toAuthUser(user),
-      tokens: {
-        accessToken: access.token,
-        accessExpiresAt: access.expiresAt,
-        refreshToken: refresh.token,
-        refreshExpiresAt: refresh.expiresAt.toISOString(),
+      sessionId,
+      session: {
+        user: toAuthUser(user),
+        tokens: {
+          accessToken: access.token,
+          accessExpiresAt: access.expiresAt,
+          refreshToken: refresh.token,
+          refreshExpiresAt: refresh.expiresAt.toISOString(),
+        },
       },
     }
+  }
+
+  private async createSession(user: UserWithRoles, ctx: RequestContext): Promise<SessionResponse> {
+    return (await this.issueSession(user, ctx)).session
   }
 
   /** 复用检测命中：吊销该用户全部会话，tokenVersion+1 让已发出去的 access 也立刻作废 */

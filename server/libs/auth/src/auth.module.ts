@@ -8,6 +8,7 @@ import { MockSmsPort } from './sms/mock-sms.port'
 import { SmsCodeStore } from './sms/sms-code.store'
 import { SMS_PORT } from './sms/sms.port'
 import { AuthService } from './auth.service'
+import { QrSessionService } from './qr/qr-session.service'
 import { JwtAuthGuard } from './jwt-auth.guard'
 import { accessTtl, jwtSecret, TokenService } from './token.service'
 
@@ -23,6 +24,7 @@ import { accessTtl, jwtSecret, TokenService } from './token.service'
   ],
   controllers: [AuthController],
   providers: [
+    QrSessionService,
     AuthService,
     TokenService,
     JwtAuthGuard,

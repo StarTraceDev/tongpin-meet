@@ -82,3 +82,13 @@ export const NOTIFICATION_TYPE = {
   FEEDBACK_REPLY: 'FEEDBACK_REPLY',
 } as const
 export type NotificationType = (typeof NOTIFICATION_TYPE)[keyof typeof NOTIFICATION_TYPE]
+
+/** 设备码 / 扫码登录会话状态（04 §6.1） */
+export const QR_SESSION_STATUS = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  CONSUMED: 'CONSUMED',
+  REJECTED: 'REJECTED',
+  EXPIRED: 'EXPIRED',
+} as const
+export type QrSessionStatus = (typeof QR_SESSION_STATUS)[keyof typeof QR_SESSION_STATUS]
