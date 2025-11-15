@@ -9,6 +9,7 @@ import { SmsCodeStore } from './sms/sms-code.store'
 import { SMS_PORT } from './sms/sms.port'
 import { AuthService } from './auth.service'
 import { QrSessionService } from './qr/qr-session.service'
+import { RbacGuard } from './rbac/rbac.guard'
 import { JwtAuthGuard } from './jwt-auth.guard'
 import { accessTtl, jwtSecret, TokenService } from './token.service'
 
@@ -28,9 +29,10 @@ import { accessTtl, jwtSecret, TokenService } from './token.service'
     AuthService,
     TokenService,
     JwtAuthGuard,
+    RbacGuard,
     SmsCodeStore,
     { provide: SMS_PORT, useClass: MockSmsPort },
   ],
-  exports: [AuthService, TokenService, JwtAuthGuard],
+  exports: [AuthService, TokenService, JwtAuthGuard, RbacGuard],
 })
 export class AuthModule {}

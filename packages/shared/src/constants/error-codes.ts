@@ -18,6 +18,8 @@ export type ErrorCodeDomain = keyof typeof ERROR_CODE_RANGES
 export const ERROR_CODES = {
   /** 404：资源不存在（文档未点名，通用段兜底码） */
   COMMON_NOT_FOUND: 10000,
+  /** 403：已登录但角色 / 权限不足（通用段自补，10001 留给参数校验） */
+  COMMON_FORBIDDEN: 10003,
   /** 401：access 失效，前端单飞刷新后重放 */
   ACCESS_EXPIRED: 20101,
   /** 401：refresh 失效，前端立即登出，不重试 */
