@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 import { MEETING_STATUS } from '../constants/enums'
 import { LIMITS } from '../constants/limits'
-import { isoDateTimeSchema, meetingNoSchema } from './common'
+import { isoDateTimeSchema, meetingNoSchema, paginationQuerySchema } from './common'
 
 export const meetingStatusSchema = z.enum(MEETING_STATUS)
 
@@ -15,10 +15,7 @@ export const meetingSettingsSchema = z.object({
 })
 
 const meetingInputShape = {
-  title: z
-    .string()
-    .min(LIMITS.MEETING_TITLE_MIN_LENGTH)
-    .max(LIMITS.MEETING_TITLE_MAX_LENGTH),
+  title: z.string().min(LIMITS.MEETING_TITLE_MIN_LENGTH).max(LIMITS.MEETING_TITLE_MAX_LENGTH),
   startAt: isoDateTimeSchema,
   endAt: isoDateTimeSchema,
   password: z
@@ -73,4 +70,46 @@ export const joinAsGuestSchema = z.object({
 /** POST /meetings/{id}:claimHost：6 位主持人密钥 */
 export const claimHostSchema = z.object({
   hostKey: z.string().regex(/^\d{6}$/, '主持人密钥是 6 位数字'),
+})
+
+/** 列表筛选（06 §M4-2）：全部 / 我主持的 / 我参与的 / 即将开始 / 已结束 */
+export const MEETING_SCOPE = {
+  ALL: 'all',
+  HOSTING: 'hosting',
+  PARTICIPATING: 'participating',
+  UPCOMING: 'upcoming',
+  ENDED: 'ended',
+} as const
+export type MeetingScope = (typeof MEETING_SCOPE)[keyof typeof MEETING_SCOPE]
+
+export const meetingScopeSchema = z.enum(MEETING_SCOPE)
+
+export const listMeetingsQuerySchema = paginationQuerySchema.extend({
+  scope: meetingScopeSchema.default('all'),
+  status: meetingStatusSchema.optional(),
+  keyword: z.string().trim().max(50).optional(),
+})
+
+/** 会议对外形状；密码与 hostKey 永不出现在这里 */
+export const meetingSchema = z.object({
+  id: z.string().min(1),
+  meetingNo: meetingNoSchema,
+  title: z.string(),
+  hostId: z.string().min(1),
+  status: meetingStatusSchema,
+  startAt: isoDateTimeSchema,
+  endAt: isoDateTimeSchema,
+  timezone: z.string(),
+  settings: meetingSettingsSchema,
+  allowWaitingRoom: z.boolean(),
+  locked: z.boolean(),
+  actualStartAt: isoDateTimeSchema.nullable(),
+  actualEndAt: isoDateTimeSchema.nullable(),
+  createdAt: isoDateTimeSchema,
+  updatedAt: isoDateTimeSchema,
+})
+
+/** 创建响应额外带一次性明文 hostKey（主持人密钥，之后只能重置） */
+export const meetingCreatedSchema = meetingSchema.extend({
+  hostKey: z.string().regex(/^\d{6}$/),
 })

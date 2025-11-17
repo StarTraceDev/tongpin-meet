@@ -51,7 +51,7 @@ describe('api 进程', () => {
   })
 
   it('未知路由返回 problem+json，带 traceId', async () => {
-    const res = await request(app.getHttpServer()).get('/api/v1/meetings/nope')
+    const res = await request(app.getHttpServer()).get('/api/v1/definitely-not-a-route')
 
     expect(res.status).toBe(404)
     expect(res.headers['content-type']).toContain('application/problem+json')
@@ -59,7 +59,7 @@ describe('api 进程', () => {
     expect(res.body).toMatchObject({
       status: 404,
       code: 10000,
-      instance: '/api/v1/meetings/nope',
+      instance: '/api/v1/definitely-not-a-route',
     })
   })
 

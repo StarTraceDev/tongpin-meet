@@ -18,6 +18,11 @@ import type {
 import type { paginationQuerySchema, problemSchema } from '../schemas/common'
 import type { qrSessionSchema, qrPollSchema } from '../schemas/qr'
 import type {
+  listMeetingsQuerySchema,
+  meetingCreatedSchema,
+  meetingSchema,
+} from '../schemas/meeting'
+import type {
   claimHostSchema,
   createMeetingSchema,
   joinAsGuestSchema,
@@ -36,6 +41,10 @@ export type AuthUser = z.infer<typeof authUserSchema>
 export type AuthSession = z.infer<typeof authSessionSchema>
 export type QrSession = z.infer<typeof qrSessionSchema>
 export type QrPoll = z.infer<typeof qrPollSchema>
+export type Meeting = z.infer<typeof meetingSchema>
+export type MeetingCreated = z.infer<typeof meetingCreatedSchema>
+export type ListMeetingsQuery = z.infer<typeof listMeetingsQuerySchema>
+export type MeetingListScope = ListMeetingsQuery['scope']
 export type SessionTokens = z.infer<typeof sessionTokensSchema>
 export type SessionResponse = z.infer<typeof sessionResponseSchema>
 

@@ -11,4 +11,5 @@ export {
 export { bootstrap, configureApp, envPort, type BootstrapOptions } from './bootstrap'
 export { loadEnvFile } from './env'
 export { ProblemJsonFilter } from './filters/problem-json.filter'
+export { IdempotencyService, IDEMPOTENCY_TTL_MS } from './idempotency.service'
 export { ZodValidationPipe } from './pipes/zod-validation.pipe'
