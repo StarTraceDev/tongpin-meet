@@ -6,6 +6,7 @@ import type { IdempotencyService } from '../../common/src/idempotency.service'
 import type { PrismaService } from '../../infra/src/prisma/prisma.service'
 
 import { MeetingService } from './meeting.service'
+import type { RtcPort } from './rtc/rtc.port'
 
 const host: AuthUser = {
   id: 'user_1',
@@ -48,6 +49,12 @@ interface Mocks {
   meetingFindUnique: ReturnType<typeof vi.fn>
   meetingFindMany: ReturnType<typeof vi.fn>
   meetingCount: ReturnType<typeof vi.fn>
+  participantFindUnique: ReturnType<typeof vi.fn>
+  participantCreate: ReturnType<typeof vi.fn>
+  participantUpdate: ReturnType<typeof vi.fn>
+  participantUpdateMany: ReturnType<typeof vi.fn>
+  eventAggregate: ReturnType<typeof vi.fn>
+  eventCreate: ReturnType<typeof vi.fn>
   transaction: ReturnType<typeof vi.fn>
 }
 
@@ -59,6 +66,12 @@ function makePrisma(): { prisma: PrismaService; mocks: Mocks } {
     meetingFindUnique: vi.fn(),
     meetingFindMany: vi.fn(),
     meetingCount: vi.fn(),
+    participantFindUnique: vi.fn(),
+    participantCreate: vi.fn(),
+    participantUpdate: vi.fn(),
+    participantUpdateMany: vi.fn(),
+    eventAggregate: vi.fn(),
+    eventCreate: vi.fn(),
     transaction: vi.fn(),
   }
   const prisma = {
@@ -70,6 +83,16 @@ function makePrisma(): { prisma: PrismaService; mocks: Mocks } {
       findMany: mocks.meetingFindMany,
       count: mocks.meetingCount,
     },
+    meetingParticipant: {
+      findUnique: mocks.participantFindUnique,
+      create: mocks.participantCreate,
+      update: mocks.participantUpdate,
+      updateMany: mocks.participantUpdateMany,
+    },
+    meetingEvent: {
+      aggregate: mocks.eventAggregate,
+      create: mocks.eventCreate,
+    },
     $transaction: mocks.transaction,
   } as unknown as PrismaService
   mocks.transaction.mockImplementation(async (arg: unknown) =>
@@ -78,6 +101,17 @@ function makePrisma(): { prisma: PrismaService; mocks: Mocks } {
       : Promise.all(arg as unknown[]),
   )
   return { prisma, mocks }
+}
+
+function makeRtc(): RtcPort {
+  return {
+    issue: (roomName: string, identity: string) =>
+      Promise.resolve({
+        token: `mock.${roomName}.${identity}`,
+        url: 'ws://127.0.0.1:7880',
+        expiresAt: new Date(),
+      }),
+  } as RtcPort
 }
 
 function makeIdempotency(): IdempotencyService {
@@ -94,7 +128,7 @@ describe('MeetingService.create', () => {
     mocks.meetingFindUnique.mockResolvedValue(null)
     mocks.meetingCreate.mockResolvedValue(meetingRow())
     mocks.meetingUpdate.mockResolvedValue(meetingRow({ roomName: 'lk_m_1_deadbeef' }))
-    const service = new MeetingService(prisma, makeIdempotency())
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
 
     const result = await service.create(host, {
       title: '周会',
@@ -124,7 +158,7 @@ describe('MeetingService.create', () => {
     mocks.meetingFindUnique.mockResolvedValue(null)
     mocks.meetingCreate.mockResolvedValue(meetingRow())
     mocks.meetingUpdate.mockResolvedValue(meetingRow())
-    const service = new MeetingService(prisma, makeIdempotency())
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
 
     const input = {
       title: '周会',
@@ -146,7 +180,7 @@ describe('MeetingService.update', () => {
     const { prisma, mocks } = makePrisma()
     const row = meetingRow()
     mocks.meetingFindFirst.mockResolvedValue(row)
-    const service = new MeetingService(prisma, makeIdempotency())
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
 
     await expect(service.update(host, 'm_1', undefined, { title: '改名' })).rejects.toMatchObject({
       status: 412,
@@ -163,7 +197,7 @@ describe('MeetingService.update', () => {
     mocks.meetingFindFirst.mockResolvedValue(row)
     const next = meetingRow({ title: '改名', updatedAt: new Date('2025-12-02T00:00:00.000Z') })
     mocks.meetingUpdate.mockResolvedValue(next)
-    const service = new MeetingService(prisma, makeIdempotency())
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
 
     const etag = `"${row.id}-${(row.updatedAt as Date).getTime()}"`
     const result = await service.update(host, 'm_1', etag, { title: '改名' })
@@ -175,7 +209,7 @@ describe('MeetingService.update', () => {
   it('非主持人返回 403', async () => {
     const { prisma, mocks } = makePrisma()
     mocks.meetingFindFirst.mockResolvedValue(meetingRow({ hostId: 'other' }))
-    const service = new MeetingService(prisma, makeIdempotency())
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
 
     await expect(service.update(host, 'm_1', '"x"', { title: '改名' })).rejects.toMatchObject({
       status: 403,
@@ -188,13 +222,92 @@ describe('MeetingService.remove', () => {
     const { prisma, mocks } = makePrisma()
     mocks.meetingFindFirst.mockResolvedValue(meetingRow())
     mocks.meetingUpdate.mockResolvedValue(meetingRow({ deletedAt: new Date() }))
-    const service = new MeetingService(prisma, makeIdempotency())
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
 
     await service.remove(host, 'm_1')
 
     expect(mocks.meetingUpdate).toHaveBeenCalledWith({
       where: { id: 'm_1' },
       data: { deletedAt: expect.any(Date) },
+    })
+  })
+})
+
+describe('MeetingService.join', () => {
+  it('首次入会把 SCHEDULED 置 ONGOING，并返回 mock RTC', async () => {
+    const { prisma, mocks } = makePrisma()
+    mocks.meetingFindFirst.mockResolvedValue(meetingRow())
+    mocks.participantFindUnique.mockResolvedValue(null)
+    mocks.participantCreate.mockResolvedValue({
+      id: 'p_1',
+      role: 'ATTENDEE',
+      guestName: null,
+    })
+    mocks.meetingUpdate.mockResolvedValue(meetingRow({ status: 'ONGOING' }))
+    mocks.eventAggregate.mockResolvedValue({ _max: { seq: 0 } })
+    mocks.eventCreate.mockResolvedValue({})
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
+
+    const result = await service.join(host, 'm_1', {})
+
+    expect(result.roomName).toBe('lk_m_1_abcd')
+    expect(result.rtc.token).toContain('lk_m_1_abcd')
+    expect(mocks.meetingUpdate).toHaveBeenCalledWith({
+      where: { id: 'm_1' },
+      data: { status: 'ONGOING', actualStartAt: expect.any(Date) },
+    })
+    expect(mocks.eventCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({ type: 'meeting.member.joined', seq: 1 }),
+    })
+  })
+
+  it('密码错误返回 403', async () => {
+    const argon2 = await import('argon2')
+    const { prisma, mocks } = makePrisma()
+    mocks.meetingFindFirst.mockResolvedValue(
+      meetingRow({ passwordHash: await argon2.hash('right-pass', { type: argon2.argon2id }) }),
+    )
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
+
+    await expect(service.join(host, 'm_1', { password: 'wrong-pass' })).rejects.toMatchObject({
+      status: 403,
+    })
+  })
+})
+
+describe('MeetingService.joinAsGuest', () => {
+  it('allowGuest=false 时 403', async () => {
+    const { prisma, mocks } = makePrisma()
+    mocks.meetingFindFirst.mockResolvedValue(meetingRow())
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
+
+    await expect(
+      service.joinAsGuest({ meetingNo: '123456789', nickname: '路人' }),
+    ).rejects.toMatchObject({ status: 403 })
+  })
+})
+
+describe('MeetingService.end', () => {
+  it('结束会议：状态 ENDED、写 actualEndAt、全体未离会成员写 leftAt', async () => {
+    const { prisma, mocks } = makePrisma()
+    mocks.meetingFindFirst.mockResolvedValue(meetingRow({ status: 'ONGOING' }))
+    mocks.meetingUpdate.mockResolvedValue(
+      meetingRow({ status: 'ENDED', actualEndAt: new Date('2026-01-01T04:00:00.000Z') }),
+    )
+    mocks.participantUpdateMany.mockResolvedValue({ count: 2 })
+    mocks.eventAggregate.mockResolvedValue({ _max: { seq: 3 } })
+    mocks.eventCreate.mockResolvedValue({})
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
+
+    const meeting = await service.end(host, 'm_1')
+
+    expect(meeting.status).toBe('ENDED')
+    expect(mocks.participantUpdateMany).toHaveBeenCalledWith({
+      where: { meetingId: 'm_1', leftAt: null },
+      data: { leftAt: expect.any(Date) },
+    })
+    expect(mocks.eventCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({ type: 'meeting.ended', seq: 4 }),
     })
   })
 })

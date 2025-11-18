@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { MEETING_STATUS } from '../constants/enums'
 import { LIMITS } from '../constants/limits'
 import { isoDateTimeSchema, meetingNoSchema, paginationQuerySchema } from './common'
+import { participantRoleSchema } from './participant'
 
 export const meetingStatusSchema = z.enum(MEETING_STATUS)
 
@@ -112,4 +113,23 @@ export const meetingSchema = z.object({
 /** 创建响应额外带一次性明文 hostKey（主持人密钥，之后只能重置） */
 export const meetingCreatedSchema = meetingSchema.extend({
   hostKey: z.string().regex(/^\d{6}$/),
+})
+
+/** RTC 入会凭证；token 只在内存/网关流转，不落库（04 §6.3） */
+export const rtcTokenSchema = z.object({
+  token: z.string().min(1),
+  url: z.string().min(1),
+  expiresAt: isoDateTimeSchema,
+})
+
+/** :join / :joinAsGuest 的返回 */
+export const meetingJoinResultSchema = z.object({
+  meetingId: z.string().min(1),
+  roomName: z.string().min(1),
+  rtc: rtcTokenSchema,
+  participant: z.object({
+    id: z.string().min(1),
+    role: participantRoleSchema.nullable(),
+    guestName: z.string().nullable(),
+  }),
 })

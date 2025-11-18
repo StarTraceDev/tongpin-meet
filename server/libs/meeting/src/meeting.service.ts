@@ -1,16 +1,21 @@
 import { randomInt, randomUUID } from 'node:crypto'
 
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import argon2 from 'argon2'
 
 import { meetingSettingsSchema } from '../../../../packages/shared/src/schemas'
+import { canRunMeetingAction, ERROR_CODES } from '../../../../packages/shared/src/constants'
 import type {
   AuthUser,
   CreateMeetingInput,
+  JoinAsGuestInput,
+  JoinMeetingInput,
   ListMeetingsQuery,
   Meeting,
   MeetingCreated,
+  MeetingJoinResult,
   Paginated,
+  RtcToken,
   UpdateMeetingInput,
 } from '@tongpin/shared/types'
 
@@ -19,6 +24,8 @@ import { ApiError } from '../../common/src/errors/api-error'
 import { IdempotencyService } from '../../common/src/idempotency.service'
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- Nest 构造函数注入需要运行时类
 import { PrismaService } from '../../infra/src/prisma/prisma.service'
+import type { Prisma } from '../../infra/src/generated/prisma/client'
+import { RTC_PORT, RTC_TOKEN_TTL_SECONDS, type RtcPort } from './rtc/rtc.port'
 
 /** 回收站保留 30 天（06 §M4-18） */
 export const TRASH_TTL_MS = 30 * 24 * 60 * 60 * 1000
@@ -28,6 +35,8 @@ interface MeetingRow {
   meetingNo: string
   title: string
   hostId: string
+  roomName: string
+  passwordHash: string | null
   status: Meeting['status']
   startAt: Date
   endAt: Date
@@ -72,6 +81,7 @@ export class MeetingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly idempotency: IdempotencyService,
+    @Inject(RTC_PORT) private readonly rtc: RtcPort,
   ) {}
 
   async create(
@@ -235,6 +245,193 @@ export class MeetingService {
     return toMeeting(restored)
   }
 
+  /** 06 §M4-4：校验密码 → 建/复用参会记录 → 首次入会把会议置 ONGOING → 签发 RTC */
+  async join(user: AuthUser, id: string, input: JoinMeetingInput): Promise<MeetingJoinResult> {
+    const meeting = await this.findJoinable(id)
+    await this.assertPassword(meeting, input.password)
+    const participant = await this.upsertParticipant(id, user.id, null)
+    await this.markOngoing(meeting)
+    await this.appendEvent(id, 'meeting.member.joined', user.id, {
+      participantId: participant.id,
+      userId: user.id,
+    })
+    const rtc = await this.issueToken(meeting.roomName, user.id)
+    return buildJoinResult(meeting.id, meeting.roomName, participant, rtc)
+  }
+
+  /** 06 §M4-12：游客凭 meetingNo + 昵称入会，allowGuest=false 时 403 */
+  async joinAsGuest(input: JoinAsGuestInput): Promise<MeetingJoinResult> {
+    const meeting = await this.prisma.meeting.findFirst({
+      where: { meetingNo: input.meetingNo, deletedAt: null },
+    })
+    if (meeting === null) {
+      throw new ApiError(ERROR_CODES.COMMON_NOT_FOUND, '会议不存在', 404)
+    }
+    if (!canRunMeetingAction(meeting.status, 'join')) {
+      throw new ApiError(ERROR_CODES.MEETING_ENDED, '会议已结束', 409)
+    }
+    if (meeting.lockedAt !== null) {
+      throw new ApiError(ERROR_CODES.COMMON_FORBIDDEN, '会议已锁定', 403)
+    }
+    if (!meetingSettingsSchema.parse(meeting.settings).allowGuest) {
+      throw new ApiError(ERROR_CODES.COMMON_FORBIDDEN, '该会议不允许游客入会', 403)
+    }
+    await this.assertPassword(meeting, input.password)
+
+    const participant = await this.prisma.meetingParticipant.create({
+      data: {
+        meetingId: meeting.id,
+        guestName: input.nickname,
+        role: 'GUEST',
+        joinedAt: new Date(),
+        mediaState: { audioOn: false, videoOn: false, screenSharing: false },
+      },
+    })
+    await this.markOngoing(meeting)
+    await this.appendEvent(meeting.id, 'meeting.member.joined', null, {
+      participantId: participant.id,
+      guestName: input.nickname,
+    })
+    const rtc = await this.issueToken(meeting.roomName, `guest:${participant.id}`)
+    return buildJoinResult(meeting.id, meeting.roomName, participant, rtc)
+  }
+
+  /** 离会只写 leftAt，不改会议状态；主持人离会由 :end 收尾 */
+  async leave(user: AuthUser, id: string): Promise<void> {
+    const participant = await this.prisma.meetingParticipant.findUnique({
+      where: { meetingId_userId: { meetingId: id, userId: user.id } },
+    })
+    if (participant === null) {
+      throw new ApiError(ERROR_CODES.COMMON_NOT_FOUND, '你不在这个会议里', 404)
+    }
+    await this.prisma.meetingParticipant.update({
+      where: { id: participant.id },
+      data: { leftAt: new Date() },
+    })
+    await this.appendEvent(id, 'meeting.member.left', user.id, { participantId: participant.id })
+  }
+
+  /** 06 §M4-6：结束会议 → 状态 ENDED、actualEndAt、所有未离会成员写 leftAt */
+  async end(user: AuthUser, id: string): Promise<Meeting> {
+    const row = await this.findOwned(user, id)
+    if (!canRunMeetingAction(row.status, 'end')) {
+      throw new ApiError(10000, '当前会议状态不可结束', 409)
+    }
+    const endedAt = new Date()
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const meeting = await tx.meeting.update({
+        where: { id },
+        data: { status: 'ENDED', actualEndAt: endedAt },
+      })
+      await tx.meetingParticipant.updateMany({
+        where: { meetingId: id, leftAt: null },
+        data: { leftAt: endedAt },
+      })
+      return meeting
+    })
+    await this.appendEvent(id, 'meeting.ended', user.id, {})
+    return toMeeting(updated)
+  }
+
+  /** 重签 RTC：必须是该会议参会人 */
+  async issueRtcToken(user: AuthUser, id: string): Promise<RtcToken> {
+    const meeting = await this.findJoinable(id)
+    const participant = await this.prisma.meetingParticipant.findUnique({
+      where: { meetingId_userId: { meetingId: id, userId: user.id } },
+    })
+    if (participant === null) {
+      throw new ApiError(ERROR_CODES.COMMON_FORBIDDEN, '你不在这个会议里', 403)
+    }
+    return this.issueToken(meeting.roomName, user.id)
+  }
+
+  private async findJoinable(id: string): Promise<MeetingRow> {
+    const row = await this.prisma.meeting.findFirst({ where: { id, deletedAt: null } })
+    if (row === null) {
+      throw new ApiError(ERROR_CODES.COMMON_NOT_FOUND, '会议不存在', 404)
+    }
+    if (!canRunMeetingAction(row.status, 'join')) {
+      throw new ApiError(ERROR_CODES.MEETING_ENDED, '会议已结束', 409)
+    }
+    if (row.lockedAt !== null) {
+      throw new ApiError(ERROR_CODES.COMMON_FORBIDDEN, '会议已锁定', 403)
+    }
+    return row
+  }
+
+  private async assertPassword(row: MeetingRow, password: string | undefined): Promise<void> {
+    if (row.passwordHash === null) return
+    if (password === undefined || !(await argon2.verify(row.passwordHash, password))) {
+      throw new ApiError(ERROR_CODES.AUTH_INVALID_CREDENTIALS, '会议密码错误', 403)
+    }
+  }
+
+  private async upsertParticipant(
+    meetingId: string,
+    userId: string,
+    guestName: string | null,
+  ): Promise<{ id: string; role: string | null; guestName: string | null }> {
+    const existing = await this.prisma.meetingParticipant.findUnique({
+      where: { meetingId_userId: { meetingId, userId } },
+    })
+    if (existing !== null) {
+      await this.prisma.meetingParticipant.update({
+        where: { id: existing.id },
+        data: { joinedAt: existing.joinedAt ?? new Date(), leftAt: null },
+      })
+      return { id: existing.id, role: existing.role, guestName: existing.guestName }
+    }
+    const created = await this.prisma.meetingParticipant.create({
+      data: {
+        meetingId,
+        userId,
+        guestName,
+        role: 'ATTENDEE',
+        joinedAt: new Date(),
+        mediaState: { audioOn: false, videoOn: false, screenSharing: false },
+      },
+    })
+    return { id: created.id, role: created.role, guestName: created.guestName }
+  }
+
+  private async markOngoing(row: MeetingRow): Promise<void> {
+    if (row.status !== 'SCHEDULED') return
+    await this.prisma.meeting.update({
+      where: { id: row.id },
+      data: { status: 'ONGOING', actualStartAt: new Date() },
+    })
+  }
+
+  private async issueToken(roomName: string, identity: string): Promise<RtcToken> {
+    const issued = await this.rtc.issue(roomName, identity, RTC_TOKEN_TTL_SECONDS)
+    return {
+      token: issued.token,
+      url: issued.url,
+      expiresAt: issued.expiresAt.toISOString(),
+    }
+  }
+
+  private async appendEvent(
+    meetingId: string,
+    type: string,
+    fromUid: string | null,
+    data: Record<string, unknown>,
+  ): Promise<void> {
+    const last = await this.prisma.meetingEvent.aggregate({
+      where: { meetingId },
+      _max: { seq: true },
+    })
+    await this.prisma.meetingEvent.create({
+      data: {
+        meetingId,
+        type,
+        fromUid,
+        data: data as Prisma.InputJsonValue,
+        seq: (last._max.seq ?? 0) + 1,
+      },
+    })
+  }
+
   /** 9 位随机会议号，碰撞重试（06 §M4-3） */
   private async allocateMeetingNo(): Promise<string> {
     for (let attempt = 0; attempt < 10; attempt += 1) {
@@ -276,5 +473,23 @@ export class MeetingService {
       throw new ApiError(10003, '只有主持人可以操作这个会议', 403)
     }
     return row
+  }
+}
+
+function buildJoinResult(
+  meetingId: string,
+  roomName: string,
+  participant: { id: string; role: string | null; guestName: string | null },
+  rtc: RtcToken,
+): MeetingJoinResult {
+  return {
+    meetingId,
+    roomName,
+    rtc,
+    participant: {
+      id: participant.id,
+      role: participant.role as MeetingJoinResult['participant']['role'],
+      guestName: participant.guestName,
+    },
   }
 }

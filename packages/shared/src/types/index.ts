@@ -20,7 +20,9 @@ import type { qrSessionSchema, qrPollSchema } from '../schemas/qr'
 import type {
   listMeetingsQuerySchema,
   meetingCreatedSchema,
+  meetingJoinResultSchema,
   meetingSchema,
+  rtcTokenSchema,
 } from '../schemas/meeting'
 import type {
   claimHostSchema,
@@ -45,6 +47,8 @@ export type Meeting = z.infer<typeof meetingSchema>
 export type MeetingCreated = z.infer<typeof meetingCreatedSchema>
 export type ListMeetingsQuery = z.infer<typeof listMeetingsQuerySchema>
 export type MeetingListScope = ListMeetingsQuery['scope']
+export type RtcToken = z.infer<typeof rtcTokenSchema>
+export type MeetingJoinResult = z.infer<typeof meetingJoinResultSchema>
 export type SessionTokens = z.infer<typeof sessionTokensSchema>
 export type SessionResponse = z.infer<typeof sessionResponseSchema>
 
