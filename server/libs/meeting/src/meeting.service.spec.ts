@@ -55,6 +55,11 @@ interface Mocks {
   participantUpdateMany: ReturnType<typeof vi.fn>
   eventAggregate: ReturnType<typeof vi.fn>
   eventCreate: ReturnType<typeof vi.fn>
+  waitingCreate: ReturnType<typeof vi.fn>
+  waitingFindFirst: ReturnType<typeof vi.fn>
+  waitingFindMany: ReturnType<typeof vi.fn>
+  waitingUpdate: ReturnType<typeof vi.fn>
+  waitingUpdateMany: ReturnType<typeof vi.fn>
   transaction: ReturnType<typeof vi.fn>
 }
 
@@ -72,6 +77,11 @@ function makePrisma(): { prisma: PrismaService; mocks: Mocks } {
     participantUpdateMany: vi.fn(),
     eventAggregate: vi.fn(),
     eventCreate: vi.fn(),
+    waitingCreate: vi.fn(),
+    waitingFindFirst: vi.fn(),
+    waitingFindMany: vi.fn(),
+    waitingUpdate: vi.fn(),
+    waitingUpdateMany: vi.fn(),
     transaction: vi.fn(),
   }
   const prisma = {
@@ -92,6 +102,13 @@ function makePrisma(): { prisma: PrismaService; mocks: Mocks } {
     meetingEvent: {
       aggregate: mocks.eventAggregate,
       create: mocks.eventCreate,
+    },
+    waitingRoomEntry: {
+      create: mocks.waitingCreate,
+      findFirst: mocks.waitingFindFirst,
+      findMany: mocks.waitingFindMany,
+      update: mocks.waitingUpdate,
+      updateMany: mocks.waitingUpdateMany,
     },
     $transaction: mocks.transaction,
   } as unknown as PrismaService
@@ -136,6 +153,7 @@ describe('MeetingService.create', () => {
       endAt: '2026-01-01T11:00:00+08:00',
       settings: { muteOnJoin: true, watermark: false, allowGuest: false, autoRecord: false },
       inviteeIds: [],
+      allowWaitingRoom: false,
     })
 
     expect(result.meetingNo).toMatch(/^\d{9}$/)
@@ -166,6 +184,7 @@ describe('MeetingService.create', () => {
       endAt: '2026-01-01T11:00:00+08:00',
       settings: { muteOnJoin: true, watermark: false, allowGuest: false, autoRecord: false },
       inviteeIds: [],
+      allowWaitingRoom: false,
     }
     const first = await service.create(host, input, 'key-1')
     const second = await service.create(host, input, 'key-1')
@@ -248,7 +267,10 @@ describe('MeetingService.join', () => {
     mocks.eventCreate.mockResolvedValue({})
     const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
 
-    const result = await service.join(host, 'm_1', {})
+    const result = (await service.join(host, 'm_1', {})) as {
+      roomName: string
+      rtc: { token: string }
+    }
 
     expect(result.roomName).toBe('lk_m_1_abcd')
     expect(result.rtc.token).toContain('lk_m_1_abcd')
@@ -308,6 +330,77 @@ describe('MeetingService.end', () => {
     })
     expect(mocks.eventCreate).toHaveBeenCalledWith({
       data: expect.objectContaining({ type: 'meeting.ended', seq: 4 }),
+    })
+  })
+})
+
+describe('MeetingService.lock', () => {
+  it('锁定后写 lockedAt，再入会 403', async () => {
+    const { prisma, mocks } = makePrisma()
+    mocks.meetingFindFirst.mockResolvedValue(meetingRow())
+    mocks.meetingUpdate.mockResolvedValue(meetingRow({ lockedAt: new Date() }))
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
+
+    const locked = await service.lock(host, 'm_1', true)
+    expect(locked.locked).toBe(true)
+
+    mocks.meetingFindFirst.mockResolvedValue(meetingRow({ lockedAt: new Date() }))
+    await expect(service.join(host, 'm_1', {})).rejects.toMatchObject({ status: 403 })
+  })
+})
+
+describe('MeetingService.claimHost', () => {
+  it('hostKey 错误 403，正确则转让主持权', async () => {
+    const argon2 = await import('argon2')
+    const { prisma, mocks } = makePrisma()
+    const row = meetingRow({ hostKey: await argon2.hash('123456', { type: argon2.argon2id }) })
+    mocks.meetingFindFirst.mockResolvedValue(row)
+    mocks.participantFindUnique.mockResolvedValue({ id: 'p_2', role: 'ATTENDEE' })
+    mocks.participantUpdateMany = undefined as never
+    mocks.meetingUpdate.mockResolvedValue(meetingRow({ hostId: host.id }))
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
+
+    await expect(service.claimHost(host, 'm_1', { hostKey: '000000' })).rejects.toMatchObject({
+      status: 403,
+    })
+  })
+})
+
+describe('MeetingService 等候室', () => {
+  it('开启等候室时，非邀请者 join 返回 waiting 并落 PENDING 记录', async () => {
+    const { prisma, mocks } = makePrisma()
+    mocks.meetingFindFirst.mockResolvedValue(meetingRow({ allowWaitingRoom: true }))
+    mocks.participantFindUnique.mockResolvedValue(null)
+    mocks.waitingCreate.mockResolvedValue({ id: 'w_1' })
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
+
+    const viewer = { ...host, id: 'user_2' }
+    const result = await service.join(viewer, 'm_1', {})
+
+    expect(result).toEqual({ meetingId: 'm_1', waiting: true, entryId: 'w_1' })
+    expect(mocks.waitingCreate).toHaveBeenCalledWith({
+      data: { meetingId: 'm_1', userId: 'user_2', status: 'PENDING' },
+    })
+  })
+
+  it('准入把记录改 ADMITTED，并返回 RTC', async () => {
+    const { prisma, mocks } = makePrisma()
+    mocks.meetingFindFirst.mockResolvedValue(meetingRow({ allowWaitingRoom: true }))
+    mocks.waitingFindFirst.mockResolvedValue({ id: 'w_1', userId: host.id, guestName: null })
+    mocks.waitingUpdate.mockResolvedValue({})
+    mocks.participantFindUnique.mockResolvedValue(null)
+    mocks.participantCreate.mockResolvedValue({ id: 'p_3', role: 'ATTENDEE', guestName: null })
+    mocks.meetingUpdate.mockResolvedValue(meetingRow({ status: 'ONGOING' }))
+    mocks.eventAggregate.mockResolvedValue({ _max: { seq: 0 } })
+    mocks.eventCreate.mockResolvedValue({})
+    const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
+
+    const result = await service.admit(host, 'm_1', 'w_1')
+
+    expect(result.rtc.token).toContain('lk_m_1_abcd')
+    expect(mocks.waitingUpdate).toHaveBeenCalledWith({
+      where: { id: 'w_1' },
+      data: { status: 'ADMITTED' },
     })
   })
 })

@@ -22,6 +22,9 @@ import type {
   meetingCreatedSchema,
   meetingJoinResultSchema,
   meetingSchema,
+  meetingWaitingSchema,
+  transferHostSchema,
+  waitingEntrySchema,
   rtcTokenSchema,
 } from '../schemas/meeting'
 import type {
@@ -49,6 +52,9 @@ export type ListMeetingsQuery = z.infer<typeof listMeetingsQuerySchema>
 export type MeetingListScope = ListMeetingsQuery['scope']
 export type RtcToken = z.infer<typeof rtcTokenSchema>
 export type MeetingJoinResult = z.infer<typeof meetingJoinResultSchema>
+export type MeetingWaiting = z.infer<typeof meetingWaitingSchema>
+export type WaitingEntry = z.infer<typeof waitingEntrySchema>
+export type TransferHostInput = z.infer<typeof transferHostSchema>
 export type SessionTokens = z.infer<typeof sessionTokensSchema>
 export type SessionResponse = z.infer<typeof sessionResponseSchema>
 

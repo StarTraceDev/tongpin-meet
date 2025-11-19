@@ -25,6 +25,7 @@ const meetingInputShape = {
     .max(LIMITS.MEETING_PASSWORD_MAX_LENGTH)
     .optional(),
   inviteeIds: z.array(z.string().min(1)).max(LIMITS.INVITE_MAX_PER_REQUEST).default([]),
+  allowWaitingRoom: z.boolean().default(false),
 }
 
 /** PATCH 只传部分字段时，两个时间都给了才校验先后 */
@@ -52,6 +53,7 @@ export const updateMeetingSchema = z
     endAt: meetingInputShape.endAt.optional(),
     password: meetingInputShape.password,
     inviteeIds: z.array(z.string().min(1)).max(LIMITS.INVITE_MAX_PER_REQUEST).optional(),
+    allowWaitingRoom: z.boolean().optional(),
     settings: meetingSettingsSchema.partial().optional(),
   })
   .refine(hasValidTimeRange, { message: '结束时间必须晚于开始时间', path: ['endAt'] })
@@ -132,4 +134,23 @@ export const meetingJoinResultSchema = z.object({
     role: participantRoleSchema.nullable(),
     guestName: z.string().nullable(),
   }),
+})
+
+/** 等候室开启时，非邀请者入会进入 202 分支（04 §附录 时序 ②） */
+export const meetingWaitingSchema = z.object({
+  meetingId: z.string().min(1),
+  waiting: z.literal(true),
+  entryId: z.string().min(1),
+})
+
+export const waitingEntrySchema = z.object({
+  id: z.string().min(1),
+  userId: z.string().nullable(),
+  guestName: z.string().nullable(),
+  createdAt: isoDateTimeSchema,
+})
+
+/** 主持人转让 / 接管的目标用户 */
+export const transferHostSchema = z.object({
+  userId: z.string().min(1),
 })
