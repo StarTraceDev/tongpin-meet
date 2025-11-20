@@ -1,0 +1,9 @@
+{
+  "extends": "@tongpin/config/tsconfig/vue.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] },
+    "types": ["vite/client"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.vue"]
+}

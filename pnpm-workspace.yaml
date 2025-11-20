@@ -57,6 +57,9 @@ catalog:
   rxjs: ^7.8.2
 
   # 前端
+  vite: ^7.0.0
+  '@vitejs/plugin-vue': ^6.0.0
+  vue-tsc: ^3.0.0
   vue: ^3.5.0
   vue-router: ^5.0.0
   pinia: ^3.0.0
