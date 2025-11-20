@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { ApiError, getAccessToken, request, setTokens } from './http'
+import { ACCESS_TOKEN_KEY, ApiError, getAccessToken, request, setTokens } from './http'
 
 function makeStorage(): Storage {
   const map = new Map<string, string>()
@@ -70,5 +70,65 @@ describe('http', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('bad gateway', { status: 502 })))
 
     await expect(request('/health')).rejects.toBeInstanceOf(ApiError)
+  })
+})
+
+describe('http 刷新单飞', () => {
+  it('access 失效（20101）→ refresh 一次 → 用新 token 重试成功', async () => {
+    vi.stubGlobal('localStorage', makeStorage())
+    setTokens({ accessToken: 'old-at', refreshToken: 'rt-1' })
+    const calls: string[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init: RequestInit) => {
+        calls.push(String(url))
+        if (String(url).endsWith('/auth/sessions:refresh')) {
+          return new Response(
+            JSON.stringify({ tokens: { accessToken: 'new-at', refreshToken: 'rt-2' } }),
+            { status: 200 },
+          )
+        }
+        const auth = new Headers(init.headers).get('authorization')
+        if (auth === 'Bearer new-at')
+          return new Response(JSON.stringify({ ok: true }), { status: 200 })
+        return new Response(JSON.stringify({ status: 401, code: 20101, title: '登录状态已失效' }), {
+          status: 401,
+        })
+      }),
+    )
+
+    await expect(request<{ ok: boolean }>('/auth/me')).resolves.toEqual({ ok: true })
+    expect(calls).toEqual(['/api/v1/auth/me', '/api/v1/auth/sessions:refresh', '/api/v1/auth/me'])
+    expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBe('new-at')
+  })
+
+  it('并发 401 只触发一次 refresh', async () => {
+    vi.stubGlobal('localStorage', makeStorage())
+    setTokens({ accessToken: 'old-at', refreshToken: 'rt-1' })
+    let refreshCalls = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init: RequestInit) => {
+        if (String(url).endsWith('/auth/sessions:refresh')) {
+          refreshCalls += 1
+          return new Response(
+            JSON.stringify({ tokens: { accessToken: 'new-at', refreshToken: 'rt-2' } }),
+            { status: 200 },
+          )
+        }
+        const auth = new Headers(init.headers).get('authorization')
+        if (auth === 'Bearer new-at')
+          return new Response(JSON.stringify({ ok: true }), { status: 200 })
+        return new Response(JSON.stringify({ status: 401, code: 20101, title: '登录状态已失效' }), {
+          status: 401,
+        })
+      }),
+    )
+
+    const [first, second] = await Promise.all([request('/auth/me'), request('/auth/me')])
+
+    expect(first).toEqual({ ok: true })
+    expect(second).toEqual({ ok: true })
+    expect(refreshCalls).toBe(1)
   })
 })

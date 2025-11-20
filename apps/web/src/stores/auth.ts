@@ -2,7 +2,13 @@ import type { AuthUser } from '@tongpin/shared/types'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import { fetchMe, loginByPassword, type LoginPayload } from '@/api/auth'
+import {
+  fetchMe,
+  loginByPassword,
+  loginBySms,
+  type LoginPayload,
+  type SmsLoginPayload,
+} from '@/api/auth'
 import { clearTokens, getAccessToken, setTokens } from '@/api/http'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -13,6 +19,23 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(payload: LoginPayload): Promise<void> {
     const session = await loginByPassword(payload)
+    setTokens(session.tokens)
+    accessToken.value = session.tokens.accessToken
+    user.value = session.user
+  }
+
+  async function loginSms(payload: SmsLoginPayload): Promise<void> {
+    const session = await loginBySms(payload)
+    setTokens(session.tokens)
+    accessToken.value = session.tokens.accessToken
+    user.value = session.user
+  }
+
+  /** 设备码确认后把服务端签好的会话落到本地 */
+  function adoptSession(session: {
+    tokens: { accessToken: string; refreshToken: string }
+    user: AuthUser
+  }): void {
     setTokens(session.tokens)
     accessToken.value = session.tokens.accessToken
     user.value = session.user
@@ -30,5 +53,5 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
   }
 
-  return { user, accessToken, isLoggedIn, login, loadMe, logout }
+  return { user, accessToken, isLoggedIn, login, loginSms, adoptSession, loadMe, logout }
 })

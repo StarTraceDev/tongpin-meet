@@ -24,6 +24,12 @@ const router = createRouter({
       meta: { public: true, title: '登录' },
     },
     {
+      path: '/device',
+      name: 'device',
+      component: lazy(() => import('@/views/DeviceView.vue')),
+      meta: { title: '确认设备登录' },
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: lazy(() => import('@/views/NotFoundView.vue')),

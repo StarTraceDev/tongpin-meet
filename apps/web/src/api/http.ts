@@ -31,7 +31,47 @@ export function clearTokens(): void {
   globalThis.localStorage?.removeItem(REFRESH_TOKEN_KEY)
 }
 
-export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+export function getRefreshToken(): string | null {
+  return globalThis.localStorage?.getItem(REFRESH_TOKEN_KEY) ?? null
+}
+
+let refreshing: Promise<boolean> | null = null
+
+/**
+ * 刷新单飞：并发 401 只发一次 refresh（04 §6.1 旋转，重放会被判复用）
+ * 失败即清 token，调用方负责跳登录。
+ */
+export function refreshSession(): Promise<boolean> {
+  if (refreshing === null) {
+    refreshing = doRefresh().finally(() => {
+      refreshing = null
+    })
+  }
+  return refreshing
+}
+
+async function doRefresh(): Promise<boolean> {
+  const refreshToken = getRefreshToken()
+  if (refreshToken === null) return false
+  const response = await fetch(`${API_BASE}/auth/sessions:refresh`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ refreshToken }),
+  })
+  if (!response.ok) {
+    clearTokens()
+    return false
+  }
+  const data = (await response.json()) as { tokens: { accessToken: string; refreshToken: string } }
+  setTokens(data.tokens)
+  return true
+}
+
+export async function request<T>(
+  path: string,
+  init: RequestInit = {},
+  retried = false,
+): Promise<T> {
   const headers = new Headers(init.headers)
   const token = getAccessToken()
   if (token !== null) headers.set('authorization', `Bearer ${token}`)
@@ -47,7 +87,12 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
     } catch {
       // 非 JSON 错误体（网关 502 之类）直接退回状态码
     }
-    if (response.status === 401) clearTokens()
+    if (response.status === 401 && problem.code === 20101 && !retried) {
+      if (await refreshSession()) return request<T>(path, init, true)
+      clearTokens()
+    } else if (response.status === 401) {
+      clearTokens()
+    }
     throw new ApiError(response.status, problem.code ?? 10000, problem.title ?? response.statusText)
   }
   if (response.status === 204) return undefined as T
