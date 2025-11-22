@@ -54,6 +54,9 @@ catalogs:
     '@types/supertest':
       specifier: ^7.0.0
       version: 7.2.1
+    '@types/ws':
+      specifier: ^8.18.2
+      version: 8.18.2
     '@vitejs/plugin-vue':
       specifier: ^6.0.0
       version: 6.0.10
@@ -135,6 +138,9 @@ catalogs:
     vue-tsc:
       specifier: ^3.0.0
       version: 3.3.14
+    ws:
+      specifier: ^8.22.0
+      version: 8.22.1
     zod:
       specifier: ^4.1.0
       version: 4.6.7
@@ -311,6 +317,9 @@ importers:
       rxjs:
         specifier: 'catalog:'
         version: 7.8.2
+      ws:
+        specifier: 'catalog:'
+        version: 8.22.1
       zod:
         specifier: 'catalog:'
         version: 4.6.7
@@ -333,6 +342,9 @@ importers:
       '@types/supertest':
         specifier: 'catalog:'
         version: 7.2.1
+      '@types/ws':
+        specifier: 'catalog:'
+        version: 8.18.2
       eslint:
         specifier: 'catalog:'
         version: 10.14.0(jiti@2.6.1)
@@ -1563,6 +1575,9 @@ packages:
 
   '@types/web-bluetooth@0.0.21':
     resolution: {integrity: sha512-oIQLCGWtcFZy2JW77j9k8nHzAOpqMHLQejDA48XXMWH6tjCQHz5RCFz1bzsmROyL6PUm+LLnUiI4BCn221inxA==}
+
+  '@types/ws@8.18.2':
+    resolution: {integrity: sha512-67MQl+fpWKVTT1NYdnmo3U4sc/xPo/zQBncVnI74qmQa0z/b+1g6iYqNmGCPbxO+zz2aklb08a0oHfegiVd0/w==}
 
   '@typescript-eslint/eslint-plugin@8.72.1':
     resolution: {integrity: sha512-5CokTWXpmbylfFabsbvHC0CAw3XLaGnoa+nFJX5FR592h/LoZsENUE6p/rg5xvkKrFEXz6pYmgI29AgXc2N3BQ==}
@@ -4044,6 +4059,18 @@ packages:
       utf-8-validate:
         optional: true
 
+  ws@8.22.1:
+    resolution: {integrity: sha512-oyL6OPYme/CmiFvNuGzeoxCJ4nOrZE2O1FwM9MWM1AsGri6nLXB2pg+lNA8aLeXMSav0J6eIVS1j6vUPzUtK9g==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
     engines: {node: '>=18'}
@@ -5202,6 +5229,10 @@ snapshots:
       '@types/superagent': 8.1.11
 
   '@types/web-bluetooth@0.0.21': {}
+
+  '@types/ws@8.18.2':
+    dependencies:
+      '@types/node': 26.6.6
 
   '@typescript-eslint/eslint-plugin@8.72.1(@typescript-eslint/parser@8.72.1(eslint@10.14.0(jiti@2.6.1))(typescript@5.9.3))(eslint@10.14.0(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
@@ -7971,6 +8002,8 @@ snapshots:
   wrappy@1.0.2: {}
 
   ws@8.21.2: {}
+
+  ws@8.22.1: {}
 
   xml-name-validator@5.0.0: {}
 

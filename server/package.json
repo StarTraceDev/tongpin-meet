@@ -29,6 +29,7 @@
     "nestjs-zod": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
+    "ws": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -38,6 +39,7 @@
     "@tongpin/config": "workspace:*",
     "@types/node": "catalog:",
     "@types/supertest": "catalog:",
+    "@types/ws": "catalog:",
     "eslint": "catalog:",
     "prisma": "catalog:",
     "supertest": "catalog:",
