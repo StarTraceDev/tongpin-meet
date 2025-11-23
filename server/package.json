@@ -29,6 +29,7 @@
     "nestjs-zod": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
+    "pg": "catalog:",
     "ws": "catalog:",
     "zod": "catalog:"
   },
@@ -40,6 +41,7 @@
     "@types/node": "catalog:",
     "@types/supertest": "catalog:",
     "@types/ws": "catalog:",
+    "@types/pg": "catalog:",
     "eslint": "catalog:",
     "prisma": "catalog:",
     "supertest": "catalog:",

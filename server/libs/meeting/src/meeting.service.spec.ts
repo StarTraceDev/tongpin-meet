@@ -61,6 +61,7 @@ interface Mocks {
   waitingUpdate: ReturnType<typeof vi.fn>
   waitingUpdateMany: ReturnType<typeof vi.fn>
   transaction: ReturnType<typeof vi.fn>
+  executeRaw: ReturnType<typeof vi.fn>
 }
 
 function makePrisma(): { prisma: PrismaService; mocks: Mocks } {
@@ -83,8 +84,10 @@ function makePrisma(): { prisma: PrismaService; mocks: Mocks } {
     waitingUpdate: vi.fn(),
     waitingUpdateMany: vi.fn(),
     transaction: vi.fn(),
+    executeRaw: vi.fn(async () => 0),
   }
   const prisma = {
+    $executeRaw: mocks.executeRaw,
     meeting: {
       create: mocks.meetingCreate,
       update: mocks.meetingUpdate,
@@ -281,6 +284,8 @@ describe('MeetingService.join', () => {
     expect(mocks.eventCreate).toHaveBeenCalledWith({
       data: expect.objectContaining({ type: 'meeting.member.joined', seq: 1 }),
     })
+    // 落库后必须 NOTIFY，否则 gateway 进程收不到实时广播
+    expect(mocks.executeRaw).toHaveBeenCalled()
   })
 
   it('密码错误返回 403', async () => {

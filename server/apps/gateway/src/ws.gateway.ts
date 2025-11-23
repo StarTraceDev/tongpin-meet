@@ -18,6 +18,18 @@ interface ClientState {
   lastPong: number
 }
 
+export interface StoredMeetingEvent {
+  id: string
+  meetingId: string
+  seq: number
+  type: string
+  fromUid: string | null
+  data: unknown
+  ts: Date
+}
+
+const REPLAY_LIMIT = 500
+
 const PING_INTERVAL_MS = 25_000
 const PONG_TIMEOUT_MS = 10_000
 
@@ -37,7 +49,6 @@ function secret(): string {
 export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger('WsGateway')
   private readonly clients = new Map<WebSocket, ClientState>()
-  private readonly roomSeq = new Map<string, number>()
   private readonly timer: NodeJS.Timeout
 
   constructor(private readonly prisma: PrismaService) {
@@ -68,22 +79,20 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.clients.delete(client)
   }
 
-  /** 后续业务广播入口：seq 按房间单调递增 */
-  broadcast(meetingId: string, type: string, data: unknown): void {
-    const seq = (this.roomSeq.get(meetingId) ?? 0) + 1
-    this.roomSeq.set(meetingId, seq)
+  /** 事件中继入口（06 §M6-6）：DB 里的事件原样推给房间内客户端，id/seq 都来自库，可重放 */
+  broadcastRecord(event: StoredMeetingEvent): void {
     const envelope = {
       v: 1,
-      id: randomUUID(),
-      type,
-      ts: Date.now(),
-      from: 'server',
-      meetingId,
-      seq,
-      data,
+      id: event.id,
+      type: event.type,
+      ts: event.ts.getTime(),
+      from: event.fromUid ?? 'server',
+      meetingId: event.meetingId,
+      seq: event.seq,
+      data: event.data,
     }
     for (const [client, state] of this.clients) {
-      if (state.meetingId === meetingId) this.rawSend(client, envelope)
+      if (state.meetingId === event.meetingId) this.rawSend(client, envelope)
     }
   }
 
@@ -91,9 +100,9 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const state = this.clients.get(client)
     if (state === undefined) return
 
-    let message: { type?: unknown; meetingId?: unknown }
+    let message: { type?: unknown; meetingId?: unknown; lastSeq?: unknown }
     try {
-      message = JSON.parse(raw) as { type?: unknown; meetingId?: unknown }
+      message = JSON.parse(raw) as { type?: unknown; meetingId?: unknown; lastSeq?: unknown }
     } catch {
       this.error(client, '消息不是合法 JSON')
       return
@@ -104,13 +113,18 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return
     }
     if (message.type === 'room.join') {
-      await this.joinRoom(client, state, String(message.meetingId ?? ''))
+      await this.joinRoom(client, state, String(message.meetingId ?? ''), message.lastSeq)
       return
     }
     this.error(client, `未知消息类型：${String(message.type)}`)
   }
 
-  private async joinRoom(client: WebSocket, state: ClientState, meetingId: string): Promise<void> {
+  private async joinRoom(
+    client: WebSocket,
+    state: ClientState,
+    meetingId: string,
+    rawLastSeq: unknown,
+  ): Promise<void> {
     if (meetingId === '') {
       this.error(client, 'room.join 缺少 meetingId')
       return
@@ -137,14 +151,52 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     state.meetingId = meetingId
-    const [members, seq] = await Promise.all([
+    const lastSeq =
+      typeof rawLastSeq === 'number' && Number.isInteger(rawLastSeq) && rawLastSeq >= 0
+        ? rawLastSeq
+        : null
+    const [members, latest] = await Promise.all([
       this.prisma.meetingParticipant.findMany({
         where: { meetingId, leftAt: null },
         select: { userId: true, guestName: true, role: true, mediaState: true },
         orderBy: { joinedAt: 'asc' },
       }),
-      Promise.resolve(this.roomSeq.get(meetingId) ?? 0),
+      this.prisma.meetingEvent.aggregate({ where: { meetingId }, _max: { seq: true } }),
     ])
+    let watermark = latest._max.seq ?? 0
+
+    // 06 §M6-5：带 lastSeq 重连时先增量回放，再发 joined 回执与快照
+    if (lastSeq !== null && lastSeq < watermark) {
+      const missed = await this.prisma.meetingEvent.findMany({
+        where: { meetingId, seq: { gt: lastSeq } },
+        orderBy: { seq: 'asc' },
+        take: REPLAY_LIMIT,
+      })
+      for (const event of missed) {
+        this.rawSend(client, {
+          v: 1,
+          id: event.id,
+          type: event.type,
+          ts: event.ts.getTime(),
+          from: event.fromUid ?? 'server',
+          meetingId,
+          seq: event.seq,
+          data: event.data,
+        })
+      }
+      watermark = Math.max(watermark, missed.at(-1)?.seq ?? lastSeq)
+    }
+
+    this.rawSend(client, {
+      v: 1,
+      id: randomUUID(),
+      type: 'room.joined',
+      ts: Date.now(),
+      from: 'server',
+      meetingId,
+      seq: watermark,
+      data: { meetingId, status: meeting.status, watermark, lastSeq: watermark },
+    })
 
     this.rawSend(client, {
       v: 1,
@@ -153,7 +205,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       ts: Date.now(),
       from: 'server',
       meetingId,
-      seq,
+      seq: watermark,
       data: {
         meetingId,
         status: meeting.status,

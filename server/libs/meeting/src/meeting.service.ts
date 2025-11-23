@@ -606,25 +606,44 @@ export class MeetingService {
     }
   }
 
+  /**
+   * 06 §M6-5：seq 是房间内单调序号，也是断线回放的游标。
+   * 并发下 aggregate+create 可能撞 @@unique([meetingId, seq])，重试即可拿到新序号；
+   * 落库后 pg_notify 给 gateway 进程实时广播（跨进程不共享内存）。
+   */
   private async appendEvent(
     meetingId: string,
     type: string,
     fromUid: string | null,
     data: Record<string, unknown>,
   ): Promise<void> {
-    const last = await this.prisma.meetingEvent.aggregate({
-      where: { meetingId },
-      _max: { seq: true },
-    })
-    await this.prisma.meetingEvent.create({
-      data: {
-        meetingId,
-        type,
-        fromUid,
-        data: data as Prisma.InputJsonValue,
-        seq: (last._max.seq ?? 0) + 1,
-      },
-    })
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const last = await this.prisma.meetingEvent.aggregate({
+        where: { meetingId },
+        _max: { seq: true },
+      })
+      try {
+        const row = await this.prisma.meetingEvent.create({
+          data: {
+            meetingId,
+            type,
+            fromUid,
+            data: data as Prisma.InputJsonValue,
+            seq: (last._max.seq ?? 0) + 1,
+          },
+        })
+        await this.notifyEvent(meetingId, row.seq)
+        return
+      } catch (error) {
+        const isConflict = (error as { code?: string }).code === 'P2002'
+        if (!isConflict || attempt === 2) throw error
+      }
+    }
+  }
+
+  private async notifyEvent(meetingId: string, seq: number): Promise<void> {
+    const payload = JSON.stringify({ meetingId, seq })
+    await this.prisma.$executeRaw`SELECT pg_notify('meeting_events', ${payload})`
   }
 
   /** 9 位随机会议号，碰撞重试（06 §M4-3） */
