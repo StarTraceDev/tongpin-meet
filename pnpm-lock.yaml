@@ -189,6 +189,9 @@ importers:
       '@tongpin/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@tongpin/tokens':
+        specifier: workspace:*
+        version: link:../../packages/tokens
       element-plus:
         specifier: 'catalog:'
         version: 2.14.7(vue@3.5.44(typescript@5.9.3))

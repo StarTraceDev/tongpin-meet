@@ -1,0 +1,62 @@
+/**
+ * reset + 字体（05 §8.2/§8.6）：只做最小干预，组件样式放 components.css。
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font: var(--tp-font-body);
+  color: var(--tp-text-primary);
+  background: var(--tp-canvas);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure {
+  margin: 0;
+}
+
+a {
+  color: var(--tp-brand);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--tp-brand-hover);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* 会议号、时长、统计数字统一等宽 */
+.tp-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.tp-text-secondary {
+  color: var(--tp-text-secondary);
+}
+
+.tp-text-tertiary {
+  color: var(--tp-text-tertiary);
+}

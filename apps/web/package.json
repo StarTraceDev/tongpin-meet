@@ -16,7 +16,8 @@
     "element-plus": "catalog:",
     "pinia": "catalog:",
     "vue": "catalog:",
-    "vue-router": "catalog:"
+    "vue-router": "catalog:",
+    "@tongpin/tokens": "workspace:*"
   },
   "devDependencies": {
     "@tongpin/config": "workspace:*",

@@ -2,5 +2,15 @@
   "name": "@tongpin/tokens",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "sideEffects": [
+    "*.css",
+    "src/*.css"
+  ],
+  "exports": {
+    ".": "./src/index.css",
+    "./tokens.css": "./src/tokens.css",
+    "./base.css": "./src/base.css",
+    "./components.css": "./src/components.css"
+  }
 }

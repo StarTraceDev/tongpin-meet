@@ -1,0 +1,91 @@
+/**
+ * 05 §8：三端唯一的颜色/字号/间距真源。
+ * 组件里禁止写 hex 与 px 阴影；要新值先在这里加 token。
+ */
+:root {
+  color-scheme: light;
+
+  /* 色彩（05 §8.1 浅色） */
+  --tp-canvas: #ffffff;
+  --tp-surface: #ffffff;
+  --tp-surface-secondary: #f5f7f9;
+  --tp-border: #e5e8ed;
+  --tp-divider: #e5e8e8;
+  --tp-text-primary: #1d1d1f;
+  --tp-text-secondary: #6e6e73;
+  --tp-text-tertiary: #a1a1a6;
+  --tp-brand: #0071e3;
+  --tp-brand-hover: #0077ed;
+  --tp-brand-soft: #0a84ff;
+  --tp-success: #34c759;
+  --tp-warning: #ff9f0a;
+  --tp-danger: #ff3b30;
+
+  /* 排版（05 §8.2） */
+  --tp-font-sans: -apple-system, 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --tp-font-display: 600 32px/40px var(--tp-font-sans);
+  --tp-font-title: 600 24px/32px var(--tp-font-sans);
+  --tp-font-headline: 600 17px/24px var(--tp-font-sans);
+  --tp-font-body: 400 15px/22px var(--tp-font-sans);
+  --tp-font-embedded: 500 13px/20px var(--tp-font-sans);
+  --tp-font-caption: 400 12px/18px var(--tp-font-sans);
+
+  /* 间距（05 §8.3） */
+  --tp-space-1: 4px;
+  --tp-space-2: 8px;
+  --tp-space-3: 12px;
+  --tp-space-4: 16px;
+  --tp-space-5: 20px;
+  --tp-space-6: 24px;
+  --tp-space-8: 32px;
+  --tp-space-10: 40px;
+  --tp-space-12: 48px;
+
+  /* 圆角 */
+  --tp-radius-s: 8px;
+  --tp-radius-m: 12px;
+  --tp-radius-l: 16px;
+  --tp-radius-xl: 20px;
+  --tp-radius-full: 999px;
+
+  /* 阴影 */
+  --tp-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --tp-shadow-2: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --tp-shadow-3: 0 24px 64px rgba(0, 0, 0, 0.16);
+
+  /* 层级（05 §8.4） */
+  --tp-z-dropdown: 1000;
+  --tp-z-sticky: 1020;
+  --tp-z-fixed: 1030;
+  --tp-z-modal-backdrop: 1040;
+  --tp-z-modal: 1050;
+  --tp-z-popover: 1060;
+  --tp-z-toast: 1080;
+  --tp-z-tooltip: 1090;
+  --tp-z-floating-window: 1100;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* 色彩（05 §8.1 深色） */
+  --tp-canvas: #141416;
+  --tp-surface: #1c1c1e;
+  --tp-surface-secondary: #2c2c2e;
+  --tp-border: rgba(255, 255, 255, 0.1);
+  --tp-divider: rgba(255, 255, 255, 0.2);
+  --tp-text-primary: #f5f5f7;
+  --tp-text-secondary: #a1a1a6;
+  --tp-text-tertiary: #8e8e93;
+  --tp-brand: #0a84ff;
+  --tp-brand-hover: #409cff;
+  --tp-brand-soft: #64b5ff;
+  --tp-success: #30d158;
+  --tp-warning: #ff9f0a;
+  --tp-danger: #ff453a;
+
+  /* 暗色靠边框提轮廓，阴影更重 */
+  --tp-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --tp-shadow-2: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --tp-shadow-3: 0 24px 64px rgba(0, 0, 0, 0.7);
+}

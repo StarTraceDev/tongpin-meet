@@ -1,0 +1,4 @@
+/* 05 §8.6：唯一入口，Web / Desktop / Admin 都 import '@tongpin/tokens' */
+@import './tokens.css';
+@import './base.css';
+@import './components.css';
