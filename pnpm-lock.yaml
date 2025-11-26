@@ -189,6 +189,9 @@ importers:
       '@tongpin/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@tongpin/theme':
+        specifier: workspace:*
+        version: link:../../packages/theme
       '@tongpin/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens

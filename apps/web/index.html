@@ -4,6 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>同频会议</title>
+    <!-- 防闪烁（05 §7.3）：早于任何 CSS/JS 执行，桌面端与后台入口在各自 index.html 内放同一段 -->
+    <script>
+      (function () {
+        try {
+          var m = localStorage.getItem('tongpin:theme') || 'system'
+          var d =
+            m === 'dark' ||
+            (m === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+          document.documentElement.dataset.theme = d ? 'dark' : 'light'
+          if (d) document.documentElement.classList.add('dark')
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>

@@ -1,0 +1,56 @@
+/**
+ * Element Plus 变量 → 我们自己的 token（05 §7.2）。
+ * Element Plus 的暗色变量挂在 html.dark 上，所以这里用同等权重的选择器覆盖，
+ * 值全部指向 --tp-*，浅色/深色由 [data-theme] 自动切换。
+ */
+:root,
+html.dark {
+  --el-color-primary: var(--tp-brand);
+  --el-color-primary-dark-2: color-mix(in srgb, var(--tp-brand) 80%, #000);
+  --el-color-primary-light-3: color-mix(in srgb, var(--tp-brand) 70%, var(--tp-surface));
+  --el-color-primary-light-5: color-mix(in srgb, var(--tp-brand) 50%, var(--tp-surface));
+  --el-color-primary-light-7: color-mix(in srgb, var(--tp-brand) 30%, var(--tp-surface));
+  --el-color-primary-light-8: color-mix(in srgb, var(--tp-brand) 20%, var(--tp-surface));
+  --el-color-primary-light-9: color-mix(in srgb, var(--tp-brand) 10%, var(--tp-surface));
+
+  --el-color-success: var(--tp-success);
+  --el-color-warning: var(--tp-warning);
+  --el-color-danger: var(--tp-danger);
+  --el-color-error: var(--tp-danger);
+
+  --el-bg-color: var(--tp-surface);
+  --el-bg-color-page: var(--tp-canvas);
+  --el-bg-color-overlay: var(--tp-surface);
+  --el-fill-color-blank: var(--tp-surface);
+  --el-fill-color: var(--tp-surface-secondary);
+  --el-fill-color-light: var(--tp-surface-secondary);
+  --el-fill-color-lighter: var(--tp-surface-secondary);
+  --el-fill-color-extra-light: var(--tp-surface-secondary);
+  --el-fill-color-dark: var(--tp-surface-secondary);
+  --el-fill-color-darker: var(--tp-surface-secondary);
+
+  --el-text-color-primary: var(--tp-text-primary);
+  --el-text-color-regular: var(--tp-text-secondary);
+  --el-text-color-secondary: var(--tp-text-tertiary);
+  --el-text-color-placeholder: var(--tp-text-tertiary);
+  --el-text-color-disabled: var(--tp-text-tertiary);
+
+  --el-border-color: var(--tp-border);
+  --el-border-color-light: var(--tp-divider);
+  --el-border-color-lighter: var(--tp-divider);
+  --el-border-color-extra-light: var(--tp-divider);
+  --el-border-color-dark: var(--tp-border);
+  --el-border-color-darker: var(--tp-border);
+
+  --el-mask-color: color-mix(in srgb, var(--tp-canvas) 78%, transparent);
+  --el-mask-color-extra-light: color-mix(in srgb, var(--tp-canvas) 40%, transparent);
+
+  --el-box-shadow: var(--tp-shadow-2);
+  --el-box-shadow-light: var(--tp-shadow-1);
+  --el-box-shadow-lighter: var(--tp-shadow-1);
+  --el-box-shadow-dark: var(--tp-shadow-3);
+
+  --el-font-family: var(--tp-font-sans);
+  --el-border-radius-base: var(--tp-radius-m);
+  --el-border-radius-small: var(--tp-radius-s);
+}
