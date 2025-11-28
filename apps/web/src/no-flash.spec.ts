@@ -29,7 +29,7 @@ describe('三端防闪烁脚本', () => {
   })
 
   it('三份脚本内容完全一致（05 §7.3 要求逐字复制）', () => {
-    const [first, ...rest] = ENTRIES.map((file) => scriptOf(readFileSync(file, 'utf8')))
+    const [first = '', ...rest] = ENTRIES.map((file) => scriptOf(readFileSync(file, 'utf8')))
     expect(first.length).toBeGreaterThan(0)
     for (const script of rest) expect(script).toBe(first)
   })
