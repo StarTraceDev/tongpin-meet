@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./types": "./src/types.ts",
-    "./web": "./src/web/index.ts"
+    "./web": "./src/web/index.ts",
+    "./electron": "./src/electron/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
