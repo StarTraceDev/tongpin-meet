@@ -2,5 +2,31 @@
   "name": "@tongpin/app-core",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@tongpin/platform": "workspace:*",
+    "@tongpin/shared": "workspace:*",
+    "@tongpin/theme": "workspace:*",
+    "@tongpin/tokens": "workspace:*",
+    "pinia": "catalog:",
+    "vue": "catalog:",
+    "vue-router": "catalog:"
+  },
+  "devDependencies": {
+    "@tongpin/config": "workspace:*",
+    "@vitejs/plugin-vue": "catalog:",
+    "eslint": "catalog:",
+    "jsdom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "vue-tsc": "catalog:"
+  }
 }

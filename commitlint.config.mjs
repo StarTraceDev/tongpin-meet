@@ -1,10 +1,11 @@
 const TYPES = ['feat', 'fix', 'perf', 'refactor', 'docs', 'style', 'test', 'build', 'ci', 'chore']
 
-// 07 §10.2：scope 必填且只能用这 12 个
+// 07 §10.2 的 12 个 + app-core（09 新增包，见 PROGRESS §5）
 const SCOPES = [
   'web',
   'desktop',
   'admin',
+  'app-core',
   'server',
   'shared',
   'platform',
