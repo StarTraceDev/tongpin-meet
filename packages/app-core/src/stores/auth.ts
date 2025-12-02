@@ -8,8 +8,8 @@ import {
   loginBySms,
   type LoginPayload,
   type SmsLoginPayload,
-} from '@/api/auth'
-import { clearTokens, getAccessToken, setTokens } from '@/api/http'
+} from '../apis/auth'
+import { clearTokens, getAccessToken, setTokens } from '../apis/http'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<AuthUser | null>(null)

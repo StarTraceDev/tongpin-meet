@@ -2,8 +2,8 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { confirmQrSession } from '@/api/auth'
-import { ApiError } from '@/api/http'
+import { confirmQrSession } from '../apis/auth'
+import { ApiError } from '../apis/http'
 
 const route = useRoute()
 const router = useRouter()

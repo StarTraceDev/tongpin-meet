@@ -23,7 +23,7 @@ describe('usePlatform', () => {
     const container = document.createElement('div')
     document.body.append(container)
 
-    const app = createApp({ platform, routes: [{ path: '/', component: Probe }] })
+    const app = createApp({ platform, guard: false, routes: [{ path: '/', component: Probe }] })
     app.mount(container)
     await app.router.isReady()
 

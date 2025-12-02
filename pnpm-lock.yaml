@@ -189,21 +189,12 @@ importers:
 
   apps/web:
     dependencies:
-      '@tongpin/shared':
+      '@tongpin/app-core':
         specifier: workspace:*
-        version: link:../../packages/shared
-      '@tongpin/theme':
+        version: link:../../packages/app-core
+      '@tongpin/platform':
         specifier: workspace:*
-        version: link:../../packages/theme
-      '@tongpin/tokens':
-        specifier: workspace:*
-        version: link:../../packages/tokens
-      element-plus:
-        specifier: 'catalog:'
-        version: 2.14.7(vue@3.5.44(typescript@5.9.3))
-      pinia:
-        specifier: 'catalog:'
-        version: 3.0.4(typescript@5.9.3)(vue@3.5.44(typescript@5.9.3))
+        version: link:../../packages/platform
       vue:
         specifier: 'catalog:'
         version: 3.5.44(typescript@5.9.3)
@@ -247,6 +238,9 @@ importers:
       '@tongpin/tokens':
         specifier: workspace:*
         version: link:../tokens
+      element-plus:
+        specifier: 'catalog:'
+        version: 2.14.7(vue@3.5.44(typescript@5.9.3))
       pinia:
         specifier: 'catalog:'
         version: 3.0.4(typescript@5.9.3)(vue@3.5.44(typescript@5.9.3))

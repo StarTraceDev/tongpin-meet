@@ -18,7 +18,8 @@
     "@tongpin/tokens": "workspace:*",
     "pinia": "catalog:",
     "vue": "catalog:",
-    "vue-router": "catalog:"
+    "vue-router": "catalog:",
+    "element-plus": "catalog:"
   },
   "devDependencies": {
     "@tongpin/config": "workspace:*",
@@ -28,5 +29,9 @@
     "typescript": "catalog:",
     "vitest": "catalog:",
     "vue-tsc": "catalog:"
-  }
+  },
+  "sideEffects": [
+    "*.css",
+    "src/**/*.css"
+  ]
 }

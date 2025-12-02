@@ -3,9 +3,9 @@ import type { QrSession } from '@tongpin/shared/types'
 import { onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { createQrSession, pollQrSession, sendSmsCode } from '@/api/auth'
-import { ApiError } from '@/api/http'
-import { useAuthStore } from '@/stores/auth'
+import { createQrSession, pollQrSession, sendSmsCode } from '../apis/auth'
+import { ApiError } from '../apis/http'
+import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
 const route = useRoute()

@@ -3,8 +3,8 @@ import type { Meeting, Paginated } from '@tongpin/shared/types'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { request } from '@/api/http'
-import { useAuthStore } from '@/stores/auth'
+import { request } from '../apis/http'
+import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
 const router = useRouter()

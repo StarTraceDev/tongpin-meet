@@ -30,7 +30,7 @@ describe('createApp', () => {
 
     const app = createApp({
       platform: createWebPlatform(),
-      routes: [{ path: '/', component: Home }],
+      routes: [{ path: '/', component: Home, meta: { public: true } }],
     })
     app.mount(container)
     await app.router.isReady()

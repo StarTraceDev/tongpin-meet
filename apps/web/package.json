@@ -12,13 +12,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@tongpin/shared": "workspace:*",
-    "element-plus": "catalog:",
-    "pinia": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:",
-    "@tongpin/tokens": "workspace:*",
-    "@tongpin/theme": "workspace:*"
+    "@tongpin/app-core": "workspace:*",
+    "@tongpin/platform": "workspace:*"
   },
   "devDependencies": {
     "@tongpin/config": "workspace:*",
