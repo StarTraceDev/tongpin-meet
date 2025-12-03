@@ -32,6 +32,8 @@ export const ERROR_CODES = {
   AUTH_SMS_RATE_LIMITED: 20105,
   /** 409：会议已结束 */
   MEETING_ENDED: 30402,
+  /** 409：签到 / 投票已关闭（单向终态，重开请新建） */
+  INTERACTION_CLOSED: 30403,
 } as const
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES]

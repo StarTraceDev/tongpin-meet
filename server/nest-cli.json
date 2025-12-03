@@ -71,6 +71,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/auth/tsconfig.lib.json"
       }
+    },
+    "interaction": {
+      "type": "library",
+      "root": "libs/interaction",
+      "entryFile": "index",
+      "sourceRoot": "libs/interaction/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/interaction/tsconfig.lib.json"
+      }
     }
   }
 }

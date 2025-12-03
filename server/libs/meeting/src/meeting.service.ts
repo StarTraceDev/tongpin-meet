@@ -611,7 +611,8 @@ export class MeetingService {
    * 并发下 aggregate+create 可能撞 @@unique([meetingId, seq])，重试即可拿到新序号；
    * 落库后 pg_notify 给 gateway 进程实时广播（跨进程不共享内存）。
    */
-  private async appendEvent(
+  /** 互动模块（签到/投票/休息）共用：落事件 + pg_notify 广播 */
+  async appendEvent(
     meetingId: string,
     type: string,
     fromUid: string | null,

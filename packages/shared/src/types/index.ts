@@ -35,6 +35,14 @@ import type {
   updateMeetingSchema,
 } from '../schemas/meeting'
 import type { mediaStateSchema } from '../schemas/participant'
+import type {
+  checkinOverviewSchema,
+  checkinRecordSchema,
+  checkinResultSchema,
+  checkinSchema,
+  createCheckinSchema,
+  interactionStatusSchema,
+} from '../schemas/interaction'
 import type { wsEnvelopeSchema, wsTicketSchema } from '../schemas/ws'
 
 export type LoginByPasswordInput = z.infer<typeof loginByPasswordSchema>
@@ -77,3 +85,10 @@ export type Paginated<T> = {
   page: number
   pageSize: number
 }
+
+export type CheckinStatus = z.infer<typeof interactionStatusSchema>
+export type Checkin = z.infer<typeof checkinSchema>
+export type CheckinRecord = z.infer<typeof checkinRecordSchema>
+export type CheckinOverview = z.infer<typeof checkinOverviewSchema>
+export type CheckinResult = z.infer<typeof checkinResultSchema>
+export type CreateCheckinInput = z.infer<typeof createCheckinSchema>
