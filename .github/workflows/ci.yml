@@ -56,17 +56,5 @@ jobs:
         if: hashFiles('server/prisma/schema.prisma') != ''
         run: pnpm --filter @tongpin/server exec prisma validate
 
-      - name: 卡口：app-core 不许出现平台 API
-        run: |
-          set -euo pipefail
-          if [ -d packages/app-core ]; then
-            if grep -rnE "window\.api|window\.electron|isElectron" packages/app-core --exclude-dir=node_modules; then
-              echo "::error::packages/app-core 里出现了平台 API，必须走 @tongpin/platform"
-              exit 1
-            fi
-            if grep -rnE "from ['\"]electron['\"]" packages/app-core --exclude-dir=node_modules; then
-              echo "::error::packages/app-core 不许 import electron"
-              exit 1
-            fi
-          fi
-          echo "app-core 卡口通过"
+      - name: 卡口：app-core 平台边界
+        run: bash scripts/check-boundaries.sh
