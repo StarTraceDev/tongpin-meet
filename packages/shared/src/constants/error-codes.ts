@@ -34,6 +34,10 @@ export const ERROR_CODES = {
   MEETING_ENDED: 30402,
   /** 409：签到 / 投票已关闭（单向终态，重开请新建） */
   INTERACTION_CLOSED: 30403,
+  /** 409：投票当前状态不允许该操作（未开始 / 已截止 / 已公布） */
+  VOTE_INVALID_STATE: 30404,
+  /** 409：同一用户重复投票 */
+  VOTE_ALREADY_SUBMITTED: 30405,
 } as const
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES]

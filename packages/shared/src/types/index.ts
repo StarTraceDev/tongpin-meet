@@ -41,7 +41,15 @@ import type {
   checkinResultSchema,
   checkinSchema,
   createCheckinSchema,
+  createVoteSchema,
   interactionStatusSchema,
+  submitVoteSchema,
+  updateVoteSchema,
+  voteQuestionSchema,
+  voteResultsSchema,
+  voteSchema,
+  voteStatusSchema,
+  voteSubmissionResultSchema,
 } from '../schemas/interaction'
 import type { wsEnvelopeSchema, wsTicketSchema } from '../schemas/ws'
 
@@ -92,3 +100,12 @@ export type CheckinRecord = z.infer<typeof checkinRecordSchema>
 export type CheckinOverview = z.infer<typeof checkinOverviewSchema>
 export type CheckinResult = z.infer<typeof checkinResultSchema>
 export type CreateCheckinInput = z.infer<typeof createCheckinSchema>
+export type VoteState = z.infer<typeof voteStatusSchema>
+export type VoteOption = z.infer<typeof voteQuestionSchema>['options'][number]
+export type VoteQuestion = z.infer<typeof voteQuestionSchema>
+export type Vote = z.infer<typeof voteSchema>
+export type VoteResults = z.infer<typeof voteResultsSchema>
+export type VoteSubmissionResult = z.infer<typeof voteSubmissionResultSchema>
+export type CreateVoteInput = z.infer<typeof createVoteSchema>
+export type UpdateVoteInput = z.infer<typeof updateVoteSchema>
+export type SubmitVoteInput = z.infer<typeof submitVoteSchema>

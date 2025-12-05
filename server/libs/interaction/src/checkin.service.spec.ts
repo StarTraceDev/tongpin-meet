@@ -6,6 +6,7 @@ import type { PrismaService } from '../../infra/src/prisma/prisma.service'
 import type { MeetingService } from '../../meeting/src/meeting.service'
 
 import { CheckinService } from './checkin.service'
+import { InteractionAccess } from './interaction-access'
 
 const host: AuthUser = {
   id: 'user_host',
@@ -84,7 +85,7 @@ function makeService(): { service: CheckinService; mocks: Mocks } {
     user: { findMany: mocks.userFindMany },
   } as unknown as PrismaService
   const meetings = { appendEvent: mocks.appendEvent } as unknown as MeetingService
-  return { service: new CheckinService(prisma, meetings), mocks }
+  return { service: new CheckinService(prisma, new InteractionAccess(prisma), meetings), mocks }
 }
 
 describe('CheckinService', () => {

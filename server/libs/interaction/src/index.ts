@@ -1,3 +1,6 @@
 export { CheckinService } from './checkin.service'
 export { CheckinController } from './checkin.controller'
+export { VoteService } from './vote.service'
+export { VoteController } from './vote.controller'
+export { InteractionAccess } from './interaction-access'
 export { InteractionModule } from './interaction.module'
