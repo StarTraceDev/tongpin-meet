@@ -153,3 +153,54 @@ export const voteSubmissionResultSchema = z.object({
   submittedAt: isoDateTimeSchema,
   alreadySubmitted: z.boolean(),
 })
+
+// ---------------------------------------------------------------------------
+// 休息（03 §5.4：ONGOING → CLOSED 单向；成员可标记「去休息 / 回来了」）
+// ---------------------------------------------------------------------------
+
+export const createBreakSchema = z.object({
+  title: z.string().trim().min(1).max(120).optional(),
+  plannedSec: z.int().min(60).max(7200).optional(),
+})
+
+export const updateBreakSchema = z
+  .object({
+    title: z.string().trim().max(120).nullable().optional(),
+    plannedSec: z.int().min(60).max(7200).nullable().optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, { message: '至少修改一项' })
+
+export const breakSchema = z.object({
+  id: idSchema,
+  meetingId: idSchema,
+  title: z.string().nullable(),
+  status: interactionStatusSchema,
+  plannedSec: z.int().nullable(),
+  createdById: idSchema,
+  startedAt: isoDateTimeSchema,
+  endedAt: isoDateTimeSchema.nullable(),
+})
+
+export const breakRecordSchema = z.object({
+  userId: idSchema,
+  userName: z.string(),
+  resting: z.boolean(),
+  changedAt: isoDateTimeSchema,
+})
+
+export const breakOverviewSchema = z.object({
+  break: breakSchema,
+  restingCount: z.int().nonnegative(),
+  records: z.array(breakRecordSchema),
+})
+
+export const breakRecordInputSchema = z.object({
+  resting: z.boolean(),
+})
+
+export const breakRecordResultSchema = z.object({
+  breakId: idSchema,
+  resting: z.boolean(),
+  restingCount: z.int().nonnegative(),
+  changedAt: isoDateTimeSchema,
+})

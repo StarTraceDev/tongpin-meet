@@ -38,12 +38,19 @@ import type { mediaStateSchema } from '../schemas/participant'
 import type {
   checkinOverviewSchema,
   checkinRecordSchema,
+  breakOverviewSchema,
+  breakRecordInputSchema,
+  breakRecordResultSchema,
+  breakRecordSchema,
+  breakSchema,
   checkinResultSchema,
   checkinSchema,
+  createBreakSchema,
   createCheckinSchema,
   createVoteSchema,
   interactionStatusSchema,
   submitVoteSchema,
+  updateBreakSchema,
   updateVoteSchema,
   voteQuestionSchema,
   voteResultsSchema,
@@ -109,3 +116,10 @@ export type VoteSubmissionResult = z.infer<typeof voteSubmissionResultSchema>
 export type CreateVoteInput = z.infer<typeof createVoteSchema>
 export type UpdateVoteInput = z.infer<typeof updateVoteSchema>
 export type SubmitVoteInput = z.infer<typeof submitVoteSchema>
+export type Break = z.infer<typeof breakSchema>
+export type BreakRecord = z.infer<typeof breakRecordSchema>
+export type BreakOverview = z.infer<typeof breakOverviewSchema>
+export type BreakRecordResult = z.infer<typeof breakRecordResultSchema>
+export type CreateBreakInput = z.infer<typeof createBreakSchema>
+export type UpdateBreakInput = z.infer<typeof updateBreakSchema>
+export type BreakRecordInput = z.infer<typeof breakRecordInputSchema>
