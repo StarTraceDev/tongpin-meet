@@ -38,6 +38,12 @@ export const ERROR_CODES = {
   VOTE_INVALID_STATE: 30404,
   /** 409：同一用户重复投票 */
   VOTE_ALREADY_SUBMITTED: 30405,
+  /** 409：文件上传状态或分片不完整 */
+  FILE_UPLOAD_INVALID: 60001,
+  /** 400：分片序号 / 大小不合法 */
+  FILE_PART_INVALID: 60002,
+  /** 410：下载链接过期 */
+  FILE_DOWNLOAD_EXPIRED: 60003,
 } as const
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES]

@@ -36,3 +36,6 @@ coverage/
 
 # Prisma 生成的客户端（CI 里 pnpm db:generate 现生成）
 server/libs/infra/src/generated/
+
+# 本地文件存储（LocalStorageProvider 的默认目录）
+server/storage/

@@ -1,0 +1,5 @@
+export { FileModule } from './file.module'
+export { FileService } from './file.service'
+export { STORAGE_PROVIDER } from './storage'
+export type { StorageProvider } from './storage'
+export { LocalStorageProvider } from './local-storage'

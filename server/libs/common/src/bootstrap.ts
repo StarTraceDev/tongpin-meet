@@ -19,6 +19,11 @@ export function configureApp(app: INestApplication): INestApplication {
   app.setGlobalPrefix('api/v1', { exclude: ['health'] })
   app.useGlobalPipes(new ZodValidationPipe())
   app.useGlobalFilters(new ProblemJsonFilter())
+  // 文件分片走 application/octet-stream 原始体（5MB/片，留一倍余量）
+  const expressApp = app as unknown as {
+    useBodyParser?: (type: string, options?: Record<string, unknown>) => void
+  }
+  expressApp.useBodyParser?.('raw', { type: 'application/octet-stream', limit: '10mb' })
   app.enableShutdownHooks()
   return app
 }

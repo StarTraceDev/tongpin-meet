@@ -16,6 +16,12 @@ import type {
   sessionTokensSchema,
 } from '../schemas/auth'
 import type { paginationQuerySchema, problemSchema } from '../schemas/common'
+import type {
+  createUploadSchema,
+  downloadUrlSchema,
+  meetingFileSchema,
+  uploadSessionSchema,
+} from '../schemas/file'
 import type { qrSessionSchema, qrPollSchema } from '../schemas/qr'
 import type {
   listMeetingsQuerySchema,
@@ -123,3 +129,7 @@ export type BreakRecordResult = z.infer<typeof breakRecordResultSchema>
 export type CreateBreakInput = z.infer<typeof createBreakSchema>
 export type UpdateBreakInput = z.infer<typeof updateBreakSchema>
 export type BreakRecordInput = z.infer<typeof breakRecordInputSchema>
+export type MeetingFile = z.infer<typeof meetingFileSchema>
+export type UploadSession = z.infer<typeof uploadSessionSchema>
+export type DownloadUrl = z.infer<typeof downloadUrlSchema>
+export type CreateUploadInput = z.infer<typeof createUploadSchema>

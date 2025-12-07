@@ -1,5 +1,6 @@
 export * from './common'
 export * from './auth'
+export * from './file'
 export * from './meeting'
 export * from './participant'
 export * from './ws'
