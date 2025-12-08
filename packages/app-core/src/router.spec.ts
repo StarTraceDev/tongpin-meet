@@ -13,6 +13,13 @@ describe('createAppRouter', () => {
     expect(router.currentRoute.value.path).toBe('/login')
   })
 
+  it('会议结束页带会议 id', async () => {
+    const router = createAppRouter({ history: createMemoryHistory(), guard: false })
+    await router.push('/meetings/m_1/ended')
+    expect(router.currentRoute.value.name).toBe('meeting-ended')
+    expect(router.currentRoute.value.params.id).toBe('m_1')
+  })
+
   it('未知路径落 404 页', async () => {
     const router = createAppRouter({ history: createMemoryHistory(), guard: false })
     await router.push('/no-such-page')

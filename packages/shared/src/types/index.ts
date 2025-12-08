@@ -16,6 +16,7 @@ import type {
   sessionTokensSchema,
 } from '../schemas/auth'
 import type { paginationQuerySchema, problemSchema } from '../schemas/common'
+import type { minutesSchema, updateMinutesSchema } from '../schemas/minutes'
 import type {
   createUploadSchema,
   downloadUrlSchema,
@@ -133,3 +134,5 @@ export type MeetingFile = z.infer<typeof meetingFileSchema>
 export type UploadSession = z.infer<typeof uploadSessionSchema>
 export type DownloadUrl = z.infer<typeof downloadUrlSchema>
 export type CreateUploadInput = z.infer<typeof createUploadSchema>
+export type Minutes = z.infer<typeof minutesSchema>
+export type UpdateMinutesInput = z.infer<typeof updateMinutesSchema>

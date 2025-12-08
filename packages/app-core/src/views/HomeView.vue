@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Meeting, Paginated } from '@tongpin/shared/types'
+import { ElMessage } from 'element-plus'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -23,6 +24,14 @@ onMounted(async () => {
   }
 })
 
+function openMeeting(meeting: Meeting): void {
+  if (meeting.status === 'ENDED') {
+    void router.push({ name: 'meeting-ended', params: { id: meeting.id } })
+    return
+  }
+  ElMessage.info('会中面板还没接（M9.9），先看已结束会议的纪要')
+}
+
 async function logout(): Promise<void> {
   auth.logout()
   await router.replace({ name: 'login' })
@@ -42,7 +51,7 @@ async function logout(): Promise<void> {
       <el-alert v-if="error !== ''" :title="error" type="warning" :closable="false" show-icon />
       <el-skeleton v-if="loading" :rows="3" animated />
       <el-empty v-else-if="meetings.length === 0" description="还没有会议" />
-      <el-table v-else :data="meetings">
+      <el-table v-else :data="meetings" class="meeting-table" @row-click="openMeeting">
         <el-table-column prop="meetingNo" label="会议号" width="140" />
         <el-table-column prop="title" label="主题" />
         <el-table-column prop="status" label="状态" width="120" />
@@ -67,5 +76,9 @@ async function logout(): Promise<void> {
 
 .spacer {
   flex: 1;
+}
+
+.meeting-table :deep(.el-table__row) {
+  cursor: pointer;
 }
 </style>

@@ -38,6 +38,7 @@ export const ERROR_CODES = {
   VOTE_INVALID_STATE: 30404,
   /** 409：同一用户重复投票 */
   VOTE_ALREADY_SUBMITTED: 30405,
+  MINUTES_VERSION_CONFLICT: 30406,
   /** 409：文件上传状态或分片不完整 */
   FILE_UPLOAD_INVALID: 60001,
   /** 400：分片序号 / 大小不合法 */

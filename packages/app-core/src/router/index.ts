@@ -30,6 +30,12 @@ export const appRoutes: RouteRecordRaw[] = [
     meta: { public: true, title: '登录' },
   },
   {
+    path: '/meetings/:id/ended',
+    name: 'meeting-ended',
+    component: lazy(() => import('../views/MeetingEndView.vue')),
+    meta: { title: '会议结束' },
+  },
+  {
     path: '/device',
     name: 'device',
     component: lazy(() => import('../views/DeviceView.vue')),
