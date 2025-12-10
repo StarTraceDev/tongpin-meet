@@ -1,13 +1,28 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 
-/**
- * M10-1 只暴露只读环境信息；M10-2 再按 platform/electron 的 25 个通道补 invoke/on。
- * 渲染进程始终拿不到 ipcRenderer / node 对象。
- */
+import { ELECTRON_CHANNELS } from '@tongpin/platform/electron'
+
+const CHANNELS = new Set<string>(Object.values(ELECTRON_CHANNELS))
+
+const bridge = {
+  os: process.platform,
+  invoke: (channel: string, payload?: unknown): Promise<unknown> => {
+    if (!CHANNELS.has(channel)) return Promise.reject(new Error(`未注册的 IPC 通道：${channel}`))
+    return ipcRenderer.invoke(channel, payload) as Promise<unknown>
+  },
+  on: (channel: string, listener: (payload: unknown) => void): (() => void) => {
+    if (!CHANNELS.has(channel)) throw new Error(`未注册的 IPC 通道：${channel}`)
+    const handler = (_event: Electron.IpcRendererEvent, payload: unknown): void => listener(payload)
+    ipcRenderer.on(channel, handler)
+    return () => ipcRenderer.removeListener(channel, handler)
+  },
+}
+
 contextBridge.exposeInMainWorld('tongpin', {
   platform: process.platform,
   versions: {
     electron: process.versions.electron,
     chrome: process.versions.chrome,
   },
+  bridge,
 })

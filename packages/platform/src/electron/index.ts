@@ -14,6 +14,8 @@ import type {
 } from '../types'
 import { ELECTRON_CHANNELS } from './channels'
 
+export { ELECTRON_CHANNELS, type ElectronChannel } from './channels'
+
 /**
  * preload 暴露给渲染进程的最小桥：
  * - `invoke` 对应 ipcRenderer.invoke，主进程返回 JSON 可序列化结果

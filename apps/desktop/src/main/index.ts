@@ -2,6 +2,8 @@ import { join } from 'node:path'
 
 import { app, BrowserWindow, shell } from 'electron'
 
+import { registerIpcHandlers, watchMaximize } from './ipc'
+import { WindowManager } from './windows'
 import { mainWindowOptions } from './window-options'
 
 function createMainWindow(): BrowserWindow {
@@ -24,7 +26,17 @@ function createMainWindow(): BrowserWindow {
 }
 
 app.whenReady().then(() => {
-  createMainWindow()
+  const mainWindow = createMainWindow()
+  const windows = new WindowManager({
+    mainWindow,
+    rendererDir: join(import.meta.dirname, '../renderer'),
+    rendererUrl: process.env.ELECTRON_RENDERER_URL,
+  })
+  registerIpcHandlers({
+    windows,
+    storagePath: join(app.getPath('userData'), 'tongpin-storage.json'),
+  })
+  watchMaximize(mainWindow)
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
   })
