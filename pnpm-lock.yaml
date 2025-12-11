@@ -199,6 +199,9 @@ importers:
       '@tongpin/platform':
         specifier: workspace:*
         version: link:../../packages/platform
+      '@tongpin/tokens':
+        specifier: workspace:*
+        version: link:../../packages/tokens
       '@types/node':
         specifier: 'catalog:'
         version: 22.20.5

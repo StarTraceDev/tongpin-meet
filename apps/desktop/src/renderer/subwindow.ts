@@ -1,0 +1,35 @@
+import '@tongpin/tokens'
+
+import { createElectronPlatform } from '@tongpin/platform/electron'
+
+import type { DesktopEnv } from './env'
+import { readSubWindowRequest, SUB_WINDOWS } from './subwindows'
+import './shell.css'
+
+export function renderSubWindow(env: DesktopEnv | undefined): void {
+  const request = readSubWindowRequest(location.search)
+  const app = document.getElementById('app')
+  if (request === null || app === null) return
+
+  const spec = SUB_WINDOWS[request.key]
+  const payload =
+    request.payload === undefined ? '（无）' : JSON.stringify(request.payload, null, 2)
+  app.innerHTML = `
+    <main class="sub-window">
+      <header><h1>${spec.title}</h1><button id="close" type="button">关闭</button></header>
+      <p class="hint">${spec.hint}</p>
+      <pre id="payload"></pre>
+      <footer>key: <code>${request.key}</code></footer>
+    </main>
+  `
+  const pre = document.getElementById('payload')
+  if (pre !== null) pre.textContent = payload
+
+  document.getElementById('close')?.addEventListener('click', () => {
+    if (env === undefined) {
+      window.close()
+      return
+    }
+    void createElectronPlatform(env.bridge).window.close()
+  })
+}

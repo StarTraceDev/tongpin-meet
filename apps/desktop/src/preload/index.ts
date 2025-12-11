@@ -4,8 +4,11 @@ import { ELECTRON_CHANNELS } from '@tongpin/platform/electron'
 
 const CHANNELS = new Set<string>(Object.values(ELECTRON_CHANNELS))
 
+const OS: 'mac' | 'win' | 'linux' =
+  process.platform === 'darwin' ? 'mac' : process.platform === 'win32' ? 'win' : 'linux'
+
 const bridge = {
-  os: process.platform,
+  os: OS,
   invoke: (channel: string, payload?: unknown): Promise<unknown> => {
     if (!CHANNELS.has(channel)) return Promise.reject(new Error(`未注册的 IPC 通道：${channel}`))
     return ipcRenderer.invoke(channel, payload) as Promise<unknown>

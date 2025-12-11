@@ -21,6 +21,7 @@
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:",
-    "@tongpin/platform": "workspace:*"
+    "@tongpin/platform": "workspace:*",
+    "@tongpin/tokens": "workspace:*"
   }
 }
