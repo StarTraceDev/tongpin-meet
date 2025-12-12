@@ -13,6 +13,16 @@ function isSubWindow(): boolean {
   return new URLSearchParams(location.search).has('sub')
 }
 
+function asButton(id: string): HTMLButtonElement | null {
+  const element = document.getElementById(id)
+  return element instanceof HTMLButtonElement ? element : null
+}
+
+function asVideo(id: string): HTMLVideoElement | null {
+  const element = document.getElementById(id)
+  return element instanceof HTMLVideoElement ? element : null
+}
+
 async function renderMain(): Promise<void> {
   const app = document.getElementById('app')
   if (app === null) return
@@ -43,6 +53,15 @@ async function renderMain(): Promise<void> {
         <div class="row">${buttons}</div>
         <p id="sub-status" class="hint">尚未打开子窗口。</p>
       </section>
+      <section class="share">
+        <h2>屏幕共享</h2>
+        <div class="row">
+          <button id="share-start" type="button">共享屏幕</button>
+          <button id="share-stop" type="button" disabled>停止共享</button>
+        </div>
+        <p id="share-status" class="hint">未共享。</p>
+        <video id="share-preview" class="share-preview" autoplay muted playsinline hidden></video>
+      </section>
     </main>
   `
 
@@ -54,12 +73,56 @@ async function renderMain(): Promise<void> {
     })
   }
 
-  if (platform !== undefined) {
-    platform.window.onSubClosed((key) => {
-      const status = document.getElementById('sub-status')
-      if (status !== null) status.textContent = `子窗口 ${key} 已关闭。`
-    })
+  if (platform === undefined) return
+
+  platform.window.onSubClosed((key) => {
+    const status = document.getElementById('sub-status')
+    if (status !== null) status.textContent = `子窗口 ${key} 已关闭。`
+  })
+
+  const startButton = asButton('share-start')
+  const stopButton = asButton('share-stop')
+  const status = document.getElementById('share-status')
+  const preview = asVideo('share-preview')
+
+  const setSharing = (on: boolean): void => {
+    if (startButton !== null) startButton.disabled = on
+    if (stopButton !== null) stopButton.disabled = !on
   }
+
+  startButton?.addEventListener('click', () => {
+    void (async (): Promise<void> => {
+      if (status !== null) status.textContent = '请选择要共享的屏幕或窗口…'
+      try {
+        const source = await platform.capture.pickSource()
+        if (source === null) {
+          if (status !== null) status.textContent = '未选择共享内容。'
+          return
+        }
+        if (status !== null) status.textContent = `正在共享：${source.name}`
+        if (preview !== null && source.stream !== undefined) {
+          preview.srcObject = source.stream
+          preview.hidden = false
+        }
+        setSharing(true)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : '未知错误'
+        if (status !== null) status.textContent = `共享失败：${message}`
+      }
+    })()
+  })
+
+  stopButton?.addEventListener('click', () => {
+    void (async (): Promise<void> => {
+      await platform.capture.stop()
+      if (preview !== null) {
+        preview.srcObject = null
+        preview.hidden = true
+      }
+      if (status !== null) status.textContent = '已停止共享。'
+      setSharing(false)
+    })()
+  })
 }
 
 if (isSubWindow()) renderSubWindow(env)

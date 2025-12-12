@@ -1,6 +1,7 @@
 import type {
   CapturePort,
   CaptureSource,
+  CaptureSourceListing,
   NotifyPort,
   Platform,
   PlatformOs,
@@ -35,6 +36,7 @@ export interface ElectronBridge {
  */
 export function createElectronPlatform(bridge: ElectronBridge): Platform {
   let pendingNotifyClick: (() => void) | undefined
+  let activeCapture: MediaStream | undefined
 
   const window: WindowPort = {
     minimize: (): Promise<void> => bridge.invoke(ELECTRON_CHANNELS.windowMinimize),
@@ -57,15 +59,35 @@ export function createElectronPlatform(bridge: ElectronBridge): Platform {
   }
 
   const capture: CapturePort = {
-    pickSource: (): Promise<CaptureSource | null> =>
-      bridge.invoke<CaptureSource | null>(ELECTRON_CHANNELS.capturePickSource),
+    // 主进程先弹自定义选择器（desktopCapturer 列表 + 缩略图），选定后由
+    // setDisplayMediaRequestHandler 把这一次 getUserMedia 定向到该源。
+    pickSource: async (): Promise<CaptureSource | null> => {
+      const listing = await bridge.invoke<CaptureSourceListing | null>(
+        ELECTRON_CHANNELS.capturePickSource,
+      )
+      if (listing === null) return null
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false })
+      activeCapture?.getTracks().forEach((track) => track.stop())
+      activeCapture = stream
+      return { id: listing.id, name: listing.name, kind: listing.kind, stream }
+    },
     checkPermission: (): Promise<'granted' | 'denied' | 'unknown'> =>
       bridge.invoke<'granted' | 'denied' | 'unknown'>(ELECTRON_CHANNELS.captureCheckPermission),
+    listSources: (sessionId: string): Promise<CaptureSourceListing[] | null> =>
+      bridge.invoke<CaptureSourceListing[] | null>(ELECTRON_CHANNELS.captureListSources, {
+        sessionId,
+      }),
+    chooseSource: (sessionId: string, sourceId: string | null): Promise<void> =>
+      bridge.invoke(ELECTRON_CHANNELS.capturePickResult, { sessionId, sourceId }),
     requestPermission: (): Promise<boolean> =>
       bridge
         .invoke<boolean>(ELECTRON_CHANNELS.captureRequestPermission)
         .then((value) => value === true),
-    stop: (): Promise<void> => bridge.invoke(ELECTRON_CHANNELS.captureStop),
+    stop: async (): Promise<void> => {
+      activeCapture?.getTracks().forEach((track) => track.stop())
+      activeCapture = undefined
+      await bridge.invoke(ELECTRON_CHANNELS.captureStop)
+    },
   }
 
   const storage: StoragePort = {

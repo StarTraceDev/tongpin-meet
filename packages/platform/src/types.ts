@@ -54,9 +54,21 @@ export interface CaptureSource {
   stream?: MediaStream
 }
 
+/** 选择器里的候选源：缩略图是 data URL，只用于展示，不能直接播放 */
+export interface CaptureSourceListing {
+  id: string
+  name: string
+  kind: CaptureSourceKind
+  thumbnail: string
+}
+
 export interface CapturePort {
   /** Electron: desktopCapturer 自定义选择器；Web: 直接调 getDisplayMedia（系统选择器） */
   pickSource(): Promise<CaptureSource | null>
+  /** 选择器窗口按会话取候选源；Web 端没有自定义选择器，返回 null */
+  listSources(sessionId: string): Promise<CaptureSourceListing[] | null>
+  /** 选择器窗口回传结果，sourceId 为 null 表示用户取消 */
+  chooseSource(sessionId: string, sourceId: string | null): Promise<void>
   checkPermission(): Promise<'granted' | 'denied' | 'unknown'>
   requestPermission(): Promise<boolean>
   stop(): Promise<void>

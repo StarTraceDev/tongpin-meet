@@ -1,11 +1,21 @@
 import { writeFile } from 'node:fs/promises'
 
-import { app, dialog, ipcMain, Notification, safeStorage, shell, systemPreferences } from 'electron'
+import {
+  app,
+  desktopCapturer,
+  dialog,
+  ipcMain,
+  Notification,
+  safeStorage,
+  shell,
+  systemPreferences,
+} from 'electron'
 
 import { ELECTRON_CHANNELS } from '@tongpin/platform/electron'
 
 import type { SubWindowKey, SubWindowOptions, UpdateState } from '@tongpin/platform'
 
+import { SourcePicker } from './picker'
 import { createStorage, type StorageCipher } from './storage'
 import type { WindowManager } from './windows'
 
@@ -32,10 +42,26 @@ export interface IpcContext {
   storagePath: string
 }
 
-/** 05 §3.4：25 个通道的主进程侧实现，渲染进程只能经 preload 白名单调用。 */
-export function registerIpcHandlers(context: IpcContext): void {
+export interface IpcHandlers {
+  /** 选源会话之外，主进程还要在 setDisplayMediaRequestHandler 里消费选中结果 */
+  capture: SourcePicker
+}
+
+/** 05 §3.4：通道的主进程侧实现，渲染进程只能经 preload 白名单调用。 */
+export function registerIpcHandlers(context: IpcContext): IpcHandlers {
   const storage = createStorage(context.storagePath, safeStorageCipher())
   const { windows } = context
+  const capture = new SourcePicker({
+    listSources: (): Promise<Electron.DesktopCapturerSource[]> =>
+      desktopCapturer.getSources({
+        types: ['screen', 'window'],
+        thumbnailSize: { width: 320, height: 180 },
+      }),
+    openPicker: (sessionId: string): void => {
+      windows.openSub('sharePicker', { title: '选择共享内容', payload: { sessionId } })
+    },
+    closePicker: (): void => windows.closeSub('sharePicker'),
+  })
 
   ipcMain.handle(ELECTRON_CHANNELS.windowMinimize, () => windows.main.minimize())
   ipcMain.handle(ELECTRON_CHANNELS.windowToggleMaximize, () => {
@@ -59,11 +85,24 @@ export function registerIpcHandlers(context: IpcContext): void {
   })
   ipcMain.handle(ELECTRON_CHANNELS.windowCloseAllSubs, () => windows.closeAllSubs())
 
-  // 自定义选择器在 M10-4 接 desktopCapturer；先返回 null，业务层按「用户取消」处理。
-  ipcMain.handle(ELECTRON_CHANNELS.capturePickSource, () => null)
+  // macOS 首次共享由系统弹窗授权；已拒绝时给不出缩略图，按取消处理。
+  ipcMain.handle(ELECTRON_CHANNELS.capturePickSource, (event) => {
+    if (screenPermission() === 'denied') return null
+    return capture.pick(event.sender.id)
+  })
+  ipcMain.handle(ELECTRON_CHANNELS.captureListSources, (_event, payload: unknown) => {
+    const { sessionId } = (payload ?? {}) as { sessionId?: string }
+    if (typeof sessionId !== 'string') return null
+    return capture.list(sessionId)
+  })
+  ipcMain.handle(ELECTRON_CHANNELS.capturePickResult, (_event, payload: unknown) => {
+    const { sessionId, sourceId } = (payload ?? {}) as { sessionId?: string; sourceId?: string }
+    if (typeof sessionId !== 'string') return
+    capture.settle(sessionId, typeof sourceId === 'string' ? sourceId : null)
+  })
   ipcMain.handle(ELECTRON_CHANNELS.captureCheckPermission, () => screenPermission())
   ipcMain.handle(ELECTRON_CHANNELS.captureRequestPermission, () => screenPermission() === 'granted')
-  ipcMain.handle(ELECTRON_CHANNELS.captureStop, () => undefined)
+  ipcMain.handle(ELECTRON_CHANNELS.captureStop, (event) => capture.release(event.sender.id))
 
   ipcMain.handle(ELECTRON_CHANNELS.storageGet, (_event, payload: unknown) => {
     const { key } = (payload ?? {}) as { key?: string }
@@ -115,6 +154,8 @@ export function registerIpcHandlers(context: IpcContext): void {
     if (result.canceled || result.filePath === undefined) return
     await writeFile(result.filePath, Buffer.from(bytes))
   })
+
+  return { capture }
 }
 
 export function watchMaximize(window: Electron.BrowserWindow): void {

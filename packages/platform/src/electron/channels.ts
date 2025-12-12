@@ -10,6 +10,8 @@ export const ELECTRON_CHANNELS = {
   windowCloseAllSubs: 'window:close-all-subs',
 
   capturePickSource: 'capture:pick-source',
+  captureListSources: 'capture:list-sources',
+  capturePickResult: 'capture:pick-result',
   captureCheckPermission: 'capture:check-permission',
   captureRequestPermission: 'capture:request-permission',
   captureStop: 'capture:stop',

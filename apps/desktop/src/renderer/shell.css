@@ -80,3 +80,53 @@ pre {
   padding: 12px;
   overflow: auto;
 }
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button:disabled:hover {
+  border-color: var(--tp-border);
+  color: inherit;
+}
+
+.source-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 0 0 12px;
+}
+
+.source-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: auto;
+  padding: 8px;
+  text-align: left;
+}
+
+.source-card img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--tp-radius-m);
+  background: var(--tp-surface-secondary);
+}
+
+.source-name {
+  font: var(--tp-font-body);
+}
+
+.source-kind {
+  color: var(--tp-text-tertiary);
+  font-size: 12px;
+}
+
+.share-preview {
+  width: 100%;
+  max-width: 480px;
+  border-radius: var(--tp-radius-m);
+  background: var(--tp-surface-secondary);
+}

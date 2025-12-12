@@ -11,7 +11,7 @@ export const SUB_WINDOWS: Record<SubWindowKey, SubWindowSpec> = {
   schedule: { title: '预定会议', hint: '填标题、时间与参会人；保存后主窗口列表会刷新。' },
   sharePicker: {
     title: '选择共享内容',
-    hint: '整屏 / 窗口 / 标签页，缩略图由 M10-4 接 desktopCapturer。',
+    hint: '整屏 / 窗口，缩略图来自 desktopCapturer；选中后回到主窗口开始共享。',
   },
   whiteboard: { title: '白板', hint: '会中白板独立窗口，尺寸可拉大。' },
 }
@@ -23,6 +23,13 @@ export interface SubWindowRequest {
 
 function isSubWindowKey(value: string): value is SubWindowKey {
   return Object.prototype.hasOwnProperty.call(SUB_WINDOWS, value)
+}
+
+/** 共享选择器开窗时主进程塞的 `{ sessionId }`；不是合法会话就退回通用子窗口。 */
+export function readPickerSessionId(payload: unknown): string | null {
+  if (payload === null || typeof payload !== 'object') return null
+  const { sessionId } = payload as { sessionId?: unknown }
+  return typeof sessionId === 'string' && sessionId !== '' ? sessionId : null
 }
 
 /** 从 `?sub=key&payload=<json>` 解析子窗口请求；非法 key 或坏 JSON 都返回 null。 */

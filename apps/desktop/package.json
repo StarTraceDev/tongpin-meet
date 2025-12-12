@@ -14,14 +14,15 @@
   },
   "devDependencies": {
     "@tongpin/config": "workspace:*",
+    "@tongpin/platform": "workspace:*",
+    "@tongpin/tokens": "workspace:*",
     "@types/node": "catalog:",
     "electron": "catalog:",
     "electron-vite": "catalog:",
     "eslint": "catalog:",
+    "jsdom": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vitest": "catalog:",
-    "@tongpin/platform": "workspace:*",
-    "@tongpin/tokens": "workspace:*"
+    "vitest": "catalog:"
   }
 }

@@ -2,6 +2,7 @@ export type {
   CapturePort,
   CaptureSource,
   CaptureSourceKind,
+  CaptureSourceListing,
   NotifyOptions,
   NotifyPort,
   Platform,

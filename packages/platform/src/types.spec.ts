@@ -23,6 +23,8 @@ function stubPlatform(): Platform {
     },
     capture: {
       pickSource: async () => null,
+      listSources: async () => null,
+      chooseSource: noop,
       checkPermission: async () => 'unknown',
       requestPermission: async () => false,
       stop: noop,

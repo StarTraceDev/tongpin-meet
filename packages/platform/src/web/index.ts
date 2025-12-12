@@ -112,6 +112,9 @@ export function createWebPlatform(options: WebPlatformOptions = {}): Platform {
       }
       return source
     },
+    // 浏览器没有自定义选择器：选源由系统弹窗完成，这两条只服务 Electron 的 sharePicker 窗口
+    listSources: async () => null,
+    chooseSource: async () => undefined,
     checkPermission: async () => {
       if (typeof navigator.mediaDevices?.getDisplayMedia !== 'function') return 'unknown'
       // 浏览器只在真正共享时弹授权，这里只能判断 API 与安全上下文

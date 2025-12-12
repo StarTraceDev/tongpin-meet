@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { readSubWindowRequest, SUB_WINDOWS } from './subwindows'
+import { readPickerSessionId, readSubWindowRequest, SUB_WINDOWS } from './subwindows'
 
 describe('readSubWindowRequest', () => {
   it('解析 key 与 JSON payload', () => {
@@ -34,5 +34,18 @@ describe('readSubWindowRequest', () => {
       expect(spec.title.length).toBeGreaterThan(0)
       expect(spec.hint.length).toBeGreaterThan(0)
     }
+  })
+})
+
+describe('readPickerSessionId', () => {
+  it('取出字符串 sessionId', () => {
+    expect(readPickerSessionId({ sessionId: 'session-1' })).toBe('session-1')
+  })
+
+  it('空串、缺字段、非对象都按无效处理', () => {
+    expect(readPickerSessionId({ sessionId: '' })).toBeNull()
+    expect(readPickerSessionId({})).toBeNull()
+    expect(readPickerSessionId('session-1')).toBeNull()
+    expect(readPickerSessionId(null)).toBeNull()
   })
 })

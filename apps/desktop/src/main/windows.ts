@@ -21,11 +21,18 @@ export interface WindowManagerOptions {
 /** 10.2：窗口池按 key 去重；子窗口关闭时通知主窗口，渲染层不用轮询。 */
 export class WindowManager {
   private readonly subs = new Map<SubWindowKey, BrowserWindow>()
+  private readonly closedListeners = new Set<(key: SubWindowKey) => void>()
 
   constructor(private readonly opts: WindowManagerOptions) {}
 
   get main(): BrowserWindow {
     return this.opts.mainWindow
+  }
+
+  /** 子窗口被用户直接关掉时（没走 closeSub）主进程也需要知道，用于取消选择器会话 */
+  onClosed(listener: (key: SubWindowKey) => void): () => void {
+    this.closedListeners.add(listener)
+    return () => this.closedListeners.delete(listener)
   }
 
   openSub(key: SubWindowKey, options: SubWindowOptions = {}): void {
@@ -61,6 +68,7 @@ export class WindowManager {
       this.subs.delete(key)
       const main = this.opts.mainWindow
       if (!main.isDestroyed()) main.webContents.send('window:sub-closed', key)
+      for (const listener of this.closedListeners) listener(key)
     })
     this.subs.set(key, window)
   }

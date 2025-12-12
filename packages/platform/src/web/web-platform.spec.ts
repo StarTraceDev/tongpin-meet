@@ -84,6 +84,9 @@ describe('createWebPlatform', () => {
     const platform = createWebPlatform()
     await expect(platform.capture.pickSource()).resolves.toBeNull()
     await expect(platform.capture.checkPermission()).resolves.toBe('unknown')
+    // 自定义选择器只在 Electron 壳里存在，Web 端两个辅助方法都降级为空
+    await expect(platform.capture.listSources('session-1')).resolves.toBeNull()
+    await expect(platform.capture.chooseSource('session-1', null)).resolves.toBeUndefined()
   })
 
   it('notify.show 在已授权时弹系统通知', async () => {

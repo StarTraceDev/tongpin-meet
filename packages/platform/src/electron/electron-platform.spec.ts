@@ -33,6 +33,11 @@ function createBridge(): {
       if (channel === ELECTRON_CHANNELS.capturePickSource) {
         return Promise.resolve({ id: 'screen:1', name: '显示器 1', kind: 'screen' } as T)
       }
+      if (channel === ELECTRON_CHANNELS.captureListSources) {
+        return Promise.resolve([
+          { id: 'screen:1', name: '显示器 1', kind: 'screen', thumbnail: 'data:screen' },
+        ] as T)
+      }
       return Promise.resolve(undefined as T)
     },
     on: (channel, listener) => {
@@ -106,15 +111,64 @@ describe('createElectronPlatform', () => {
     const { bridge } = createBridge()
     const platform = createElectronPlatform(bridge)
 
-    await expect(platform.capture.pickSource()).resolves.toEqual({
-      id: 'screen:1',
-      name: '显示器 1',
-      kind: 'screen',
-    } satisfies CaptureSource)
     await expect(platform.capture.checkPermission()).resolves.toBe('granted')
     await expect(platform.capture.requestPermission()).resolves.toBe(true)
     await expect(platform.storage.get('refresh')).resolves.toBe('stored')
     await expect(platform.update.check()).resolves.toEqual({ status: 'idle' } satisfies UpdateState)
+  })
+
+  it('选择器窗口按会话取列表并回传结果', async () => {
+    const { bridge, calls } = createBridge()
+    const platform = createElectronPlatform(bridge)
+
+    await expect(platform.capture.listSources('session-9')).resolves.toHaveLength(1)
+    await platform.capture.chooseSource('session-9', 'screen:1')
+
+    expect(calls.at(-2)?.payload).toEqual({ sessionId: 'session-9' })
+    expect(calls.at(-1)?.payload).toEqual({ sessionId: 'session-9', sourceId: 'screen:1' })
+  })
+
+  it('选源后取流，停止共享时停轨并通知主进程', async () => {
+    const { bridge, calls } = createBridge()
+    const platform = createElectronPlatform(bridge)
+    const track = { stop: vi.fn() } as unknown as MediaStreamTrack
+    const stream = { getTracks: () => [track] } as unknown as MediaStream
+    const getDisplayMedia = vi.fn(async () => stream)
+    vi.stubGlobal('navigator', { mediaDevices: { getDisplayMedia } })
+
+    const source = await platform.capture.pickSource()
+
+    expect(getDisplayMedia).toHaveBeenCalledWith({ video: true, audio: false })
+    expect(source).toEqual({
+      id: 'screen:1',
+      name: '显示器 1',
+      kind: 'screen',
+      stream,
+    } satisfies CaptureSource)
+    expect(calls.map((call) => call.channel)).toEqual([ELECTRON_CHANNELS.capturePickSource])
+
+    await platform.capture.stop()
+
+    expect(track.stop).toHaveBeenCalledTimes(1)
+    expect(calls.map((call) => call.channel)).toContain(ELECTRON_CHANNELS.captureStop)
+    vi.unstubAllGlobals()
+  })
+
+  it('选择器被取消时直接返回 null，不再取流', async () => {
+    const bridge: ElectronBridge = {
+      os: 'mac',
+      invoke: <T>(channel: string): Promise<T> => {
+        expect(channel).toBe(ELECTRON_CHANNELS.capturePickSource)
+        return Promise.resolve(null as T)
+      },
+      on: () => () => undefined,
+    }
+    const getDisplayMedia = vi.fn()
+    vi.stubGlobal('navigator', { mediaDevices: { getDisplayMedia } })
+
+    await expect(createElectronPlatform(bridge).capture.pickSource()).resolves.toBeNull()
+    expect(getDisplayMedia).not.toHaveBeenCalled()
+    vi.unstubAllGlobals()
   })
 
   it('最大化与更新状态只在载荷合法时回调', () => {
