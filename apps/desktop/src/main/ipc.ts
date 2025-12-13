@@ -13,10 +13,11 @@ import {
 
 import { ELECTRON_CHANNELS } from '@tongpin/platform/electron'
 
-import type { SubWindowKey, SubWindowOptions, UpdateState } from '@tongpin/platform'
+import type { SubWindowKey, SubWindowOptions } from '@tongpin/platform'
 
 import { SourcePicker } from './picker'
 import { createStorage, type StorageCipher } from './storage'
+import { createUpdater } from './updater'
 import type { WindowManager } from './windows'
 
 type Permission = 'granted' | 'denied' | 'unknown'
@@ -117,10 +118,14 @@ export function registerIpcHandlers(context: IpcContext): IpcHandlers {
     if (key !== undefined) storage.remove(key)
   })
 
-  // 真正的 electron-updater 接线在 M10-5；在此之前返回 idle，不伪造版本。
-  const idleState: UpdateState = { status: 'idle' }
-  ipcMain.handle(ELECTRON_CHANNELS.updateCheck, () => idleState)
-  ipcMain.handle(ELECTRON_CHANNELS.updateInstall, () => undefined)
+  // 开发态没有 app-update.yml，控制器此时只回 unsupported，不加载 electron-updater。
+  const updater = createUpdater({
+    isPackaged: app.isPackaged,
+    feedUrl: process.env.TONGPIN_UPDATE_URL,
+    getWindow: () => (windows.main.isDestroyed() ? null : windows.main),
+  })
+  ipcMain.handle(ELECTRON_CHANNELS.updateCheck, () => updater.check())
+  ipcMain.handle(ELECTRON_CHANNELS.updateInstall, () => updater.install())
 
   ipcMain.handle(ELECTRON_CHANNELS.notifyShow, (_event, payload: unknown) => {
     const { title, body, clickable } = (payload ?? {}) as {

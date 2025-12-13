@@ -130,3 +130,7 @@ button:disabled:hover {
   border-radius: var(--tp-radius-m);
   background: var(--tp-surface-secondary);
 }
+
+.deeplink-note {
+  overflow-wrap: anywhere;
+}

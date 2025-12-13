@@ -33,6 +33,7 @@ export const ELECTRON_CHANNELS = {
   eventSubClosed: 'window:sub-closed',
   eventUpdateState: 'update:state',
   eventNotifyClicked: 'notify:clicked',
+  appDeepLink: 'app:deep-link',
 } as const
 
 export type ElectronChannel = (typeof ELECTRON_CHANNELS)[keyof typeof ELECTRON_CHANNELS]

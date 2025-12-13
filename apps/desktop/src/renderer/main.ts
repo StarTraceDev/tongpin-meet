@@ -1,10 +1,13 @@
 import '@tongpin/tokens'
 
-import { createElectronPlatform } from '@tongpin/platform/electron'
+import type { UpdateState } from '@tongpin/platform'
+import { createElectronPlatform, ELECTRON_CHANNELS } from '@tongpin/platform/electron'
 
+import { deepLinkText, readDeepLinkNotice } from './deep-link-view'
 import type { DesktopEnv } from './env'
 import { renderSubWindow } from './subwindow'
 import { SUB_WINDOWS } from './subwindows'
+import { updateText } from './update-view'
 import './shell.css'
 
 const env = (globalThis as { tongpin?: DesktopEnv }).tongpin
@@ -61,6 +64,18 @@ async function renderMain(): Promise<void> {
         </div>
         <p id="share-status" class="hint">未共享。</p>
         <video id="share-preview" class="share-preview" autoplay muted playsinline hidden></video>
+      </section>
+      <section class="update">
+        <h2>自动更新</h2>
+        <div class="row">
+          <button id="update-check" type="button">检查更新</button>
+          <button id="update-install" type="button" disabled>重启安装</button>
+        </div>
+        <p id="update-status" class="hint">尚未检查更新。</p>
+      </section>
+      <section class="deeplink">
+        <h2>深链入口</h2>
+        <p id="deeplink-status" class="hint deeplink-note">用 tongpin://join?no=… 拉起应用后，会在这里显示会议号。</p>
       </section>
     </main>
   `
@@ -122,6 +137,30 @@ async function renderMain(): Promise<void> {
       if (status !== null) status.textContent = '已停止共享。'
       setSharing(false)
     })()
+  })
+
+  const updateStatus = document.getElementById('update-status')
+  const updateCheck = asButton('update-check')
+  const updateInstall = asButton('update-install')
+
+  const renderUpdate = (state: UpdateState): void => {
+    if (updateStatus !== null) updateStatus.textContent = updateText(state)
+    if (updateInstall !== null) updateInstall.disabled = state.status !== 'ready'
+  }
+
+  platform.update.onState(renderUpdate)
+  updateCheck?.addEventListener('click', () => {
+    void platform.update.check().then(renderUpdate)
+  })
+  updateInstall?.addEventListener('click', () => {
+    void platform.update.install()
+  })
+
+  const deepLinkStatus = document.getElementById('deeplink-status')
+  env?.bridge.on(ELECTRON_CHANNELS.appDeepLink, (payload) => {
+    if (deepLinkStatus !== null) {
+      deepLinkStatus.textContent = deepLinkText(readDeepLinkNotice(payload))
+    }
   })
 }
 
