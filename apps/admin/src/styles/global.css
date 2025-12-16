@@ -1,0 +1,66 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--tp-canvas);
+  color: var(--tp-text-primary);
+  font-family: var(--tp-font-sans);
+}
+
+.admin-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--tp-space-6);
+  background: var(--tp-surface-secondary);
+}
+
+.admin-login-card {
+  width: 100%;
+  max-width: 384px;
+}
+
+.admin-login-title {
+  margin: 0;
+  font: var(--tp-font-title);
+}
+
+.admin-login-hint {
+  margin: var(--tp-space-2) 0 var(--tp-space-6);
+  color: var(--tp-text-secondary);
+  font: var(--tp-font-caption);
+}
+
+.admin-login-error {
+  margin-bottom: var(--tp-space-4);
+}
+
+.admin-layout {
+  min-height: 100vh;
+  background: var(--tp-surface-secondary);
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--tp-surface);
+  border-bottom: 1px solid var(--tp-border);
+  padding: 0 var(--tp-space-6);
+}
+
+.admin-header-title {
+  margin: 0;
+  font: var(--tp-font-headline);
+}
+
+.admin-content {
+  padding: var(--tp-space-6);
+}
+
+.admin-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}

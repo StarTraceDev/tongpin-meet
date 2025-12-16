@@ -11,6 +11,7 @@
     "./eslint/base": "./eslint/base.mjs",
     "./eslint/node": "./eslint/node.mjs",
     "./eslint/vue": "./eslint/vue.mjs",
+    "./eslint/react": "./eslint/react.mjs",
     "./prettier": "./prettier.mjs"
   },
   "scripts": {
