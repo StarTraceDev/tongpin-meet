@@ -1,0 +1,39 @@
+# 打包配置（M10-6）。产物在 release/，不进仓库。
+appId: me.tongpin.desktop
+productName: 同频会议
+artifactName: tongpin-${version}-${arch}.${ext}
+directories:
+  output: release
+  buildResources: resources
+files:
+  - out/**
+  - package.json
+extraResources:
+  - from: resources/tray
+    to: tray
+protocols:
+  - name: 同频会议
+    schemes:
+      - tongpin
+mac:
+  category: public.app-category.productivity
+  minimumSystemVersion: '12.0'
+  icon: icon.icns
+  target:
+    - dmg
+    - zip
+win:
+  icon: icon.ico
+  target:
+    - nsis
+linux:
+  icon: icons
+  category: Office
+  target:
+    - AppImage
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: 同频会议

@@ -1,6 +1,7 @@
 {
   "name": "@tongpin/desktop",
   "version": "0.0.0",
+  "productName": "同频会议",
   "private": true,
   "type": "module",
   "main": "out/main/index.js",
@@ -10,7 +11,12 @@
     "preview": "electron-vite preview",
     "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.web.json --noEmit",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "pack": "pnpm build && electron-builder --dir",
+    "dist": "pnpm build && electron-builder",
+    "dist:mac": "pnpm build && electron-builder --mac",
+    "dist:win": "pnpm build && electron-builder --win",
+    "dist:linux": "pnpm build && electron-builder --linux"
   },
   "devDependencies": {
     "@tongpin/config": "workspace:*",
@@ -23,9 +29,12 @@
     "jsdom": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "electron-builder": "catalog:"
   },
   "dependencies": {
-    "electron-updater": "catalog:"
-  }
+    "electron-updater": "^6.0.0"
+  },
+  "description": "同频会议桌面客户端",
+  "author": "同频会议"
 }

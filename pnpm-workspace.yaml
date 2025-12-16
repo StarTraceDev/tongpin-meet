@@ -13,6 +13,7 @@ allowBuilds:
   prisma: true
   '@prisma/client': true
   '@prisma/engines': true
+  electron-winstaller: true
 
 # 全仓唯一版本出处：子包一律写 catalog:，不在各自 package.json 里写版本号
 catalog:
