@@ -1,5 +1,16 @@
-import { DashboardOutlined } from '@ant-design/icons'
-import { Avatar, Breadcrumb, Button, Dropdown, Layout, Menu, Space, Typography } from 'antd'
+import { DashboardOutlined, MenuOutlined } from '@ant-design/icons'
+import {
+  Avatar,
+  Breadcrumb,
+  Button,
+  Drawer,
+  Dropdown,
+  Grid,
+  Layout,
+  Menu,
+  Space,
+  Typography,
+} from 'antd'
 import type { MenuProps } from 'antd'
 import { useState } from 'react'
 import type { ReactElement } from 'react'
@@ -14,7 +25,10 @@ export function AdminLayout(): ReactElement {
   const location = useLocation()
   const navigate = useNavigate()
   const matches = useMatches()
+  const screens = Grid.useBreakpoint()
+  const narrow = screens.lg === false
   const [collapsed, setCollapsed] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   const labels = breadcrumbLabels(matches)
   const crumbs =
@@ -22,6 +36,20 @@ export function AdminLayout(): ReactElement {
   const initial = user?.name.trim().slice(0, 1) ?? ''
 
   const menuItems: MenuProps['items'] = [{ key: '/', label: '仪表盘', icon: <DashboardOutlined /> }]
+
+  const navigation = (
+    <Menu
+      className="admin-menu"
+      mode="inline"
+      theme="light"
+      selectedKeys={[location.pathname]}
+      items={menuItems}
+      onClick={({ key }): void => {
+        navigate(key)
+        setDrawerOpen(false)
+      }}
+    />
+  )
 
   const userMenu: MenuProps = {
     items: [{ key: 'signOut', label: '退出登录' }],
@@ -33,31 +61,34 @@ export function AdminLayout(): ReactElement {
   }
 
   return (
-    <Layout className="admin-layout" hasSider>
-      <Layout.Sider
-        className="admin-sider"
-        theme="light"
-        collapsible
-        collapsed={collapsed}
-        onCollapse={setCollapsed}
-        width={216}
-        collapsedWidth={64}
-      >
-        <div className="admin-brand">{collapsed ? '同' : '同频会议 · 管理台'}</div>
-        <Menu
-          className="admin-menu"
-          mode="inline"
+    <Layout className="admin-layout" hasSider={!narrow}>
+      {narrow ? null : (
+        <Layout.Sider
+          className="admin-sider"
           theme="light"
-          selectedKeys={[location.pathname]}
-          items={menuItems}
-          onClick={({ key }): void => {
-            navigate(key)
-          }}
-        />
-      </Layout.Sider>
+          collapsible
+          collapsed={collapsed}
+          onCollapse={setCollapsed}
+          width={216}
+          collapsedWidth={64}
+        >
+          <div className="admin-brand">{collapsed ? '同' : '同频会议 · 管理台'}</div>
+          {navigation}
+        </Layout.Sider>
+      )}
       <Layout>
         <Layout.Header className="admin-header">
-          <Breadcrumb items={crumbs} />
+          <Space size="small">
+            {narrow ? (
+              <Button
+                type="text"
+                icon={<MenuOutlined />}
+                aria-label="打开导航"
+                onClick={(): void => setDrawerOpen(true)}
+              />
+            ) : null}
+            <Breadcrumb items={crumbs} />
+          </Space>
           <Space size="middle">
             <ThemeToggle />
             <Dropdown menu={userMenu} trigger={['click']}>
@@ -65,7 +96,9 @@ export function AdminLayout(): ReactElement {
                 <Avatar size="small" className="admin-avatar">
                   {initial}
                 </Avatar>
-                <Typography.Text>{user?.name ?? '未登录'}</Typography.Text>
+                <Typography.Text className="admin-user-name">
+                  {user?.name ?? '未登录'}
+                </Typography.Text>
               </Button>
             </Dropdown>
           </Space>
@@ -74,6 +107,18 @@ export function AdminLayout(): ReactElement {
           <Outlet />
         </Layout.Content>
       </Layout>
+      {narrow ? (
+        <Drawer
+          placement="left"
+          width={216}
+          open={drawerOpen}
+          title="同频会议 · 管理台"
+          onClose={(): void => setDrawerOpen(false)}
+          styles={{ body: { padding: 0 } }}
+        >
+          {navigation}
+        </Drawer>
+      ) : null}
     </Layout>
   )
 }

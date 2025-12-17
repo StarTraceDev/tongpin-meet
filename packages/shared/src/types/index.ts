@@ -5,6 +5,15 @@
 import type { z } from 'zod'
 
 import type {
+  adminRoomListSchema,
+  adminRoomSchema,
+  adminStatsOverviewSchema,
+  adminTrendPointSchema,
+  adminTrendSchema,
+  adminUsageSchema,
+  adminUsageSliceSchema,
+} from '../schemas/admin'
+import type {
   authSessionSchema,
   authUserSchema,
   loginByPasswordSchema,
@@ -66,6 +75,14 @@ import type {
   voteSubmissionResultSchema,
 } from '../schemas/interaction'
 import type { wsEnvelopeSchema, wsTicketSchema } from '../schemas/ws'
+
+export type AdminStatsOverview = z.infer<typeof adminStatsOverviewSchema>
+export type AdminTrendPoint = z.infer<typeof adminTrendPointSchema>
+export type AdminTrend = z.infer<typeof adminTrendSchema>
+export type AdminUsageSlice = z.infer<typeof adminUsageSliceSchema>
+export type AdminUsage = z.infer<typeof adminUsageSchema>
+export type AdminRoom = z.infer<typeof adminRoomSchema>
+export type AdminRoomList = z.infer<typeof adminRoomListSchema>
 
 export type LoginByPasswordInput = z.infer<typeof loginByPasswordSchema>
 export type LoginBySmsInput = z.infer<typeof loginBySmsSchema>

@@ -20,7 +20,8 @@
     "react-dom": "catalog:",
     "react-router": "catalog:",
     "@tongpin/theme": "workspace:*",
-    "@ant-design/icons": "catalog:"
+    "@ant-design/icons": "catalog:",
+    "recharts": "catalog:"
   },
   "devDependencies": {
     "@tongpin/config": "workspace:*",
