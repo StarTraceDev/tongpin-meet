@@ -4,11 +4,13 @@ import './styles/global.css'
 
 import { ConfigProvider, theme } from 'antd'
 import { StrictMode } from 'react'
+import type { ReactElement } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router'
 
 import { AuthProvider } from './app/AuthProvider'
 import { router } from './app/router'
+import { ThemeProvider, useTheme } from './app/theme'
 
 const container = document.getElementById('app')
 
@@ -18,14 +20,14 @@ if (container === null) {
 
 // 主色只在 05 §8 的 token 里定义，这里读变量而不是再写一份 hex
 const brandColor = getComputedStyle(document.documentElement).getPropertyValue('--tp-brand').trim()
-// 入口防闪烁脚本已经把主题写进 html，AntD 跟着切算法才不会在暗色下留白卡片
-const isDark = document.documentElement.classList.contains('dark')
 
-createRoot(container).render(
-  <StrictMode>
+function Root(): ReactElement {
+  const { resolved } = useTheme()
+
+  return (
     <ConfigProvider
       theme={{
-        algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
+        algorithm: resolved === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: brandColor === '' ? {} : { colorPrimary: brandColor },
       }}
     >
@@ -33,5 +35,13 @@ createRoot(container).render(
         <RouterProvider router={router} />
       </AuthProvider>
     </ConfigProvider>
+  )
+}
+
+createRoot(container).render(
+  <StrictMode>
+    <ThemeProvider>
+      <Root />
+    </ThemeProvider>
   </StrictMode>,
 )

@@ -40,22 +40,51 @@ body {
   background: var(--tp-surface-secondary);
 }
 
+.admin-sider {
+  background: var(--tp-surface);
+  border-right: 1px solid var(--tp-border);
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  padding: 0 var(--tp-space-3);
+  overflow: hidden;
+  color: var(--tp-text-primary);
+  font: var(--tp-font-headline);
+  white-space: nowrap;
+}
+
+.admin-menu {
+  border-inline-end: 0;
+  background: transparent;
+}
+
 .admin-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--tp-space-4);
   background: var(--tp-surface);
   border-bottom: 1px solid var(--tp-border);
   padding: 0 var(--tp-space-6);
 }
 
-.admin-header-title {
-  margin: 0;
-  font: var(--tp-font-headline);
+.admin-user {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tp-space-2);
+}
+
+.admin-avatar {
+  background: var(--tp-brand);
 }
 
 .admin-content {
   padding: var(--tp-space-6);
+  background: var(--tp-surface-secondary);
 }
 
 .admin-loading {

@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    '@ant-design/icons':
+      specifier: ^5.6.1
+      version: 5.6.1
     '@ant-design/v5-patch-for-react-19':
       specifier: ^1.0.3
       version: 1.0.3
@@ -218,12 +221,18 @@ importers:
 
   apps/admin:
     dependencies:
+      '@ant-design/icons':
+        specifier: 'catalog:'
+        version: 5.6.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@ant-design/v5-patch-for-react-19':
         specifier: 'catalog:'
         version: 1.0.3(antd@5.29.3(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@tongpin/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@tongpin/theme':
+        specifier: workspace:*
+        version: link:../../packages/theme
       '@tongpin/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
