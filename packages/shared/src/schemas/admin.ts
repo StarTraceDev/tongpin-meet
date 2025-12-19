@@ -1,6 +1,12 @@
 import { z } from 'zod'
 
-import { isoDateTimeSchema } from './common'
+import {
+  isoDateTimeSchema,
+  meetingNoSchema,
+  paginatedSchema,
+  paginationQuerySchema,
+} from './common'
+import { meetingStatusSchema } from './meeting'
 
 /** 04 §6.8：管理台仪表盘四个统计卡 */
 export const adminStatsOverviewSchema = z.object({
@@ -41,4 +47,29 @@ export const adminRoomSchema = z.object({
 
 export const adminRoomListSchema = z.object({
   items: z.array(adminRoomSchema),
+})
+
+/** 06 §11.4 会议管理列表行：hostName 是主持人昵称，participantCount 去重人数 */
+export const adminMeetingItemSchema = z.object({
+  id: z.string().min(1),
+  meetingNo: meetingNoSchema,
+  title: z.string(),
+  hostName: z.string(),
+  status: meetingStatusSchema,
+  startAt: isoDateTimeSchema,
+  actualStartAt: isoDateTimeSchema.nullable(),
+  actualEndAt: isoDateTimeSchema.nullable(),
+  participantCount: z.int().nonnegative(),
+})
+
+export const adminMeetingsQuerySchema = paginationQuerySchema.extend({
+  status: meetingStatusSchema.optional(),
+  keyword: z.string().trim().max(50).optional(),
+})
+
+export const adminMeetingListSchema = paginatedSchema(adminMeetingItemSchema)
+
+/** 强制结束的返回体与列表行同形状，前端可以直接原地替换 */
+export const adminMeetingActionSchema = z.object({
+  meeting: adminMeetingItemSchema,
 })

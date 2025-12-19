@@ -82,7 +82,12 @@ body {
   background: var(--tp-brand);
 }
 
+.admin-body {
+  min-width: 0;
+}
+
 .admin-content {
+  min-width: 0;
   padding: var(--tp-space-6);
   background: var(--tp-surface-secondary);
 }
@@ -179,4 +184,31 @@ body {
   .admin-header .ant-breadcrumb {
     display: none;
   }
+}
+
+.meetings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tp-space-4);
+}
+
+.meetings-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--tp-space-3);
+}
+
+.meetings-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tp-space-3);
+}
+
+.meetings-keyword {
+  max-width: 320px;
+}
+
+.meetings-status {
+  width: 160px;
 }

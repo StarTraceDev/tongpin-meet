@@ -2,7 +2,7 @@ import '@ant-design/v5-patch-for-react-19'
 import '@tongpin/tokens'
 import './styles/global.css'
 
-import { ConfigProvider, theme } from 'antd'
+import { App as AntdApp, ConfigProvider, theme } from 'antd'
 import { StrictMode } from 'react'
 import type { ReactElement } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -31,9 +31,11 @@ function Root(): ReactElement {
         token: brandColor === '' ? {} : { colorPrimary: brandColor },
       }}
     >
-      <AuthProvider>
-        <RouterProvider router={router} />
-      </AuthProvider>
+      <AntdApp>
+        <AuthProvider>
+          <RouterProvider router={router} />
+        </AuthProvider>
+      </AntdApp>
     </ConfigProvider>
   )
 }

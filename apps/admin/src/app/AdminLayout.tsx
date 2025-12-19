@@ -1,4 +1,4 @@
-import { DashboardOutlined, MenuOutlined } from '@ant-design/icons'
+import { DashboardOutlined, MenuOutlined, VideoCameraOutlined } from '@ant-design/icons'
 import {
   Avatar,
   Breadcrumb,
@@ -35,7 +35,10 @@ export function AdminLayout(): ReactElement {
     labels.length === 0 ? [{ title: '首页' }] : labels.map((label) => ({ title: label }))
   const initial = user?.name.trim().slice(0, 1) ?? ''
 
-  const menuItems: MenuProps['items'] = [{ key: '/', label: '仪表盘', icon: <DashboardOutlined /> }]
+  const menuItems: MenuProps['items'] = [
+    { key: '/', label: '仪表盘', icon: <DashboardOutlined /> },
+    { key: '/meetings', label: '会议管理', icon: <VideoCameraOutlined /> },
+  ]
 
   const navigation = (
     <Menu
@@ -76,7 +79,7 @@ export function AdminLayout(): ReactElement {
           {navigation}
         </Layout.Sider>
       )}
-      <Layout>
+      <Layout className="admin-body">
         <Layout.Header className="admin-header">
           <Space size="small">
             {narrow ? (

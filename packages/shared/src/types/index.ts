@@ -5,6 +5,10 @@
 import type { z } from 'zod'
 
 import type {
+  adminMeetingActionSchema,
+  adminMeetingItemSchema,
+  adminMeetingListSchema,
+  adminMeetingsQuerySchema,
   adminRoomListSchema,
   adminRoomSchema,
   adminStatsOverviewSchema,
@@ -81,6 +85,10 @@ export type AdminTrendPoint = z.infer<typeof adminTrendPointSchema>
 export type AdminTrend = z.infer<typeof adminTrendSchema>
 export type AdminUsageSlice = z.infer<typeof adminUsageSliceSchema>
 export type AdminUsage = z.infer<typeof adminUsageSchema>
+export type AdminMeetingItem = z.infer<typeof adminMeetingItemSchema>
+export type AdminMeetingList = z.infer<typeof adminMeetingListSchema>
+export type AdminMeetingsQuery = z.infer<typeof adminMeetingsQuerySchema>
+export type AdminMeetingAction = z.infer<typeof adminMeetingActionSchema>
 export type AdminRoom = z.infer<typeof adminRoomSchema>
 export type AdminRoomList = z.infer<typeof adminRoomListSchema>
 
@@ -94,6 +102,7 @@ export type AuthSession = z.infer<typeof authSessionSchema>
 export type QrSession = z.infer<typeof qrSessionSchema>
 export type QrPoll = z.infer<typeof qrPollSchema>
 export type Meeting = z.infer<typeof meetingSchema>
+export type MeetingStatusValue = Meeting['status']
 export type MeetingCreated = z.infer<typeof meetingCreatedSchema>
 export type ListMeetingsQuery = z.infer<typeof listMeetingsQuerySchema>
 export type MeetingListScope = ListMeetingsQuery['scope']

@@ -361,6 +361,35 @@ export class MeetingService {
     return toMeeting(updated)
   }
 
+  /**
+   * 管理台强制结束（06 §11.4）：不校验主持人，只由 /admin 的 RBAC 拦截；
+   * 事件 fromUid 为空，payload 里标记 admin，方便回放时区分主动结束。
+   */
+  async forceEnd(id: string): Promise<Meeting> {
+    const row = await this.prisma.meeting.findFirst({ where: { id, deletedAt: null } })
+    if (row === null) {
+      throw new ApiError(10000, '会议不存在', 404)
+    }
+    if (!canRunMeetingAction(row.status, 'end')) {
+      throw new ApiError(10000, '当前会议状态不可结束', 409)
+    }
+
+    const endedAt = new Date()
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const meeting = await tx.meeting.update({
+        where: { id },
+        data: { status: 'ENDED', actualEndAt: endedAt },
+      })
+      await tx.meetingParticipant.updateMany({
+        where: { meetingId: id, leftAt: null },
+        data: { leftAt: endedAt },
+      })
+      return meeting
+    })
+    await this.appendEvent(id, 'meeting.ended', null, { by: 'admin' })
+    return toMeeting(updated)
+  }
+
   /** 重签 RTC：必须是该会议参会人 */
   async issueRtcToken(user: AuthUser, id: string): Promise<RtcToken> {
     const meeting = await this.findJoinable(id)
