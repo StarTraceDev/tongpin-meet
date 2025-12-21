@@ -1,12 +1,17 @@
 import { z } from 'zod'
 
+import { USER_STATUS } from '../constants/enums'
+
 import {
   isoDateTimeSchema,
   meetingNoSchema,
   paginatedSchema,
   paginationQuerySchema,
+  phoneSchema,
 } from './common'
 import { meetingStatusSchema } from './meeting'
+
+export const userStatusSchema = z.enum(USER_STATUS)
 
 /** 04 §6.8：管理台仪表盘四个统计卡 */
 export const adminStatsOverviewSchema = z.object({
@@ -72,4 +77,63 @@ export const adminMeetingListSchema = paginatedSchema(adminMeetingItemSchema)
 /** 强制结束的返回体与列表行同形状，前端可以直接原地替换 */
 export const adminMeetingActionSchema = z.object({
   meeting: adminMeetingItemSchema,
+})
+
+export const adminRoleOptionSchema = z.object({
+  id: z.string().min(1),
+  code: z.string().min(1),
+  name: z.string().min(1),
+  builtin: z.boolean(),
+})
+
+export const adminRoleOptionListSchema = z.object({
+  items: z.array(adminRoleOptionSchema),
+})
+
+export const adminUserItemSchema = z.object({
+  id: z.string().min(1),
+  phone: z.string().min(1),
+  name: z.string().min(1),
+  email: z.string().nullable(),
+  avatarUrl: z.string().nullable(),
+  status: userStatusSchema,
+  deptId: z.string().nullable(),
+  deptName: z.string().nullable(),
+  roles: z.array(adminRoleOptionSchema),
+  lastLoginAt: isoDateTimeSchema.nullable(),
+  createdAt: isoDateTimeSchema,
+})
+
+export const adminUsersQuerySchema = paginationQuerySchema.extend({
+  status: userStatusSchema.optional(),
+  keyword: z.string().trim().max(50).optional(),
+})
+
+export const adminUserListSchema = paginatedSchema(adminUserItemSchema)
+
+export const adminPasswordSchema = z.string().min(8, '密码至少 8 位').max(64, '密码最多 64 位')
+
+export const adminUserCreateSchema = z.object({
+  phone: phoneSchema,
+  name: z.string().trim().min(1, '请填写姓名').max(30),
+  email: z.email().optional(),
+  password: adminPasswordSchema,
+  roleIds: z.array(z.string().min(1)).default([]),
+})
+
+export const adminUserUpdateSchema = z.object({
+  name: z.string().trim().min(1).max(30).optional(),
+  email: z.email().nullable().optional(),
+})
+
+export const adminUserActionSchema = z.object({
+  user: adminUserItemSchema,
+})
+
+export const adminUserRolesSchema = z.object({
+  roleIds: z.array(z.string().min(1)),
+})
+
+export const adminResetPasswordSchema = z.object({
+  password: adminPasswordSchema,
 })

@@ -6,6 +6,14 @@ import type { z } from 'zod'
 
 import type {
   adminMeetingActionSchema,
+  adminRoleOptionListSchema,
+  adminRoleOptionSchema,
+  adminUserActionSchema,
+  adminUserCreateSchema,
+  adminUserItemSchema,
+  adminUserListSchema,
+  adminUserUpdateSchema,
+  adminUsersQuerySchema,
   adminMeetingItemSchema,
   adminMeetingListSchema,
   adminMeetingsQuerySchema,
@@ -89,6 +97,14 @@ export type AdminMeetingItem = z.infer<typeof adminMeetingItemSchema>
 export type AdminMeetingList = z.infer<typeof adminMeetingListSchema>
 export type AdminMeetingsQuery = z.infer<typeof adminMeetingsQuerySchema>
 export type AdminMeetingAction = z.infer<typeof adminMeetingActionSchema>
+export type AdminRoleOption = z.infer<typeof adminRoleOptionSchema>
+export type AdminRoleOptionList = z.infer<typeof adminRoleOptionListSchema>
+export type AdminUserItem = z.infer<typeof adminUserItemSchema>
+export type AdminUserList = z.infer<typeof adminUserListSchema>
+export type AdminUsersQuery = z.infer<typeof adminUsersQuerySchema>
+export type AdminUserCreateInput = z.infer<typeof adminUserCreateSchema>
+export type AdminUserUpdateInput = z.infer<typeof adminUserUpdateSchema>
+export type AdminUserAction = z.infer<typeof adminUserActionSchema>
 export type AdminRoom = z.infer<typeof adminRoomSchema>
 export type AdminRoomList = z.infer<typeof adminRoomListSchema>
 

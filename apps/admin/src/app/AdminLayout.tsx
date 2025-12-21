@@ -1,4 +1,9 @@
-import { DashboardOutlined, MenuOutlined, VideoCameraOutlined } from '@ant-design/icons'
+import {
+  DashboardOutlined,
+  MenuOutlined,
+  TeamOutlined,
+  VideoCameraOutlined,
+} from '@ant-design/icons'
 import {
   Avatar,
   Breadcrumb,
@@ -38,6 +43,7 @@ export function AdminLayout(): ReactElement {
   const menuItems: MenuProps['items'] = [
     { key: '/', label: '仪表盘', icon: <DashboardOutlined /> },
     { key: '/meetings', label: '会议管理', icon: <VideoCameraOutlined /> },
+    { key: '/users', label: '用户管理', icon: <TeamOutlined /> },
   ]
 
   const navigation = (

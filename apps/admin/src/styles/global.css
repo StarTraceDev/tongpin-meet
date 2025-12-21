@@ -212,3 +212,44 @@ body {
 .meetings-status {
   width: 160px;
 }
+
+.users {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tp-space-4);
+}
+
+.users-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--tp-space-4);
+  flex-wrap: wrap;
+}
+
+.users-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tp-space-2);
+}
+
+.users-keyword {
+  width: 100%;
+  max-width: 320px;
+}
+
+.users-status {
+  width: 160px;
+}
+
+.users-role-summary {
+  font: var(--tp-font-caption);
+}
+
+.users-role-select {
+  width: 100%;
+}
+
+.users-error {
+  margin-bottom: 0;
+}
