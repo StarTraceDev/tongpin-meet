@@ -8,3 +8,5 @@ export * from './participant'
 export * from './ws'
 export * from './qr'
 export * from './interaction'
+
+export * from './org'

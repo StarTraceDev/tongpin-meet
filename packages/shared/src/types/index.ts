@@ -25,6 +25,7 @@ import type {
   adminUsageSchema,
   adminUsageSliceSchema,
 } from '../schemas/admin'
+import type { deptCreateSchema, deptUpdateSchema } from '../schemas/org'
 import type {
   authSessionSchema,
   authUserSchema,
@@ -105,6 +106,8 @@ export type AdminUsersQuery = z.infer<typeof adminUsersQuerySchema>
 export type AdminUserCreateInput = z.infer<typeof adminUserCreateSchema>
 export type AdminUserUpdateInput = z.infer<typeof adminUserUpdateSchema>
 export type AdminUserAction = z.infer<typeof adminUserActionSchema>
+export type DeptCreateInput = z.infer<typeof deptCreateSchema>
+export type DeptUpdateInput = z.infer<typeof deptUpdateSchema>
 export type AdminRoom = z.infer<typeof adminRoomSchema>
 export type AdminRoomList = z.infer<typeof adminRoomListSchema>
 

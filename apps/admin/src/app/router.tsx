@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 
 import { DashboardPage } from '../pages/dashboard/DashboardPage'
+import { DepartmentsPage } from '../pages/departments/DepartmentsPage'
 import { LoginPage } from '../pages/login/LoginPage'
 import { MeetingsPage } from '../pages/meetings/MeetingsPage'
 import { UsersPage } from '../pages/users/UsersPage'
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
       { index: true, handle: { crumb: '仪表盘' }, element: <DashboardPage /> },
       { path: 'meetings', handle: { crumb: '会议管理' }, element: <MeetingsPage /> },
       { path: 'users', handle: { crumb: '用户管理' }, element: <UsersPage /> },
+      { path: 'departments', handle: { crumb: '部门管理' }, element: <DepartmentsPage /> },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },

@@ -253,3 +253,21 @@ body {
 .users-error {
   margin-bottom: 0;
 }
+
+.departments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tp-space-4);
+}
+
+.departments-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--tp-space-4);
+  flex-wrap: wrap;
+}
+
+.departments-sort {
+  width: 120px;
+}

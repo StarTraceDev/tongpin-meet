@@ -36,6 +36,12 @@ export const ERROR_CODES = {
   INTERACTION_CLOSED: 30403,
   /** 409：投票当前状态不允许该操作（未开始 / 已截止 / 已公布） */
   VOTE_INVALID_STATE: 30404,
+  /** 404：部门不存在（org 段自补） */
+  ORG_DEPT_NOT_FOUND: 50003,
+  /** 409：部门下还有子部门 / 成员，不能删除（org 段自补） */
+  ORG_DEPT_NOT_EMPTY: 50004,
+  /** 409：不能把部门挂到自己或自己的子部门下（org 段自补） */
+  ORG_DEPT_CYCLE: 50005,
   /** 409：手机号已被其他账号使用（org 段自补） */
   ORG_PHONE_TAKEN: 50001,
   /** 400：引用的部门 / 角色不存在（org 段自补） */
