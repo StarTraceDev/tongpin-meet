@@ -2,6 +2,7 @@ import {
   ApartmentOutlined,
   DashboardOutlined,
   MenuOutlined,
+  SafetyCertificateOutlined,
   TeamOutlined,
   VideoCameraOutlined,
 } from '@ant-design/icons'
@@ -46,6 +47,7 @@ export function AdminLayout(): ReactElement {
     { key: '/meetings', label: '会议管理', icon: <VideoCameraOutlined /> },
     { key: '/users', label: '用户管理', icon: <TeamOutlined /> },
     { key: '/departments', label: '部门管理', icon: <ApartmentOutlined /> },
+    { key: '/roles', label: '角色权限', icon: <SafetyCertificateOutlined /> },
   ]
 
   const navigation = (

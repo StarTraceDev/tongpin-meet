@@ -250,16 +250,3 @@ describe('AdminUsersService.setRoles', () => {
     expect(prisma.userRole.createMany).not.toHaveBeenCalled()
   })
 })
-
-describe('AdminUsersService.roles', () => {
-  it('返回未删除的角色选项', async () => {
-    const prisma = createPrisma()
-
-    await expect(service(prisma).roles()).resolves.toEqual([role])
-    expect(prisma.role.findMany).toHaveBeenCalledWith({
-      where: { deletedAt: null },
-      orderBy: { createdAt: 'asc' },
-      select: { id: true, code: true, name: true, builtin: true },
-    })
-  })
-})

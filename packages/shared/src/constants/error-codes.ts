@@ -44,6 +44,12 @@ export const ERROR_CODES = {
   ORG_DEPT_CYCLE: 50005,
   /** 409：手机号已被其他账号使用（org 段自补） */
   ORG_PHONE_TAKEN: 50001,
+  /** 409：角色编码已被占用（org 段自补） */
+  ORG_ROLE_TAKEN: 50006,
+  /** 409：内置角色不可删除 / 不可改权限（org 段自补） */
+  ORG_ROLE_BUILTIN: 50007,
+  /** 409：角色仍被用户使用（org 段自补） */
+  ORG_ROLE_IN_USE: 50008,
   /** 400：引用的部门 / 角色不存在（org 段自补） */
   ORG_REFERENCE_MISSING: 50002,
   /** 409：同一用户重复投票 */

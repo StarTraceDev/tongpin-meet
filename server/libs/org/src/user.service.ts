@@ -5,7 +5,6 @@ import argon2 from 'argon2'
 import { ERROR_CODES } from '../../../../packages/shared/src/constants/error-codes'
 
 import type {
-  AdminRoleOption,
   AdminUserCreateInput,
   AdminUserItem,
   AdminUserList,
@@ -192,15 +191,6 @@ export class AdminUsersService {
     }
 
     return toItem(row)
-  }
-
-  async roles(): Promise<AdminRoleOption[]> {
-    const rows = await this.prisma.role.findMany({
-      where: { deletedAt: null },
-      orderBy: { createdAt: 'asc' },
-      select: { id: true, code: true, name: true, builtin: true },
-    })
-    return rows
   }
 
   private async requireUser(id: string): Promise<void> {

@@ -271,3 +271,42 @@ body {
 .departments-sort {
   width: 120px;
 }
+
+.roles {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.roles-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.roles-title {
+  margin: 0 !important;
+}
+
+.roles-desc {
+  margin: 4px 0 0 !important;
+}
+
+.role-permissions {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.role-permission-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.role-permission-group .ant-checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 4px;
+}

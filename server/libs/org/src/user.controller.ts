@@ -12,12 +12,7 @@ import {
 } from '@nestjs/common'
 import { createZodDto } from 'nestjs-zod'
 
-import type {
-  AdminRoleOptionList,
-  AdminUserAction,
-  AdminUserItem,
-  AdminUserList,
-} from '@tongpin/shared/types'
+import type { AdminUserAction, AdminUserItem, AdminUserList } from '@tongpin/shared/types'
 
 import {
   adminResetPasswordSchema,
@@ -87,18 +82,5 @@ export class UserController {
   @RequirePermissions('role:write')
   async setRoles(@Param('id') id: string, @Body() input: SetRolesDto): Promise<AdminUserAction> {
     return { user: await this.users.setRoles(id, input.roleIds) }
-  }
-}
-
-/** 分配角色时的下拉数据；11.7 的完整 CRUD 仍走 /roles */
-@Controller('roles')
-@UseGuards(JwtAuthGuard, RbacGuard)
-export class RoleOptionsController {
-  constructor(private readonly users: AdminUsersService) {}
-
-  @Get()
-  @RequirePermissions('user:read')
-  async list(): Promise<AdminRoleOptionList> {
-    return { items: await this.users.roles() }
   }
 }
