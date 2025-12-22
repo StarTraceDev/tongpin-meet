@@ -47,6 +47,21 @@ import type {
   sessionTokensSchema,
 } from '../schemas/auth'
 import type { paginationQuerySchema, problemSchema } from '../schemas/common'
+import type {
+  smsLogItemSchema,
+  smsLogListSchema,
+  smsLogsQuerySchema,
+  smsProviderActionSchema,
+  smsProviderCreateSchema,
+  smsProviderItemSchema,
+  smsProviderListSchema,
+  smsProviderUpdateSchema,
+  smsTemplateActionSchema,
+  smsTemplateCreateSchema,
+  smsTemplateItemSchema,
+  smsTemplateListSchema,
+  smsTemplateUpdateSchema,
+} from '../schemas/sms'
 import type { minutesSchema, updateMinutesSchema } from '../schemas/minutes'
 import type {
   createUploadSchema,
@@ -123,6 +138,19 @@ export type RoleCreateInput = z.input<typeof roleCreateSchema>
 export type RoleUpdateInput = z.infer<typeof roleUpdateSchema>
 export type RoleAction = z.infer<typeof roleActionSchema>
 export type PermissionList = z.infer<typeof permissionListSchema>
+export type SmsProviderItem = z.infer<typeof smsProviderItemSchema>
+export type SmsProviderList = z.infer<typeof smsProviderListSchema>
+export type SmsProviderCreateInput = z.input<typeof smsProviderCreateSchema>
+export type SmsProviderUpdateInput = z.infer<typeof smsProviderUpdateSchema>
+export type SmsProviderAction = z.infer<typeof smsProviderActionSchema>
+export type SmsTemplateItem = z.infer<typeof smsTemplateItemSchema>
+export type SmsTemplateList = z.infer<typeof smsTemplateListSchema>
+export type SmsTemplateCreateInput = z.input<typeof smsTemplateCreateSchema>
+export type SmsTemplateUpdateInput = z.infer<typeof smsTemplateUpdateSchema>
+export type SmsTemplateAction = z.infer<typeof smsTemplateActionSchema>
+export type SmsLogItem = z.infer<typeof smsLogItemSchema>
+export type SmsLogList = z.infer<typeof smsLogListSchema>
+export type SmsLogsQuery = z.infer<typeof smsLogsQuerySchema>
 export type AdminRoom = z.infer<typeof adminRoomSchema>
 export type AdminRoomList = z.infer<typeof adminRoomListSchema>
 

@@ -61,6 +61,12 @@ export const ERROR_CODES = {
   FILE_PART_INVALID: 60002,
   /** 410：下载链接过期 */
   FILE_DOWNLOAD_EXPIRED: 60003,
+  /** 500：未配置 TONGPIN_CONFIG_KEY，无法加密短信密钥（system 段自补） */
+  SYSTEM_SECRET_KEY_MISSING: 90001,
+  /** 409：短信服务商编码已被占用（system 段自补） */
+  SYSTEM_SMS_PROVIDER_TAKEN: 90002,
+  /** 409：短信模板编码已被占用（system 段自补） */
+  SYSTEM_SMS_TEMPLATE_TAKEN: 90003,
 } as const
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES]

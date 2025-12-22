@@ -10,3 +10,4 @@ export * from './qr'
 export * from './interaction'
 
 export * from './org'
+export * from './sms'

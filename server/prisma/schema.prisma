@@ -661,3 +661,57 @@ model QrSession {
   @@index([expiresAt])
   @@map("qr_sessions")
 }
+
+/// 06 §11.8 短信服务商；secret 只写不读，库里存 AES-256-GCM 密文
+model SmsProvider {
+  id           String    @id @default(cuid())
+  code         String    @unique // ALIYUN / TENCENT / CUSTOM
+  name         String
+  endpoint     String?
+  accessKeyId  String
+  secretCipher String // 密文 base64（iv:tag:data）
+  secretLast4  String // 掩码展示用，只存后 4 位
+  signName     String
+  templateCode String?
+  enabled      Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  templates SmsTemplate[]
+  logs      SmsLog[]
+
+  @@map("sms_providers")
+}
+
+model SmsTemplate {
+  id         String    @id @default(cuid())
+  code       String    @unique
+  name       String
+  content    String
+  providerId String?
+  enabled    Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  provider SmsProvider? @relation(fields: [providerId], references: [id])
+
+  @@map("sms_templates")
+}
+
+model SmsLog {
+  id         String   @id @default(cuid())
+  phone      String
+  template   String
+  providerId String?
+  status     String // SENT / FAILED
+  error      String?
+  createdAt  DateTime @default(now())
+
+  provider SmsProvider? @relation(fields: [providerId], references: [id])
+
+  @@index([createdAt])
+  @@index([phone])
+  @@map("sms_logs")
+}

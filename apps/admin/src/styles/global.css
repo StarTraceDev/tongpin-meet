@@ -310,3 +310,37 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 4px;
 }
+
+.sms {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sms-title {
+  margin: 0 !important;
+}
+
+.sms-desc {
+  margin: 4px 0 0 !important;
+}
+
+.sms-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sms-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sms-phone {
+  max-width: 260px;
+}
+
+.sms-status {
+  width: 140px;
+}
