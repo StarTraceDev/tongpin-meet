@@ -3,6 +3,7 @@ import {
   DashboardOutlined,
   MenuOutlined,
   MessageOutlined,
+  RobotOutlined,
   SafetyCertificateOutlined,
   TeamOutlined,
   VideoCameraOutlined,
@@ -50,6 +51,7 @@ export function AdminLayout(): ReactElement {
     { key: '/departments', label: '部门管理', icon: <ApartmentOutlined /> },
     { key: '/roles', label: '角色权限', icon: <SafetyCertificateOutlined /> },
     { key: '/sms', label: '短信配置', icon: <MessageOutlined /> },
+    { key: '/ai', label: 'AI 配置', icon: <RobotOutlined /> },
   ]
 
   const navigation = (

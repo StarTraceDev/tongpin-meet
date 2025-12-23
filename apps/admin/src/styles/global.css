@@ -344,3 +344,39 @@ body {
 .sms-status {
   width: 140px;
 }
+
+.ai {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ai-title {
+  margin: 0 !important;
+}
+
+.ai-desc {
+  margin: 4px 0 0 !important;
+}
+
+.ai-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-scene {
+  width: 160px;
+}
+
+.ai-totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}

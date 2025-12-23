@@ -48,6 +48,22 @@ import type {
 } from '../schemas/auth'
 import type { paginationQuerySchema, problemSchema } from '../schemas/common'
 import type {
+  aiProviderActionSchema,
+  aiProviderCreateSchema,
+  aiProviderItemSchema,
+  aiProviderListSchema,
+  aiProviderUpdateSchema,
+  aiRouteActionSchema,
+  aiRouteCreateSchema,
+  aiRouteItemSchema,
+  aiRouteListSchema,
+  aiRouteUpdateSchema,
+  aiUsageItemSchema,
+  aiUsageListSchema,
+  aiUsageQuerySchema,
+  aiUsageTotalsSchema,
+} from '../schemas/ai'
+import type {
   smsLogItemSchema,
   smsLogListSchema,
   smsLogsQuerySchema,
@@ -151,6 +167,20 @@ export type SmsTemplateAction = z.infer<typeof smsTemplateActionSchema>
 export type SmsLogItem = z.infer<typeof smsLogItemSchema>
 export type SmsLogList = z.infer<typeof smsLogListSchema>
 export type SmsLogsQuery = z.infer<typeof smsLogsQuerySchema>
+export type AiProviderItem = z.infer<typeof aiProviderItemSchema>
+export type AiProviderList = z.infer<typeof aiProviderListSchema>
+export type AiProviderCreateInput = z.input<typeof aiProviderCreateSchema>
+export type AiProviderUpdateInput = z.infer<typeof aiProviderUpdateSchema>
+export type AiProviderAction = z.infer<typeof aiProviderActionSchema>
+export type AiRouteItem = z.infer<typeof aiRouteItemSchema>
+export type AiRouteList = z.infer<typeof aiRouteListSchema>
+export type AiRouteCreateInput = z.input<typeof aiRouteCreateSchema>
+export type AiRouteUpdateInput = z.infer<typeof aiRouteUpdateSchema>
+export type AiRouteAction = z.infer<typeof aiRouteActionSchema>
+export type AiUsageItem = z.infer<typeof aiUsageItemSchema>
+export type AiUsageQuery = z.infer<typeof aiUsageQuerySchema>
+export type AiUsageTotals = z.infer<typeof aiUsageTotalsSchema>
+export type AiUsageList = z.infer<typeof aiUsageListSchema>
 export type AdminRoom = z.infer<typeof adminRoomSchema>
 export type AdminRoomList = z.infer<typeof adminRoomListSchema>
 

@@ -715,3 +715,53 @@ model SmsLog {
   @@index([phone])
   @@map("sms_logs")
 }
+
+/// 06 §11.9 AI 服务商；密钥只写不读，库里存 AES-256-GCM 密文
+model AiProvider {
+  id          String    @id @default(cuid())
+  code        String    @unique // OPENAI / DASHSCOPE / DEEPSEEK
+  name        String
+  baseUrl     String
+  apiKeyCipher String
+  apiKeyLast4 String
+  model       String // 默认模型
+  enabled     Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  routes AiRoute[]
+  usages AiUsage[]
+
+  @@map("ai_providers")
+}
+
+model AiRoute {
+  id            String   @id @default(cuid())
+  scene         String   @unique // minutes / qa / summary
+  providerId    String?
+  modelOverride String?
+  enabled       Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  provider AiProvider? @relation(fields: [providerId], references: [id])
+
+  @@map("ai_routes")
+}
+
+model AiUsage {
+  id               String   @id @default(cuid())
+  scene            String
+  providerId       String?
+  promptTokens     Int      @default(0)
+  completionTokens Int      @default(0)
+  costCents        Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  provider AiProvider? @relation(fields: [providerId], references: [id])
+
+  @@index([createdAt])
+  @@index([scene])
+  @@map("ai_usage")
+}

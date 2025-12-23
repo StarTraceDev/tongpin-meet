@@ -67,6 +67,10 @@ export const ERROR_CODES = {
   SYSTEM_SMS_PROVIDER_TAKEN: 90002,
   /** 409：短信模板编码已被占用（system 段自补） */
   SYSTEM_SMS_TEMPLATE_TAKEN: 90003,
+  /** 409：AI 服务商编码已被占用（system 段自补） */
+  SYSTEM_AI_PROVIDER_TAKEN: 90004,
+  /** 409：AI 场景路由已存在（system 段自补） */
+  SYSTEM_AI_ROUTE_TAKEN: 90005,
 } as const
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES]
