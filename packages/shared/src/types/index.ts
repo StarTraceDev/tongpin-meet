@@ -48,6 +48,17 @@ import type {
 } from '../schemas/auth'
 import type { paginationQuerySchema, problemSchema } from '../schemas/common'
 import type {
+  configActionSchema,
+  configCreateSchema,
+  configItemSchema,
+  configListSchema,
+  configUpdateSchema,
+  featureFlagActionSchema,
+  featureFlagItemSchema,
+  featureFlagListSchema,
+  featureFlagUpdateSchema,
+} from '../schemas/config'
+import type {
   aiProviderActionSchema,
   aiProviderCreateSchema,
   aiProviderItemSchema,
@@ -254,3 +265,13 @@ export type DownloadUrl = z.infer<typeof downloadUrlSchema>
 export type CreateUploadInput = z.infer<typeof createUploadSchema>
 export type Minutes = z.infer<typeof minutesSchema>
 export type UpdateMinutesInput = z.infer<typeof updateMinutesSchema>
+
+export type ConfigItem = z.infer<typeof configItemSchema>
+export type ConfigList = z.infer<typeof configListSchema>
+export type ConfigCreateInput = z.infer<typeof configCreateSchema>
+export type ConfigUpdateInput = z.infer<typeof configUpdateSchema>
+export type ConfigAction = z.infer<typeof configActionSchema>
+export type FeatureFlagItem = z.infer<typeof featureFlagItemSchema>
+export type FeatureFlagList = z.infer<typeof featureFlagListSchema>
+export type FeatureFlagUpdateInput = z.infer<typeof featureFlagUpdateSchema>
+export type FeatureFlagAction = z.infer<typeof featureFlagActionSchema>

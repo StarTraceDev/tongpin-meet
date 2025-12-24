@@ -1,5 +1,6 @@
 export * from './ai'
 export * from './admin'
+export * from './config'
 export * from './common'
 export * from './auth'
 export * from './file'

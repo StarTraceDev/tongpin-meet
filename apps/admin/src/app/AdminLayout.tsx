@@ -5,6 +5,7 @@ import {
   MessageOutlined,
   RobotOutlined,
   SafetyCertificateOutlined,
+  SettingOutlined,
   TeamOutlined,
   VideoCameraOutlined,
 } from '@ant-design/icons'
@@ -52,6 +53,7 @@ export function AdminLayout(): ReactElement {
     { key: '/roles', label: '角色权限', icon: <SafetyCertificateOutlined /> },
     { key: '/sms', label: '短信配置', icon: <MessageOutlined /> },
     { key: '/ai', label: 'AI 配置', icon: <RobotOutlined /> },
+    { key: '/configs', label: '系统配置', icon: <SettingOutlined /> },
   ]
 
   const navigation = (

@@ -380,3 +380,36 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
 }
+
+.configs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.configs-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.configs-title {
+  margin: 0;
+  font: var(--tp-font-headline);
+}
+
+.configs-subtitle {
+  margin: 6px 0 0;
+}
+
+.configs-value {
+  font: var(--tp-font-embedded);
+}
+
+.configs-json {
+  margin: 0;
+  font: var(--tp-font-embedded);
+  white-space: pre-wrap;
+  max-height: 320px;
+}
