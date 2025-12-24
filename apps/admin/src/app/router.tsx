@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router'
 import { DashboardPage } from '../pages/dashboard/DashboardPage'
 import { DepartmentsPage } from '../pages/departments/DepartmentsPage'
 import { LoginPage } from '../pages/login/LoginPage'
+import { AlertsPage } from '../pages/alerts/AlertsPage'
 import { ConfigsPage } from '../pages/configs/ConfigsPage'
 import { MeetingsPage } from '../pages/meetings/MeetingsPage'
 import { RolesPage } from '../pages/roles/RolesPage'
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
       { path: 'meetings', handle: { crumb: '会议管理' }, element: <MeetingsPage /> },
       { path: 'roles', handle: { crumb: '角色权限' }, element: <RolesPage /> },
       { path: 'configs', handle: { crumb: '系统配置' }, element: <ConfigsPage /> },
+      { path: 'alerts', handle: { crumb: '告警规则' }, element: <AlertsPage /> },
       { path: 'sms', handle: { crumb: '短信配置' }, element: <SmsPage /> },
       { path: 'ai', handle: { crumb: 'AI 配置' }, element: <AiPage /> },
       { path: 'users', handle: { crumb: '用户管理' }, element: <UsersPage /> },

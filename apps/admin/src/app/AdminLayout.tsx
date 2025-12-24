@@ -1,4 +1,5 @@
 import {
+  AlertOutlined,
   ApartmentOutlined,
   DashboardOutlined,
   MenuOutlined,
@@ -54,6 +55,7 @@ export function AdminLayout(): ReactElement {
     { key: '/sms', label: '短信配置', icon: <MessageOutlined /> },
     { key: '/ai', label: 'AI 配置', icon: <RobotOutlined /> },
     { key: '/configs', label: '系统配置', icon: <SettingOutlined /> },
+    { key: '/alerts', label: '告警规则', icon: <AlertOutlined /> },
   ]
 
   const navigation = (

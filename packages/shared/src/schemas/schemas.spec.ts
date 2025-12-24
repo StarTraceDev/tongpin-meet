@@ -118,9 +118,9 @@ describe('会议 schema', () => {
   })
 
   it('游客入会只认 meetingNo + 昵称', () => {
-    expect(
-      joinAsGuestSchema.safeParse({ meetingNo: '123456789', nickname: '访客' }).success,
-    ).toBe(true)
+    expect(joinAsGuestSchema.safeParse({ meetingNo: '123456789', nickname: '访客' }).success).toBe(
+      true,
+    )
     expect(joinAsGuestSchema.safeParse({ meetingNo: '123', nickname: '访客' }).success).toBe(false)
   })
 })
@@ -167,7 +167,8 @@ describe('常量', () => {
   it('权限点只有白名单里的', () => {
     expect(isPermission('sms:secret')).toBe(true)
     expect(isPermission('sms:nope')).toBe(false)
-    expect(PERMISSIONS).toHaveLength(24)
+    // 04 §5.6 的 24 个 + 告警规则读/写两个（M11-11）
+    expect(PERMISSIONS).toHaveLength(26)
   })
 
   it('WS 事件名不重复', () => {

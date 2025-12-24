@@ -7,6 +7,8 @@ import { AdminController } from './admin.controller'
 import { AiConfigController } from './ai-config.controller'
 import { AiConfigService } from './ai-config.service'
 import { ConfigController } from './config.controller'
+import { AlertRuleController } from './alert-rule.controller'
+import { AlertRuleService } from './alert-rule.service'
 import { ConfigService } from './config.service'
 import { AdminMeetingsService } from './admin-meetings.service'
 import { AdminStatsService } from './admin-stats.service'
@@ -15,13 +17,20 @@ import { SmsConfigService } from './sms-config.service'
 
 @Module({
   imports: [AuthModule, MeetingModule],
-  controllers: [AdminController, SmsConfigController, AiConfigController, ConfigController],
+  controllers: [
+    AdminController,
+    SmsConfigController,
+    AiConfigController,
+    ConfigController,
+    AlertRuleController,
+  ],
   providers: [
     AdminStatsService,
     AdminMeetingsService,
     SmsConfigService,
     AiConfigService,
     ConfigService,
+    AlertRuleService,
   ],
 })
 export class AdminModule {}

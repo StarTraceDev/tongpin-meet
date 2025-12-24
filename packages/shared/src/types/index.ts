@@ -59,6 +59,13 @@ import type {
   featureFlagUpdateSchema,
 } from '../schemas/config'
 import type {
+  alertRuleActionSchema,
+  alertRuleCreateSchema,
+  alertRuleItemSchema,
+  alertRuleListSchema,
+  alertRuleUpdateSchema,
+} from '../schemas/alert'
+import type {
   aiProviderActionSchema,
   aiProviderCreateSchema,
   aiProviderItemSchema,
@@ -275,3 +282,9 @@ export type FeatureFlagItem = z.infer<typeof featureFlagItemSchema>
 export type FeatureFlagList = z.infer<typeof featureFlagListSchema>
 export type FeatureFlagUpdateInput = z.infer<typeof featureFlagUpdateSchema>
 export type FeatureFlagAction = z.infer<typeof featureFlagActionSchema>
+
+export type AlertRuleItem = z.infer<typeof alertRuleItemSchema>
+export type AlertRuleList = z.infer<typeof alertRuleListSchema>
+export type AlertRuleCreateInput = z.infer<typeof alertRuleCreateSchema>
+export type AlertRuleUpdateInput = z.infer<typeof alertRuleUpdateSchema>
+export type AlertRuleAction = z.infer<typeof alertRuleActionSchema>

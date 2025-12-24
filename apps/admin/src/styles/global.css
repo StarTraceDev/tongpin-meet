@@ -413,3 +413,29 @@ body {
   white-space: pre-wrap;
   max-height: 320px;
 }
+
+.alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.alerts-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.alerts-title {
+  margin: 0;
+  font: var(--tp-font-headline);
+}
+
+.alerts-subtitle {
+  margin: 6px 0 0;
+}
+
+.alerts-target {
+  font: var(--tp-font-caption);
+}

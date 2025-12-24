@@ -60,6 +60,8 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     options: [
       { code: 'config:read', label: '查看系统配置' },
       { code: 'config:write', label: '编辑系统配置' },
+      { code: 'alert:read', label: '查看告警规则' },
+      { code: 'alert:write', label: '编辑告警规则' },
       { code: 'audit:read', label: '查看审计日志' },
       { code: 'stats:read', label: '查看统计' },
       { code: 'cost:read', label: '查看成本' },

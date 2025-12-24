@@ -765,3 +765,20 @@ model AiUsage {
   @@index([scene])
   @@map("ai_usage")
 }
+
+/// 06 §11.11 告警规则：指标超过/低于阈值时按通知方式提醒
+model AlertRule {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  metric      String // cpu / memory / connections / storage / errorRate
+  comparator  String // GT / LT
+  threshold   Int
+  channel     String // INBOX / SMS / EMAIL / WEBHOOK
+  target      String?
+  enabled     Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@map("alert_rules")
+}

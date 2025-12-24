@@ -72,6 +72,7 @@ export const ERROR_CODES = {
   /** 409：AI 场景路由已存在（system 段自补） */
   SYSTEM_AI_ROUTE_TAKEN: 90005,
   SYSTEM_CONFIG_TAKEN: 90006,
+  SYSTEM_ALERT_NAME_TAKEN: 90007,
 } as const
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES]

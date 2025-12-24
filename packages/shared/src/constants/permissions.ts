@@ -20,6 +20,8 @@ export const PERMISSIONS = [
   'ai:secret',
   'config:read',
   'config:write',
+  'alert:read',
+  'alert:write',
   'audit:read',
   'feedback:read',
   'feedback:write',
