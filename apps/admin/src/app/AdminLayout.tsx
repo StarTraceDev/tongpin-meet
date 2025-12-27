@@ -55,6 +55,7 @@ export function AdminLayout(): ReactElement {
     { key: '/sms', label: '短信配置', icon: <MessageOutlined /> },
     { key: '/ai', label: 'AI 配置', icon: <RobotOutlined /> },
     { key: '/configs', label: '系统配置', icon: <SettingOutlined /> },
+    { key: '/host', label: '主机监控', icon: <DashboardOutlined /> },
     { key: '/alerts', label: '告警规则', icon: <AlertOutlined /> },
   ]
 

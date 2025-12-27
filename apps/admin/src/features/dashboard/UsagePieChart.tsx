@@ -2,7 +2,7 @@ import type { AdminUsageSlice } from '@tongpin/shared/types'
 import type { ReactElement } from 'react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 
-import type { ChartPalette } from './colors'
+import type { ChartPalette } from '@/lib/chart-colors'
 import { formatBytes } from './format'
 
 interface UsagePieChartProps {

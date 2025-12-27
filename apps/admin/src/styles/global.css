@@ -439,3 +439,35 @@ body {
 .alerts-target {
   font: var(--tp-font-caption);
 }
+
+.host {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.host-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.host-title {
+  margin: 0;
+  font: var(--tp-font-headline);
+}
+
+.host-subtitle {
+  margin: 6px 0 0;
+}
+
+.host-loading {
+  display: flex;
+  justify-content: center;
+  padding: 64px 0;
+}
+
+.host-card {
+  height: 100%;
+}

@@ -1,6 +1,7 @@
 export * from './ai'
 export * from './admin'
 export * from './config'
+export * from './metrics'
 export * from './alert'
 export * from './common'
 export * from './auth'

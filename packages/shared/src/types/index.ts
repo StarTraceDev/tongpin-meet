@@ -4,6 +4,8 @@
  */
 import type { z } from 'zod'
 
+import type { hostMetricsSchema } from '../schemas/metrics'
+
 import type {
   adminMeetingActionSchema,
   adminRoleOptionListSchema,
@@ -164,6 +166,7 @@ export type AdminUsersQuery = z.infer<typeof adminUsersQuerySchema>
 export type AdminUserCreateInput = z.infer<typeof adminUserCreateSchema>
 export type AdminUserUpdateInput = z.infer<typeof adminUserUpdateSchema>
 export type AdminUserAction = z.infer<typeof adminUserActionSchema>
+export type HostMetrics = z.infer<typeof hostMetricsSchema>
 export type DeptCreateInput = z.infer<typeof deptCreateSchema>
 export type DeptUpdateInput = z.infer<typeof deptUpdateSchema>
 export type RoleItem = z.infer<typeof roleItemSchema>

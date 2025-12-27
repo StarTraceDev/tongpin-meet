@@ -10,6 +10,8 @@ import { ConfigController } from './config.controller'
 import { AlertRuleController } from './alert-rule.controller'
 import { AlertRuleService } from './alert-rule.service'
 import { ConfigService } from './config.service'
+import { HostMetricsController } from './host-metrics.controller'
+import { HostMetricsService } from './host-metrics.service'
 import { AdminMeetingsService } from './admin-meetings.service'
 import { AdminStatsService } from './admin-stats.service'
 import { SmsConfigController } from './sms-config.controller'
@@ -23,6 +25,7 @@ import { SmsConfigService } from './sms-config.service'
     AiConfigController,
     ConfigController,
     AlertRuleController,
+    HostMetricsController,
   ],
   providers: [
     AdminStatsService,
@@ -31,6 +34,7 @@ import { SmsConfigService } from './sms-config.service'
     AiConfigService,
     ConfigService,
     AlertRuleService,
+    HostMetricsService,
   ],
 })
 export class AdminModule {}

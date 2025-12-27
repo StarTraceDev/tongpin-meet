@@ -17,8 +17,8 @@ import {
   fetchUsage,
   fetchUserGrowth,
 } from '../../features/dashboard/api'
-import type { ChartPalette } from '../../features/dashboard/colors'
-import { readChartPalette } from '../../features/dashboard/colors'
+import type { ChartPalette } from '@/lib/chart-colors'
+import { readChartPalette } from '@/lib/chart-colors'
 import { LiveRoomsTable } from '../../features/dashboard/LiveRoomsTable'
 import { MeetingTrendChart } from '../../features/dashboard/MeetingTrendChart'
 import { UsagePieChart } from '../../features/dashboard/UsagePieChart'

@@ -10,7 +10,7 @@ import {
   YAxis,
 } from 'recharts'
 
-import type { ChartPalette } from './colors'
+import type { ChartPalette } from '@/lib/chart-colors'
 import { formatDay } from './format'
 
 interface UserGrowthChartProps {
