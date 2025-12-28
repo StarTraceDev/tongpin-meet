@@ -471,3 +471,54 @@ body {
 .host-card {
   height: 100%;
 }
+
+.costs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.costs-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.costs-title {
+  margin: 0;
+  font: var(--tp-font-headline);
+}
+
+.costs-subtitle {
+  margin: 6px 0 0;
+}
+
+.costs-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+}
+
+.costs-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 4px;
+  font: var(--tp-font-caption);
+  color: var(--tp-text-secondary);
+}
+
+.costs-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.costs-legend-item i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}

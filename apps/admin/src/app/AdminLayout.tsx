@@ -1,6 +1,7 @@
 import {
   AlertOutlined,
   ApartmentOutlined,
+  BarChartOutlined,
   DashboardOutlined,
   MenuOutlined,
   MessageOutlined,
@@ -56,6 +57,7 @@ export function AdminLayout(): ReactElement {
     { key: '/ai', label: 'AI 配置', icon: <RobotOutlined /> },
     { key: '/configs', label: '系统配置', icon: <SettingOutlined /> },
     { key: '/host', label: '主机监控', icon: <DashboardOutlined /> },
+    { key: '/costs', label: '成本统计', icon: <BarChartOutlined /> },
     { key: '/alerts', label: '告警规则', icon: <AlertOutlined /> },
   ]
 

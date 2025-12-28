@@ -5,6 +5,7 @@ import { DepartmentsPage } from '../pages/departments/DepartmentsPage'
 import { LoginPage } from '../pages/login/LoginPage'
 import { AlertsPage } from '../pages/alerts/AlertsPage'
 import { ConfigsPage } from '../pages/configs/ConfigsPage'
+import { CostsPage } from '../pages/costs/CostsPage'
 import { HostPage } from '../pages/host/HostPage'
 import { MeetingsPage } from '../pages/meetings/MeetingsPage'
 import { RolesPage } from '../pages/roles/RolesPage'
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
       { path: 'roles', handle: { crumb: '角色权限' }, element: <RolesPage /> },
       { path: 'configs', handle: { crumb: '系统配置' }, element: <ConfigsPage /> },
       { path: 'host', handle: { crumb: '主机监控' }, element: <HostPage /> },
+      { path: 'costs', handle: { crumb: '成本统计' }, element: <CostsPage /> },
       { path: 'alerts', handle: { crumb: '告警规则' }, element: <AlertsPage /> },
       { path: 'sms', handle: { crumb: '短信配置' }, element: <SmsPage /> },
       { path: 'ai', handle: { crumb: 'AI 配置' }, element: <AiPage /> },
