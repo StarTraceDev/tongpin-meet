@@ -522,3 +522,48 @@ body {
   height: 8px;
   border-radius: 50%;
 }
+
+.audit {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.audit-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.audit-title {
+  margin: 0;
+  font: var(--tp-font-headline);
+}
+
+.audit-subtitle {
+  margin: 6px 0 0;
+}
+
+.audit-keyword {
+  width: 320px;
+  max-width: 100%;
+}
+
+.audit-actor-id {
+  font: var(--tp-font-caption);
+}
+
+.audit-detail-title {
+  margin-top: 20px;
+}
+
+.audit-json {
+  margin: 0;
+  padding: 12px;
+  border-radius: var(--tp-radius-m);
+  background: var(--tp-surface-secondary);
+  font: var(--tp-font-embedded);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

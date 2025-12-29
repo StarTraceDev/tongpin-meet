@@ -88,11 +88,11 @@ async function readProblem(response: Response): Promise<Partial<Problem>> {
   }
 }
 
-export async function request<T>(
+async function authorizedFetch(
   path: string,
-  init: RequestInit = {},
-  retried = false,
-): Promise<T> {
+  init: RequestInit,
+  retried: boolean,
+): Promise<Response> {
   const headers = new Headers(init.headers)
   const accessToken = getAccessToken()
 
@@ -111,7 +111,7 @@ export async function request<T>(
     const canRetry = response.status === 401 && problem.code === TOKEN_EXPIRED_CODE && !retried
 
     if (canRetry && (await refreshSession())) {
-      return request<T>(path, init, true)
+      return authorizedFetch(path, init, true)
     }
 
     if (response.status === 401) {
@@ -121,9 +121,21 @@ export async function request<T>(
     throw new ApiError(response.status, problem.code ?? 10000, problem.title ?? response.statusText)
   }
 
+  return response
+}
+
+export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await authorizedFetch(path, init, false)
+
   if (response.status === 204) {
     return undefined as T
   }
 
   return (await response.json()) as T
+}
+
+/** 导出接口返回 CSV 等非 JSON，复用同一套鉴权与刷新逻辑 */
+export async function requestText(path: string, init: RequestInit = {}): Promise<string> {
+  const response = await authorizedFetch(path, init, false)
+  return response.text()
 }

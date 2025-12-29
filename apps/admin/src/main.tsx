@@ -3,6 +3,7 @@ import '@tongpin/tokens'
 import './styles/global.css'
 
 import { App as AntdApp, ConfigProvider, theme } from 'antd'
+import zhCN from 'antd/locale/zh_CN'
 import { StrictMode } from 'react'
 import type { ReactElement } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -26,6 +27,7 @@ function Root(): ReactElement {
 
   return (
     <ConfigProvider
+      locale={zhCN}
       theme={{
         algorithm: resolved === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: brandColor === '' ? {} : { colorPrimary: brandColor },

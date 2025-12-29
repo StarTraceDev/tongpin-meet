@@ -4,6 +4,7 @@
  */
 import type { z } from 'zod'
 
+import type { auditLogItemSchema, auditLogListSchema, auditLogQuerySchema } from '../schemas/audit'
 import type { costDaySchema, costsSchema, costTotalsSchema } from '../schemas/costs'
 import type { hostMetricsSchema } from '../schemas/metrics'
 
@@ -171,6 +172,9 @@ export type HostMetrics = z.infer<typeof hostMetricsSchema>
 export type CostDay = z.infer<typeof costDaySchema>
 export type CostTotals = z.infer<typeof costTotalsSchema>
 export type Costs = z.infer<typeof costsSchema>
+export type AuditLogItem = z.infer<typeof auditLogItemSchema>
+export type AuditLogList = z.infer<typeof auditLogListSchema>
+export type AuditLogQuery = z.infer<typeof auditLogQuerySchema>
 export type DeptCreateInput = z.infer<typeof deptCreateSchema>
 export type DeptUpdateInput = z.infer<typeof deptUpdateSchema>
 export type RoleItem = z.infer<typeof roleItemSchema>
