@@ -5,6 +5,15 @@
 import type { z } from 'zod'
 
 import type { auditLogItemSchema, auditLogListSchema, auditLogQuerySchema } from '../schemas/audit'
+import type {
+  feedbackActionSchema,
+  feedbackCategorySchema,
+  feedbackCreateSchema,
+  feedbackItemSchema,
+  feedbackListSchema,
+  feedbackQuerySchema,
+  feedbackUpdateSchema,
+} from '../schemas/feedback'
 import type { costDaySchema, costsSchema, costTotalsSchema } from '../schemas/costs'
 import type { hostMetricsSchema } from '../schemas/metrics'
 
@@ -174,6 +183,13 @@ export type CostTotals = z.infer<typeof costTotalsSchema>
 export type Costs = z.infer<typeof costsSchema>
 export type AuditLogItem = z.infer<typeof auditLogItemSchema>
 export type AuditLogList = z.infer<typeof auditLogListSchema>
+export type FeedbackCategory = z.infer<typeof feedbackCategorySchema>
+export type FeedbackItem = z.infer<typeof feedbackItemSchema>
+export type FeedbackList = z.infer<typeof feedbackListSchema>
+export type FeedbackQuery = z.infer<typeof feedbackQuerySchema>
+export type FeedbackCreateInput = z.input<typeof feedbackCreateSchema>
+export type FeedbackUpdateInput = z.input<typeof feedbackUpdateSchema>
+export type FeedbackAction = z.infer<typeof feedbackActionSchema>
 export type AuditLogQuery = z.infer<typeof auditLogQuerySchema>
 export type DeptCreateInput = z.infer<typeof deptCreateSchema>
 export type DeptUpdateInput = z.infer<typeof deptUpdateSchema>

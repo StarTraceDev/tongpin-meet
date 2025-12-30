@@ -567,3 +567,51 @@ body {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.feedbacks {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feedbacks-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.feedbacks-title {
+  margin: 0;
+  font: var(--tp-font-headline);
+}
+
+.feedbacks-subtitle {
+  margin: 6px 0 0;
+}
+
+.feedbacks-keyword {
+  width: 300px;
+  max-width: 100%;
+}
+
+.feedbacks-status {
+  width: 140px;
+}
+
+.feedbacks-reply {
+  display: inline-block;
+  max-width: 120px;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--tp-font-caption);
+}
+
+.feedbacks-modal-content {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border-radius: var(--tp-radius-m);
+  background: var(--tp-surface-secondary);
+}
