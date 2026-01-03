@@ -4,6 +4,7 @@ import { DashboardPage } from '../pages/dashboard/DashboardPage'
 import { DepartmentsPage } from '../pages/departments/DepartmentsPage'
 import { LoginPage } from '../pages/login/LoginPage'
 import { AlertsPage } from '../pages/alerts/AlertsPage'
+import { AnnouncementsPage } from '../pages/announcements/AnnouncementsPage'
 import { AuditLogsPage } from '../pages/audit/AuditLogsPage'
 import { ConfigsPage } from '../pages/configs/ConfigsPage'
 import { FeedbacksPage } from '../pages/feedbacks/FeedbacksPage'
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { path: 'roles', handle: { crumb: '角色权限' }, element: <RolesPage /> },
       { path: 'configs', handle: { crumb: '系统配置' }, element: <ConfigsPage /> },
       { path: 'audit', handle: { crumb: '审计日志' }, element: <AuditLogsPage /> },
+      { path: 'announcements', handle: { crumb: '系统公告' }, element: <AnnouncementsPage /> },
       { path: 'feedbacks', handle: { crumb: '反馈管理' }, element: <FeedbacksPage /> },
       { path: 'host', handle: { crumb: '主机监控' }, element: <HostPage /> },
       { path: 'costs', handle: { crumb: '成本统计' }, element: <CostsPage /> },

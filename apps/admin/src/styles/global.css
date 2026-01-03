@@ -615,3 +615,34 @@ body {
   border-radius: var(--tp-radius-m);
   background: var(--tp-surface-secondary);
 }
+
+.announcements {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.announcements-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.announcements-title {
+  margin: 0;
+  font: var(--tp-font-headline);
+}
+
+.announcements-subtitle {
+  margin: 6px 0 0;
+}
+
+.announcements-keyword {
+  width: 320px;
+  max-width: 100%;
+}
+
+.announcements-time {
+  width: 220px;
+}

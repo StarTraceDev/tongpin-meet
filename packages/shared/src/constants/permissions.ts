@@ -25,6 +25,8 @@ export const PERMISSIONS = [
   'audit:read',
   'feedback:read',
   'feedback:write',
+  'announcement:read',
+  'announcement:write',
   'stats:read',
   'cost:read',
   'host:read',

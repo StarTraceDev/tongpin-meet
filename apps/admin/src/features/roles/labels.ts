@@ -53,6 +53,8 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     options: [
       { code: 'feedback:read', label: '查看反馈' },
       { code: 'feedback:write', label: '处理反馈' },
+      { code: 'announcement:read', label: '查看公告' },
+      { code: 'announcement:write', label: '管理公告' },
     ],
   },
   {

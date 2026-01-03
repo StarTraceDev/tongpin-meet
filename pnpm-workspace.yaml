@@ -83,6 +83,7 @@ catalog:
   '@tanstack/react-query': ^5.0.0
   zustand: ^5.0.0
   recharts: ^3.0.0
+  dayjs: ^1.11.13
 
   # 桌面端
   electron: ^39.0.0

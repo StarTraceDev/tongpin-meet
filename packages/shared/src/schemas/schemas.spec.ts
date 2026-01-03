@@ -167,8 +167,8 @@ describe('常量', () => {
   it('权限点只有白名单里的', () => {
     expect(isPermission('sms:secret')).toBe(true)
     expect(isPermission('sms:nope')).toBe(false)
-    // 04 §5.6 的 24 个 + 告警规则读/写两个（M11-11）
-    expect(PERMISSIONS).toHaveLength(26)
+    // 04 §5.6 的 24 个 + 告警规则读/写、公告读/写（M11-11 / M11-16）
+    expect(PERMISSIONS).toHaveLength(28)
   })
 
   it('WS 事件名不重复', () => {

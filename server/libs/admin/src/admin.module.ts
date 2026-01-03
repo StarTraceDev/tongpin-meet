@@ -10,6 +10,8 @@ import { ConfigController } from './config.controller'
 import { AlertRuleController } from './alert-rule.controller'
 import { AlertRuleService } from './alert-rule.service'
 import { ConfigService } from './config.service'
+import { AnnouncementController } from './announcement.controller'
+import { AnnouncementService } from './announcement.service'
 import { FeedbackController } from './feedback.controller'
 import { FeedbackService } from './feedback.service'
 import { HostMetricsController } from './host-metrics.controller'
@@ -35,6 +37,7 @@ import { SmsConfigService } from './sms-config.service'
     CostController,
     AuditLogController,
     FeedbackController,
+    AnnouncementController,
   ],
   providers: [
     AdminStatsService,
@@ -47,6 +50,7 @@ import { SmsConfigService } from './sms-config.service'
     CostService,
     AuditLogService,
     FeedbackService,
+    AnnouncementService,
   ],
 })
 export class AdminModule {}

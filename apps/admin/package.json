@@ -21,7 +21,8 @@
     "react-router": "catalog:",
     "@tongpin/theme": "workspace:*",
     "@ant-design/icons": "catalog:",
-    "recharts": "catalog:"
+    "recharts": "catalog:",
+    "dayjs": "catalog:"
   },
   "devDependencies": {
     "@tongpin/config": "workspace:*",
