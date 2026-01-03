@@ -87,19 +87,4 @@ describe('AuditLogService', () => {
       status: 404,
     })
   })
-
-  it('导出 CSV 转义逗号与引号', async () => {
-    const prisma = createPrisma()
-    ;(
-      prisma as never as { auditLog: { findMany: ReturnType<typeof vi.fn> } }
-    ).auditLog.findMany.mockResolvedValue([{ ...row, ua: 'Mozilla, "test"' }])
-    const service = new AuditLogService(prisma as never)
-
-    const csv = await service.exportCsv({ page: 1, pageSize: 20 })
-
-    expect(csv.startsWith('\uFEFF时间,操作者ID,操作者,动作')).toBe(true)
-    expect(csv).toContain('"Mozilla, ""test"""')
-    const detailJson = JSON.stringify({ from: 'ONGOING', to: 'ENDED' })
-    expect(csv).toContain(`"${detailJson.replace(/"/g, '""')}"`)
-  })
 })

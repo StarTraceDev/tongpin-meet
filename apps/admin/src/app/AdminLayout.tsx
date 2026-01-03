@@ -1,5 +1,6 @@
 import {
   AlertOutlined,
+  DownloadOutlined,
   ApartmentOutlined,
   BarChartOutlined,
   CommentOutlined,
@@ -64,6 +65,7 @@ export function AdminLayout(): ReactElement {
     { key: '/feedbacks', label: '反馈管理', icon: <CommentOutlined /> },
     { key: '/host', label: '主机监控', icon: <DashboardOutlined /> },
     { key: '/costs', label: '成本统计', icon: <BarChartOutlined /> },
+    { key: '/exports', label: '下载中心', icon: <DownloadOutlined /> },
     { key: '/alerts', label: '告警规则', icon: <AlertOutlined /> },
   ]
 

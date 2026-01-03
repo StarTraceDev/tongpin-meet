@@ -19,6 +19,8 @@ import { HostMetricsService } from './host-metrics.service'
 import { CostController } from './cost.controller'
 import { CostService } from './cost.service'
 import { AuditLogController } from './audit-log.controller'
+import { ExportController } from './export.controller'
+import { ExportService } from './export.service'
 import { AuditLogService } from './audit-log.service'
 import { AdminMeetingsService } from './admin-meetings.service'
 import { AdminStatsService } from './admin-stats.service'
@@ -38,6 +40,7 @@ import { SmsConfigService } from './sms-config.service'
     AuditLogController,
     FeedbackController,
     AnnouncementController,
+    ExportController,
   ],
   providers: [
     AdminStatsService,
@@ -51,6 +54,7 @@ import { SmsConfigService } from './sms-config.service'
     AuditLogService,
     FeedbackService,
     AnnouncementService,
+    ExportService,
   ],
 })
 export class AdminModule {}

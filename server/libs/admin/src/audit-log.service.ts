@@ -12,8 +12,6 @@ import { ApiError } from '../../common/src/errors/api-error'
 import { PrismaService } from '../../infra/src/prisma/prisma.service'
 import type { Prisma } from '../../infra/src/generated/prisma/client'
 
-const EXPORT_LIMIT = 5000
-
 type AuditRow = {
   id: string
   actorId: string
@@ -26,11 +24,7 @@ type AuditRow = {
   createdAt: Date
 }
 
-function csvCell(value: string): string {
-  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value
-}
-
-/** 04 §6.8 `GET /admin/audit-logs`：只读列表 + 详情 + CSV 导出 */
+/** 04 §6.8 `GET /admin/audit-logs`：只读列表 + 详情；导出走通用导出任务 */
 @Injectable()
 export class AuditLogService {
   constructor(private readonly prisma: PrismaService) {}
@@ -62,33 +56,6 @@ export class AuditLogService {
     }
     const names = await this.actorNames([row.actorId])
     return this.toItem(row, names)
-  }
-
-  async exportCsv(query: AuditLogQuery): Promise<string> {
-    const rows = await this.prisma.auditLog.findMany({
-      where: this.where(query),
-      orderBy: { createdAt: 'desc' },
-      take: EXPORT_LIMIT,
-    })
-    const names = await this.actorNames(rows.map((row) => row.actorId))
-    const header = ['时间', '操作者ID', '操作者', '动作', '目标类型', '目标ID', 'IP', 'UA', '详情']
-    const lines = rows.map((row) => {
-      const item = this.toItem(row, names)
-      return [
-        item.createdAt,
-        item.actorId,
-        item.actorName ?? '',
-        item.action,
-        item.targetType ?? '',
-        item.targetId ?? '',
-        item.ip ?? '',
-        item.ua ?? '',
-        JSON.stringify(item.detail ?? null),
-      ]
-        .map((cell) => csvCell(String(cell)))
-        .join(',')
-    })
-    return `\uFEFF${[header.join(','), ...lines].join('\n')}`
   }
 
   private where(query: AuditLogQuery): Prisma.AuditLogWhereInput {

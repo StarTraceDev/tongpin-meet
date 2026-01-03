@@ -1,4 +1,4 @@
-import { Controller, Get, Header, Param, Query, UseGuards } from '@nestjs/common'
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common'
 import { createZodDto } from 'nestjs-zod'
 
 import type { AuditLogItem, AuditLogList } from '../../../../packages/shared/src/types'
@@ -22,14 +22,6 @@ export class AuditLogController {
   @RequirePermissions('audit:read')
   list(@Query() query: AuditLogQueryDto): Promise<AuditLogList> {
     return this.logs.list(query)
-  }
-
-  @Get('audit-logs\\:export')
-  @Header('content-type', 'text/csv; charset=utf-8')
-  @Header('content-disposition', 'attachment; filename="audit-logs.csv"')
-  @RequirePermissions('audit:read')
-  exportCsv(@Query() query: AuditLogQueryDto): Promise<string> {
-    return this.logs.exportCsv(query)
   }
 
   @Get('audit-logs/:id')

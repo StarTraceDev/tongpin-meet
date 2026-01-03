@@ -6,6 +6,13 @@ import type { z } from 'zod'
 
 import type { auditLogItemSchema, auditLogListSchema, auditLogQuerySchema } from '../schemas/audit'
 import type {
+  exportOperationActionSchema,
+  exportOperationItemSchema,
+  exportOperationListSchema,
+  exportOperationQuerySchema,
+  exportResourceSchema,
+} from '../schemas/export'
+import type {
   announcementActionSchema,
   announcementCreateSchema,
   announcementItemSchema,
@@ -204,6 +211,11 @@ export type AnnouncementQuery = z.infer<typeof announcementQuerySchema>
 export type AnnouncementCreateInput = z.input<typeof announcementCreateSchema>
 export type AnnouncementUpdateInput = z.input<typeof announcementUpdateSchema>
 export type AnnouncementAction = z.infer<typeof announcementActionSchema>
+export type ExportResource = z.infer<typeof exportResourceSchema>
+export type ExportOperationItem = z.infer<typeof exportOperationItemSchema>
+export type ExportOperationList = z.infer<typeof exportOperationListSchema>
+export type ExportOperationQuery = z.infer<typeof exportOperationQuerySchema>
+export type ExportOperationAction = z.infer<typeof exportOperationActionSchema>
 export type AuditLogQuery = z.infer<typeof auditLogQuerySchema>
 export type DeptCreateInput = z.infer<typeof deptCreateSchema>
 export type DeptUpdateInput = z.infer<typeof deptUpdateSchema>

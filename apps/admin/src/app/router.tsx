@@ -9,6 +9,7 @@ import { AuditLogsPage } from '../pages/audit/AuditLogsPage'
 import { ConfigsPage } from '../pages/configs/ConfigsPage'
 import { FeedbacksPage } from '../pages/feedbacks/FeedbacksPage'
 import { CostsPage } from '../pages/costs/CostsPage'
+import { ExportsPage } from '../pages/exports/ExportsPage'
 import { HostPage } from '../pages/host/HostPage'
 import { MeetingsPage } from '../pages/meetings/MeetingsPage'
 import { RolesPage } from '../pages/roles/RolesPage'
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
       { path: 'host', handle: { crumb: '主机监控' }, element: <HostPage /> },
       { path: 'costs', handle: { crumb: '成本统计' }, element: <CostsPage /> },
       { path: 'alerts', handle: { crumb: '告警规则' }, element: <AlertsPage /> },
+      { path: 'exports', handle: { crumb: '下载中心' }, element: <ExportsPage /> },
       { path: 'sms', handle: { crumb: '短信配置' }, element: <SmsPage /> },
       { path: 'ai', handle: { crumb: 'AI 配置' }, element: <AiPage /> },
       { path: 'users', handle: { crumb: '用户管理' }, element: <UsersPage /> },

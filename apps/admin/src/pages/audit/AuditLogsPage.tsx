@@ -13,28 +13,21 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 
 import type { AuditLogItem } from '@tongpin/shared'
 
-import { exportAuditLogs, fetchAuditLog, fetchAuditLogs } from '@/features/audit/api'
+import { fetchAuditLog, fetchAuditLogs } from '@/features/audit/api'
+import { startExport } from '@/features/exports/api'
 import { formatAuditTime, formatTarget } from '@/features/audit/format'
 
 const { RangePicker } = DatePicker
 
 type Range = { from: string; to: string }
 
-function downloadCsv(text: string): void {
-  const blob = new Blob([text], { type: 'text/csv;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = 'audit-logs.csv'
-  link.click()
-  URL.revokeObjectURL(url)
-}
-
 export function AuditLogsPage(): React.JSX.Element {
   const { message } = App.useApp()
+  const navigate = useNavigate()
   const [items, setItems] = useState<AuditLogItem[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -83,14 +76,9 @@ export function AuditLogsPage(): React.JSX.Element {
   const exportCsv = async (): Promise<void> => {
     setExporting(true)
     try {
-      const csv = await exportAuditLogs({
-        page: 1,
-        pageSize,
-        ...(keyword === '' ? {} : { action: keyword }),
-        ...(range === null ? {} : { from: range.from, to: range.to }),
-      })
-      downloadCsv(csv)
-      void message.success('已导出当前筛选条件下的审计日志')
+      await startExport('audit-logs')
+      void message.success('已创建导出任务，请在下载中心查看')
+      navigate('/exports')
     } catch (cause) {
       void message.error(cause instanceof Error ? cause.message : '导出失败')
     } finally {
@@ -172,7 +160,7 @@ export function AuditLogsPage(): React.JSX.Element {
             审计日志
           </Typography.Title>
           <Typography.Paragraph type="secondary" className="audit-subtitle">
-            管理台关键操作留痕，只读；导出为当前筛选条件下的 CSV（最多 5000 条）。
+            管理台关键操作留痕，只读；导出任务在下载中心生成并下载（最近 5000 条）。
           </Typography.Paragraph>
         </div>
         <Button loading={exporting} onClick={() => void exportCsv()}>

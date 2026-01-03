@@ -1,6 +1,6 @@
 import type { AuditLogItem, AuditLogList, AuditLogQuery } from '@tongpin/shared'
 
-import { request, requestText } from '@/lib/http'
+import { request } from '@/lib/http'
 
 export function auditQueryString(query: AuditLogQuery): string {
   const params = new URLSearchParams()
@@ -27,8 +27,4 @@ export function fetchAuditLogs(query: AuditLogQuery): Promise<AuditLogList> {
 
 export function fetchAuditLog(id: string): Promise<AuditLogItem> {
   return request<AuditLogItem>(`/admin/audit-logs/${encodeURIComponent(id)}`)
-}
-
-export function exportAuditLogs(query: AuditLogQuery): Promise<string> {
-  return requestText(`/admin/audit-logs:export?${auditQueryString(query)}`)
 }
