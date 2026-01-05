@@ -15,6 +15,7 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useEffect, useState } from 'react'
+import { Can } from '@/app/Can'
 
 import type {
   SmsLogItem,
@@ -321,22 +322,24 @@ export function SmsPage(): React.JSX.Element {
       key: 'actions',
       width: 150,
       render: (_value, provider) => (
-        <Space size="small">
-          <Button type="link" size="small" onClick={() => openEditProvider(provider)}>
-            编辑
-          </Button>
-          <Popconfirm
-            title={`删除 ${provider.name}？`}
-            description="删除后模板与历史日志仍会保留。"
-            okText="删除"
-            cancelText="取消"
-            onConfirm={() => removeProvider(provider)}
-          >
-            <Button type="link" size="small" danger loading={busy}>
-              删除
+        <Can perm="sms:write">
+          <Space size="small">
+            <Button type="link" size="small" onClick={() => openEditProvider(provider)}>
+              编辑
             </Button>
-          </Popconfirm>
-        </Space>
+            <Popconfirm
+              title={`删除 ${provider.name}？`}
+              description="删除后模板与历史日志仍会保留。"
+              okText="删除"
+              cancelText="取消"
+              onConfirm={() => removeProvider(provider)}
+            >
+              <Button type="link" size="small" danger loading={busy}>
+                删除
+              </Button>
+            </Popconfirm>
+          </Space>
+        </Can>
       ),
     },
   ]
@@ -364,21 +367,23 @@ export function SmsPage(): React.JSX.Element {
       key: 'actions',
       width: 150,
       render: (_value, template) => (
-        <Space size="small">
-          <Button type="link" size="small" onClick={() => openEditTemplate(template)}>
-            编辑
-          </Button>
-          <Popconfirm
-            title={`删除 ${template.name}？`}
-            okText="删除"
-            cancelText="取消"
-            onConfirm={() => removeTemplate(template)}
-          >
-            <Button type="link" size="small" danger loading={busy}>
-              删除
+        <Can perm="sms:write">
+          <Space size="small">
+            <Button type="link" size="small" onClick={() => openEditTemplate(template)}>
+              编辑
             </Button>
-          </Popconfirm>
-        </Space>
+            <Popconfirm
+              title={`删除 ${template.name}？`}
+              okText="删除"
+              cancelText="取消"
+              onConfirm={() => removeTemplate(template)}
+            >
+              <Button type="link" size="small" danger loading={busy}>
+                删除
+              </Button>
+            </Popconfirm>
+          </Space>
+        </Can>
       ),
     },
   ]
@@ -441,9 +446,11 @@ export function SmsPage(): React.JSX.Element {
             children: (
               <div className="sms-tab">
                 <div className="sms-toolbar">
-                  <Button type="primary" onClick={openCreateProvider}>
-                    新增服务商
-                  </Button>
+                  <Can perm="sms:write">
+                    <Button type="primary" onClick={openCreateProvider}>
+                      新增服务商
+                    </Button>
+                  </Can>
                 </div>
                 <Table<SmsProviderItem>
                   rowKey="id"
@@ -463,9 +470,11 @@ export function SmsPage(): React.JSX.Element {
             children: (
               <div className="sms-tab">
                 <div className="sms-toolbar">
-                  <Button type="primary" onClick={openCreateTemplate}>
-                    新增模板
-                  </Button>
+                  <Can perm="sms:write">
+                    <Button type="primary" onClick={openCreateTemplate}>
+                      新增模板
+                    </Button>
+                  </Can>
                 </div>
                 <Table<SmsTemplateItem>
                   rowKey="id"

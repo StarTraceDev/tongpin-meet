@@ -13,6 +13,7 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useEffect, useState } from 'react'
+import { Can } from '@/app/Can'
 
 import type { DeptNode } from '@tongpin/shared'
 
@@ -146,27 +147,29 @@ export function DepartmentsPage(): React.JSX.Element {
       key: 'actions',
       width: 240,
       render: (_value, node) => (
-        <Space size="small" wrap>
-          <Button type="link" size="small" onClick={() => openCreate(node.id)}>
-            新增子部门
-          </Button>
-          <Button type="link" size="small" onClick={() => openEdit(node)}>
-            编辑
-          </Button>
-          <Popconfirm
-            title={`删除 ${node.name}？`}
-            description="部门下还有子部门或成员时不能删除。"
-            okText="确认"
-            cancelText="取消"
-            onConfirm={() => {
-              void remove(node)
-            }}
-          >
-            <Button type="link" size="small" danger loading={removingId === node.id}>
-              删除
+        <Can perm="dept:write">
+          <Space size="small" wrap>
+            <Button type="link" size="small" onClick={() => openCreate(node.id)}>
+              新增子部门
             </Button>
-          </Popconfirm>
-        </Space>
+            <Button type="link" size="small" onClick={() => openEdit(node)}>
+              编辑
+            </Button>
+            <Popconfirm
+              title={`删除 ${node.name}？`}
+              description="部门下还有子部门或成员时不能删除。"
+              okText="确认"
+              cancelText="取消"
+              onConfirm={() => {
+                void remove(node)
+              }}
+            >
+              <Button type="link" size="small" danger loading={removingId === node.id}>
+                删除
+              </Button>
+            </Popconfirm>
+          </Space>
+        </Can>
       ),
     },
   ]
@@ -184,9 +187,11 @@ export function DepartmentsPage(): React.JSX.Element {
             部门树支持多级；有子部门或成员的部门不能删除。
           </Typography.Paragraph>
         </div>
-        <Button type="primary" onClick={() => openCreate(null)}>
-          新增根部门
-        </Button>
+        <Can perm="dept:write">
+          <Button type="primary" onClick={() => openCreate(null)}>
+            新增根部门
+          </Button>
+        </Can>
       </header>
 
       {error !== null && (

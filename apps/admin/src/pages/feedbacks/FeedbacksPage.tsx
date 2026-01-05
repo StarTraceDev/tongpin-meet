@@ -1,6 +1,7 @@
 import { Alert, App, Button, Form, Input, Modal, Select, Space, Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useState } from 'react'
+import { Can } from '@/app/Can'
 
 import { FEEDBACK_TRANSITIONS } from '@tongpin/shared'
 import type { FeedbackCategory, FeedbackItem, FeedbackStatus } from '@tongpin/shared'
@@ -174,18 +175,20 @@ export function FeedbacksPage(): React.JSX.Element {
       render: (_value, item): React.JSX.Element => {
         const reply = item.reply
         return (
-          <Space size="small" wrap>
-            <Button type="link" size="small" onClick={() => openHandle(item)}>
-              {item.status === 'PENDING' ? '开始处理' : '处理'}
-            </Button>
-            {reply !== null && (
-              <span title={reply}>
-                <Typography.Text type="secondary" className="feedbacks-reply">
-                  {reply}
-                </Typography.Text>
-              </span>
-            )}
-          </Space>
+          <Can perm="feedback:write">
+            <Space size="small" wrap>
+              <Button type="link" size="small" onClick={() => openHandle(item)}>
+                {item.status === 'PENDING' ? '开始处理' : '处理'}
+              </Button>
+              {reply !== null && (
+                <span title={reply}>
+                  <Typography.Text type="secondary" className="feedbacks-reply">
+                    {reply}
+                  </Typography.Text>
+                </span>
+              )}
+            </Space>
+          </Can>
         )
       },
     },
@@ -210,9 +213,11 @@ export function FeedbacksPage(): React.JSX.Element {
             待处理 → 处理中 → 已解决 / 已驳回，状态只按这条链路流转。
           </Typography.Paragraph>
         </div>
-        <Button type="primary" onClick={() => setEditor({ open: true, mode: 'create' })}>
-          代录反馈
-        </Button>
+        <Can perm="feedback:write">
+          <Button type="primary" onClick={() => setEditor({ open: true, mode: 'create' })}>
+            代录反馈
+          </Button>
+        </Can>
       </header>
 
       {error !== null && (

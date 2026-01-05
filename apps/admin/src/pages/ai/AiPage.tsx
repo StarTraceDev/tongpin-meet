@@ -16,6 +16,7 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useEffect, useState } from 'react'
+import { Can } from '@/app/Can'
 
 import type {
   AiProviderCreateInput,
@@ -300,21 +301,23 @@ export function AiPage(): React.JSX.Element {
       key: 'actions',
       width: 150,
       render: (_value, provider) => (
-        <Space size="small">
-          <Button type="link" size="small" onClick={() => openEditProvider(provider)}>
-            编辑
-          </Button>
-          <Popconfirm
-            title={`删除 ${provider.name}？`}
-            okText="删除"
-            cancelText="取消"
-            onConfirm={() => removeProvider(provider)}
-          >
-            <Button type="link" size="small" danger loading={busy}>
-              删除
+        <Can perm="ai:write">
+          <Space size="small">
+            <Button type="link" size="small" onClick={() => openEditProvider(provider)}>
+              编辑
             </Button>
-          </Popconfirm>
-        </Space>
+            <Popconfirm
+              title={`删除 ${provider.name}？`}
+              okText="删除"
+              cancelText="取消"
+              onConfirm={() => removeProvider(provider)}
+            >
+              <Button type="link" size="small" danger loading={busy}>
+                删除
+              </Button>
+            </Popconfirm>
+          </Space>
+        </Can>
       ),
     },
   ]
@@ -351,21 +354,23 @@ export function AiPage(): React.JSX.Element {
       key: 'actions',
       width: 150,
       render: (_value, route) => (
-        <Space size="small">
-          <Button type="link" size="small" onClick={() => openEditRoute(route)}>
-            编辑
-          </Button>
-          <Popconfirm
-            title={`删除 ${sceneLabel(route.scene)} 路由？`}
-            okText="删除"
-            cancelText="取消"
-            onConfirm={() => removeRoute(route)}
-          >
-            <Button type="link" size="small" danger loading={busy}>
-              删除
+        <Can perm="ai:write">
+          <Space size="small">
+            <Button type="link" size="small" onClick={() => openEditRoute(route)}>
+              编辑
             </Button>
-          </Popconfirm>
-        </Space>
+            <Popconfirm
+              title={`删除 ${sceneLabel(route.scene)} 路由？`}
+              okText="删除"
+              cancelText="取消"
+              onConfirm={() => removeRoute(route)}
+            >
+              <Button type="link" size="small" danger loading={busy}>
+                删除
+              </Button>
+            </Popconfirm>
+          </Space>
+        </Can>
       ),
     },
   ]
@@ -439,9 +444,11 @@ export function AiPage(): React.JSX.Element {
             children: (
               <div className="ai-tab">
                 <div className="ai-toolbar">
-                  <Button type="primary" onClick={openCreateProvider}>
-                    新增服务商
-                  </Button>
+                  <Can perm="ai:write">
+                    <Button type="primary" onClick={openCreateProvider}>
+                      新增服务商
+                    </Button>
+                  </Can>
                 </div>
                 <Table<AiProviderItem>
                   rowKey="id"
@@ -461,9 +468,11 @@ export function AiPage(): React.JSX.Element {
             children: (
               <div className="ai-tab">
                 <div className="ai-toolbar">
-                  <Button type="primary" onClick={openCreateRoute}>
-                    新增路由
-                  </Button>
+                  <Can perm="ai:write">
+                    <Button type="primary" onClick={openCreateRoute}>
+                      新增路由
+                    </Button>
+                  </Can>
                 </div>
                 <Table<AiRouteItem>
                   rowKey="id"

@@ -1,8 +1,15 @@
-import type { ExportOperationItem, ExportOperationList, ExportResource } from '@tongpin/shared'
+import type {
+  ExportOperationItem,
+  ExportOperationList,
+  ExportResource,
+  Permission,
+} from '@tongpin/shared'
 import { App, Alert, Button, Progress, Space, Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { DownloadOutlined } from '@ant-design/icons'
 import { useCallback, useEffect, useState } from 'react'
+
+import { Can } from '@/app/Can'
 
 import {
   EXPORT_RESOURCES,
@@ -13,6 +20,13 @@ import {
 import { downloadExport, fetchExports, startExport } from '@/features/exports/api'
 
 const PAGE_SIZE = 20
+
+const RESOURCE_PERMISSION: Record<ExportResource, Permission> = {
+  meetings: 'meeting:export',
+  users: 'user:read',
+  'audit-logs': 'audit:read',
+  feedbacks: 'feedback:read',
+}
 
 export function ExportsPage(): React.JSX.Element {
   const { message } = App.useApp()
@@ -178,14 +192,15 @@ export function ExportsPage(): React.JSX.Element {
         </div>
         <Space wrap>
           {EXPORT_RESOURCES.map((resource) => (
-            <Button
-              key={resource.value}
-              icon={<DownloadOutlined />}
-              loading={starting === resource.value}
-              onClick={() => handleStart(resource.value)}
-            >
-              导出{resource.label}
-            </Button>
+            <Can key={resource.value} perm={RESOURCE_PERMISSION[resource.value]}>
+              <Button
+                icon={<DownloadOutlined />}
+                loading={starting === resource.value}
+                onClick={() => handleStart(resource.value)}
+              >
+                导出{resource.label}
+              </Button>
+            </Can>
           ))}
         </Space>
       </header>

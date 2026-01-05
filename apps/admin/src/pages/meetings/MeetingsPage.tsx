@@ -15,6 +15,7 @@ import {
 } from 'antd'
 import type { TableProps } from 'antd'
 import { useEffect, useState } from 'react'
+import { Can } from '@/app/Can'
 import type { ReactElement } from 'react'
 import { useSearchParams } from 'react-router'
 
@@ -134,17 +135,19 @@ export function MeetingsPage(): ReactElement {
             详情
           </Button>
           {canForceEnd(row.status) ? (
-            <Popconfirm
-              title="强制结束这场会议？"
-              description="会内所有成员会被移出，且不可恢复。"
-              okText="结束"
-              cancelText="取消"
-              onConfirm={(): Promise<void> => handleForceEnd(row)}
-            >
-              <Button type="link" size="small" danger loading={endingId === row.id}>
-                强制结束
-              </Button>
-            </Popconfirm>
+            <Can perm="meeting:forceEnd">
+              <Popconfirm
+                title="强制结束这场会议？"
+                description="会内所有成员会被移出，且不可恢复。"
+                okText="结束"
+                cancelText="取消"
+                onConfirm={(): Promise<void> => handleForceEnd(row)}
+              >
+                <Button type="link" size="small" danger loading={endingId === row.id}>
+                  强制结束
+                </Button>
+              </Popconfirm>
+            </Can>
           ) : null}
         </Space>
       ),

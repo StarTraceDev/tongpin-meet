@@ -16,6 +16,7 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useState } from 'react'
+import { Can } from '@/app/Can'
 
 import type { AlertRuleItem } from '@tongpin/shared'
 
@@ -214,16 +215,18 @@ export function AlertsPage(): React.JSX.Element {
       key: 'actions',
       width: 120,
       render: (_value, rule) => (
-        <Space size="small">
-          <Button type="link" size="small" onClick={() => openEdit(rule)}>
-            编辑
-          </Button>
-          <Popconfirm title={`删除「${rule.name}」？`} onConfirm={() => void remove(rule)}>
-            <Button type="link" size="small" danger>
-              删除
+        <Can perm="alert:write">
+          <Space size="small">
+            <Button type="link" size="small" onClick={() => openEdit(rule)}>
+              编辑
             </Button>
-          </Popconfirm>
-        </Space>
+            <Popconfirm title={`删除「${rule.name}」？`} onConfirm={() => void remove(rule)}>
+              <Button type="link" size="small" danger>
+                删除
+              </Button>
+            </Popconfirm>
+          </Space>
+        </Can>
       ),
     },
   ]
@@ -239,9 +242,11 @@ export function AlertsPage(): React.JSX.Element {
             指标越过阈值时按通知方式推送；站内信不需要额外填写接收地址。
           </Typography.Paragraph>
         </div>
-        <Button type="primary" onClick={openCreate}>
-          新增规则
-        </Button>
+        <Can perm="alert:write">
+          <Button type="primary" onClick={openCreate}>
+            新增规则
+          </Button>
+        </Can>
       </header>
 
       {error !== null && (

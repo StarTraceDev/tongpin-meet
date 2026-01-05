@@ -13,6 +13,7 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useState } from 'react'
+import { Can } from '@/app/Can'
 import { useNavigate } from 'react-router'
 
 import type { AuditLogItem } from '@tongpin/shared'
@@ -163,9 +164,11 @@ export function AuditLogsPage(): React.JSX.Element {
             管理台关键操作留痕，只读；导出任务在下载中心生成并下载（最近 5000 条）。
           </Typography.Paragraph>
         </div>
-        <Button loading={exporting} onClick={() => void exportCsv()}>
-          导出 CSV
-        </Button>
+        <Can perm="audit:read">
+          <Button loading={exporting} onClick={() => void exportCsv()}>
+            导出 CSV
+          </Button>
+        </Can>
       </header>
 
       {error !== null && (

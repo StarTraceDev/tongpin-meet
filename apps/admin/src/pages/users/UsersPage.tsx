@@ -13,6 +13,8 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useEffect, useState } from 'react'
+import { Can } from '@/app/Can'
+import { useAuth } from '@/app/AuthProvider'
 
 import type { AdminRoleOption, AdminUserItem, AdminUsersQuery } from '@tongpin/shared'
 
@@ -45,6 +47,7 @@ const initialQuery: AdminUsersQuery = { page: 1, pageSize: 20 }
 
 export function UsersPage(): React.JSX.Element {
   const { message } = App.useApp()
+  const { can } = useAuth()
   const [query, setQuery] = useState<AdminUsersQuery>(initialQuery)
   const [keyword, setKeyword] = useState('')
   const [data, setData] = useState<AdminUserItem[]>([])
@@ -234,51 +237,59 @@ export function UsersPage(): React.JSX.Element {
       width: 260,
       render: (_value, user) => (
         <Space size="small" wrap>
-          <Button type="link" size="small" onClick={() => openEdit(user)}>
-            编辑
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              setRolesUser(user)
-              setSelectedRoleIds(user.roles.map((role) => role.id))
-            }}
-          >
-            分配角色
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              setPasswordUser(user)
-              passwordForm.resetFields()
-            }}
-          >
-            重置密码
-          </Button>
-          <Popconfirm
-            title={user.status === 'ACTIVE' ? `禁用 ${user.name}？` : `启用 ${user.name}？`}
-            description={
-              user.status === 'ACTIVE'
-                ? '该用户会被立即踢下线，之后无法登录。'
-                : '恢复后可以重新登录。'
-            }
-            okText="确认"
-            cancelText="取消"
-            onConfirm={() => {
-              void toggleDisabled(user)
-            }}
-          >
+          {can('user:write') ? (
+            <Button type="link" size="small" onClick={() => openEdit(user)}>
+              编辑
+            </Button>
+          ) : null}
+          {can('role:write') ? (
             <Button
               type="link"
               size="small"
-              danger={user.status === 'ACTIVE'}
-              loading={pendingId === user.id}
+              onClick={() => {
+                setRolesUser(user)
+                setSelectedRoleIds(user.roles.map((role) => role.id))
+              }}
             >
-              {user.status === 'ACTIVE' ? '禁用' : '启用'}
+              分配角色
             </Button>
-          </Popconfirm>
+          ) : null}
+          {can('user:resetPwd') ? (
+            <Button
+              type="link"
+              size="small"
+              onClick={() => {
+                setPasswordUser(user)
+                passwordForm.resetFields()
+              }}
+            >
+              重置密码
+            </Button>
+          ) : null}
+          {can('user:disable') ? (
+            <Popconfirm
+              title={user.status === 'ACTIVE' ? `禁用 ${user.name}？` : `启用 ${user.name}？`}
+              description={
+                user.status === 'ACTIVE'
+                  ? '该用户会被立即踢下线，之后无法登录。'
+                  : '恢复后可以重新登录。'
+              }
+              okText="确认"
+              cancelText="取消"
+              onConfirm={() => {
+                void toggleDisabled(user)
+              }}
+            >
+              <Button
+                type="link"
+                size="small"
+                danger={user.status === 'ACTIVE'}
+                loading={pendingId === user.id}
+              >
+                {user.status === 'ACTIVE' ? '禁用' : '启用'}
+              </Button>
+            </Popconfirm>
+          ) : null}
         </Space>
       ),
     },
@@ -295,9 +306,11 @@ export function UsersPage(): React.JSX.Element {
             新增、编辑、禁用与分配角色；密码重置会立即踢掉该用户的登录会话。
           </Typography.Paragraph>
         </div>
-        <Button type="primary" onClick={openCreate}>
-          新增用户
-        </Button>
+        <Can perm="user:write">
+          <Button type="primary" onClick={openCreate}>
+            新增用户
+          </Button>
+        </Can>
       </header>
 
       <Space className="users-filters" wrap>

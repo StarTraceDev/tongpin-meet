@@ -17,6 +17,7 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useState } from 'react'
+import { Can } from '@/app/Can'
 
 import type { ConfigItem, FeatureFlagItem } from '@tongpin/shared'
 
@@ -201,16 +202,18 @@ export function ConfigsPage(): React.JSX.Element {
       key: 'actions',
       width: 120,
       render: (_value, item) => (
-        <Space size="small">
-          <Button type="link" size="small" onClick={() => openEdit(item)}>
-            编辑
-          </Button>
-          <Popconfirm title={`删除 ${item.key}？`} onConfirm={() => void remove(item.key)}>
-            <Button type="link" size="small" danger>
-              删除
+        <Can perm="config:write">
+          <Space size="small">
+            <Button type="link" size="small" onClick={() => openEdit(item)}>
+              编辑
             </Button>
-          </Popconfirm>
-        </Space>
+            <Popconfirm title={`删除 ${item.key}？`} onConfirm={() => void remove(item.key)}>
+              <Button type="link" size="small" danger>
+                删除
+              </Button>
+            </Popconfirm>
+          </Space>
+        </Can>
       ),
     },
   ]
@@ -283,9 +286,11 @@ export function ConfigsPage(): React.JSX.Element {
           </Typography.Paragraph>
         </div>
         {tab === 'configs' && (
-          <Button type="primary" onClick={openCreate}>
-            新增配置
-          </Button>
+          <Can perm="config:write">
+            <Button type="primary" onClick={openCreate}>
+              新增配置
+            </Button>
+          </Can>
         )}
       </header>
 

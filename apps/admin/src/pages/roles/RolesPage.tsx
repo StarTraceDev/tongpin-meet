@@ -14,6 +14,7 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useEffect, useState } from 'react'
+import { Can } from '@/app/Can'
 
 import type { Permission, RoleCreateInput, RoleItem } from '@tongpin/shared'
 
@@ -166,29 +167,31 @@ export function RolesPage(): React.JSX.Element {
       key: 'actions',
       width: 160,
       render: (_value, role) => (
-        <Space size="small">
-          <Button type="link" size="small" onClick={() => openEdit(role)}>
-            编辑
-          </Button>
-          <Popconfirm
-            title={`删除 ${role.name}？`}
-            description="内置角色或仍有用户的角色不能删除。"
-            okText="删除"
-            cancelText="取消"
-            disabled={role.builtin}
-            onConfirm={() => remove(role)}
-          >
-            <Button
-              type="link"
-              size="small"
-              danger
-              disabled={role.builtin}
-              loading={removingId === role.id}
-            >
-              删除
+        <Can perm="role:write">
+          <Space size="small">
+            <Button type="link" size="small" onClick={() => openEdit(role)}>
+              编辑
             </Button>
-          </Popconfirm>
-        </Space>
+            <Popconfirm
+              title={`删除 ${role.name}？`}
+              description="内置角色或仍有用户的角色不能删除。"
+              okText="删除"
+              cancelText="取消"
+              disabled={role.builtin}
+              onConfirm={() => remove(role)}
+            >
+              <Button
+                type="link"
+                size="small"
+                danger
+                disabled={role.builtin}
+                loading={removingId === role.id}
+              >
+                删除
+              </Button>
+            </Popconfirm>
+          </Space>
+        </Can>
       ),
     },
   ]
@@ -204,9 +207,11 @@ export function RolesPage(): React.JSX.Element {
             角色决定后台能做什么；权限点与 03 §5.6 一一对应，内置角色不可删除。
           </Typography.Paragraph>
         </div>
-        <Button type="primary" onClick={openCreate}>
-          新增角色
-        </Button>
+        <Can perm="role:write">
+          <Button type="primary" onClick={openCreate}>
+            新增角色
+          </Button>
+        </Can>
       </header>
 
       {error !== null && (

@@ -17,6 +17,7 @@ import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import type { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useState } from 'react'
+import { Can } from '@/app/Can'
 
 import type { AnnouncementItem } from '@tongpin/shared'
 
@@ -206,16 +207,18 @@ export function AnnouncementsPage(): React.JSX.Element {
       key: 'actions',
       width: 130,
       render: (_value, item) => (
-        <Space size="small">
-          <Button type="link" size="small" onClick={() => openEdit(item)}>
-            编辑
-          </Button>
-          <Popconfirm title={`删除「${item.title}」？`} onConfirm={() => void remove(item.id)}>
-            <Button type="link" size="small" danger>
-              删除
+        <Can perm="announcement:write">
+          <Space size="small">
+            <Button type="link" size="small" onClick={() => openEdit(item)}>
+              编辑
             </Button>
-          </Popconfirm>
-        </Space>
+            <Popconfirm title={`删除「${item.title}」？`} onConfirm={() => void remove(item.id)}>
+              <Button type="link" size="small" danger>
+                删除
+              </Button>
+            </Popconfirm>
+          </Space>
+        </Can>
       ),
     },
   ]
@@ -231,9 +234,11 @@ export function AnnouncementsPage(): React.JSX.Element {
             公告按发布时间自动上线，过期时间可选；置顶的公告排在最前。
           </Typography.Paragraph>
         </div>
-        <Button type="primary" onClick={openCreate}>
-          新建公告
-        </Button>
+        <Can perm="announcement:write">
+          <Button type="primary" onClick={openCreate}>
+            新建公告
+          </Button>
+        </Can>
       </header>
 
       {error !== null && (
