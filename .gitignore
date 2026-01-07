@@ -39,3 +39,8 @@ server/libs/infra/src/generated/
 
 # 本地文件存储（LocalStorageProvider 的默认目录）
 server/storage/
+
+# Playwright 产物
+test-results/
+playwright-report/
+blob-report/

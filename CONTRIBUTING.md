@@ -50,6 +50,20 @@ docs/tools/commit.sh -m "feat(admin): ✨ 新增某功能"
 5. `git status` 只包含本次改动；`.env`、`dist`、`node_modules`、`docs/` 不入库
 6. 界面改动附浅色/暗色/窄屏三张截图（管理台 375px，桌面端窗口最小尺寸）
 
+## 冒烟测试
+
+`pnpm test:e2e` 用 Playwright 的 request 客户端打真实接口，覆盖「登录 → 建会 → 入会 → 签到 → 结束」。前置条件：
+
+```bash
+docker compose up -d          # PostgreSQL
+pnpm db:deploy && pnpm db:seed
+pnpm --filter @tongpin/server build
+node server/dist/apps/api/main.js &   # 或 pnpm --filter @tongpin/server dev
+pnpm test:e2e
+```
+
+脚本读取 `E2E_BASE_URL`（默认 `http://127.0.0.1:3000`），使用 seed 里的两个账号，结束后软删本次会议。CI 的 `smoke` job 会自带 PostgreSQL 跑同一套用例。
+
 ## 数据库变更
 
 - 改 `server/prisma/schema.prisma` 后运行 `pnpm db:migrate` 生成迁移，迁移文件一并提交

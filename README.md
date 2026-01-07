@@ -67,6 +67,7 @@ pnpm dev:desktop    # Electron 开发窗口
 | `pnpm dev` | 全部应用并行开发模式 |
 | `pnpm build` | 按依赖顺序构建全部包 |
 | `pnpm typecheck` / `pnpm lint` / `pnpm test` | 全仓检查与单测 |
+| `pnpm test:e2e` | API 冒烟（需先起 server，见 CONTRIBUTING） |
 | `pnpm db:migrate` / `pnpm db:deploy` | 本地迁移 / 生产执行迁移 |
 | `pnpm db:seed` | 演示数据（可重复执行） |
 | `pnpm db:studio` | Prisma Studio |
@@ -113,7 +114,7 @@ Web / Desktop / Admin
 
 ## 状态
 
-里程碑 M0–M11 已完成：账号与会议主链路、Web 端会中能力、桌面端（共享选择器/更新/托盘/深链/三端打包）、管理台（统计、用户、部门、角色、配置、审计、告警、导出、按钮级权限）。M12 收尾中：README、compose、CONTRIBUTING、LICENSE、CHANGELOG 已就绪；安装包发布与 Playwright 冒烟待补。
+里程碑 M0–M11 已完成：账号与会议主链路、Web 端会中能力、桌面端（共享选择器/更新/托盘/深链/三端打包）、管理台（统计、用户、部门、角色、配置、审计、告警、导出、按钮级权限）。M12 收尾中：README、compose、CONTRIBUTING、LICENSE、CHANGELOG、API 冒烟已就绪；安装包发布待补。
 
 ## License
 

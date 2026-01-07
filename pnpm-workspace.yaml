@@ -98,8 +98,11 @@ catalog:
   unplugin-swc: ^2.0.0
   supertest: ^7.0.0
   '@types/supertest': ^7.0.0
-  '@playwright/test': ^1.50.0
+  '@playwright/test': ^1.65.0
   orval: ^7.0.0
 
 minimumReleaseAgeExclude:
   - jsdom@31.0.0
+  - '@playwright/test@1.65.0'
+  - playwright-core@1.65.0
+  - playwright@1.65.0

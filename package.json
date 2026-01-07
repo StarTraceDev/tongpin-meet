@@ -18,7 +18,8 @@
     "db:migrate": "pnpm --filter @tongpin/server db:migrate",
     "db:deploy": "pnpm --filter @tongpin/server db:deploy",
     "db:studio": "pnpm --filter @tongpin/server db:studio",
-    "db:seed": "pnpm --filter @tongpin/server db:seed"
+    "db:seed": "pnpm --filter @tongpin/server db:seed",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@commitlint/cli": "catalog:",
@@ -28,6 +29,7 @@
     "husky": "catalog:",
     "lint-staged": "catalog:",
     "prettier": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@playwright/test": "catalog:"
   }
 }
