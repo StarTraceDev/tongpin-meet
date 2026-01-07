@@ -113,8 +113,8 @@ Web / Desktop / Admin
 
 ## 状态
 
-里程碑 M0–M11 已完成：账号与会议主链路、Web 端会中能力、桌面端（共享选择器/更新/托盘/深链/三端打包）、管理台（统计、用户、部门、角色、配置、审计、告警、导出、按钮级权限）。M12 收尾中：README 与 compose 已就绪，安装包发布、Playwright 冒烟与 CONTRIBUTING/LICENSE 待补。
+里程碑 M0–M11 已完成：账号与会议主链路、Web 端会中能力、桌面端（共享选择器/更新/托盘/深链/三端打包）、管理台（统计、用户、部门、角色、配置、审计、告警、导出、按钮级权限）。M12 收尾中：README、compose、CONTRIBUTING、LICENSE、CHANGELOG 已就绪；安装包发布与 Playwright 冒烟待补。
 
 ## License
 
-MIT（LICENSE 文件随 M12-3 补入）。
+MIT，见 [LICENSE](LICENSE)。
