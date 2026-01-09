@@ -14,6 +14,25 @@
 | 管理台 | React 19 + Ant Design 5 + Recharts；统计、用户/部门/角色、配置、审计、告警、导出 |
 | 共享层 | `@tongpin/shared`（zod 契约、枚举、状态机、错误码、权限点）、`@tongpin/tokens`（设计变量） |
 
+## 发布桌面端
+
+安装包由 GitHub Actions 在打 tag 时构建：
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+`Release` workflow 会在 macOS / Windows / Linux 三个 runner 上分别产出：
+
+- macOS：`tongpin-<version>-<arch>.dmg`（安装）+ `.zip`（自动更新）
+- Windows：`tongpin-<version>-<arch>.exe`（NSIS 安装包）
+- Linux：`tongpin-<version>-<arch>.AppImage`
+
+版本号取自 tag（去掉前缀 `v`）；Release 附件还包含 `latest*.yml`，`electron-updater` 用它判断更新，运行时把 `TONGPIN_UPDATE_URL` 指向该 Release 的资源地址（generic provider）。
+
+当前安装包**未签名**：macOS 首次打开需右键「打开」，Windows 可能触发 SmartScreen 提示。
+
 ## 目录结构
 
 ```

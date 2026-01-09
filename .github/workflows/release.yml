@@ -1,0 +1,97 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: 打包 ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS（dmg + zip）
+            os: macos-latest
+            args: --mac
+          - name: Windows（nsis）
+            os: windows-latest
+            args: --win
+          - name: Linux（AppImage）
+            os: ubuntu-latest
+            args: --linux
+    env:
+      # 未配置签名证书时不要尝试自动发现，否则 electron-builder 会报错退出
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      # 安装包版本跟 tag 走（v0.1.0 → 0.1.0），产物名由 electron-builder yml 里的 artifactName 决定
+      - name: 同步桌面端版本
+        shell: bash
+        run: |
+          node -e "const fs=require('node:fs');const p='apps/desktop/package.json';const pkg=JSON.parse(fs.readFileSync(p,'utf8'));pkg.version=process.env.GITHUB_REF_NAME.replace(/^v/,'');fs.writeFileSync(p,JSON.stringify(pkg,null,2)+'\n')"
+
+      - name: 构建渲染层与主进程
+        run: pnpm --filter @tongpin/desktop build
+
+      - name: electron-builder
+        run: pnpm --filter @tongpin/desktop exec electron-builder ${{ matrix.args }} --publish never
+
+      - name: 上传安装包与更新清单
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.os }}
+          if-no-files-found: error
+          path: |
+            apps/desktop/release/*.dmg
+            apps/desktop/release/*.zip
+            apps/desktop/release/*.exe
+            apps/desktop/release/*.AppImage
+            apps/desktop/release/*.yml
+            apps/desktop/release/*.blockmap
+
+  publish:
+    name: 创建 GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: 发布
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: artifacts/*
+          body: |
+            同频会议 ${{ github.ref_name }}
+
+            - macOS：`.dmg`（安装）与 `.zip`（自动更新用）
+            - Windows：`.exe`（NSIS 安装包）
+            - Linux：`.AppImage`
+            - `latest*.yml` 是 electron-updater 的更新清单，需与安装包同目录发布
+
+            当前安装包未签名：macOS 首次打开需右键「打开」，Windows 可能触发 SmartScreen 提示。
