@@ -5,21 +5,29 @@
 :root {
   color-scheme: light;
 
-  /* 色彩（05 §8.1 浅色） */
+  /* 色彩：真值来自 docs/design/mockup.css（01-UI 设计稿），不再按 05 §8.1 */
   --tp-canvas: #ffffff;
   --tp-surface: #ffffff;
-  --tp-surface-secondary: #f5f7f9;
-  --tp-border: #e5e8ed;
-  --tp-divider: #e5e8e8;
-  --tp-text-primary: #1d1d1f;
-  --tp-text-secondary: #6e6e73;
-  --tp-text-tertiary: #a1a1a6;
-  --tp-brand: #0071e3;
-  --tp-brand-hover: #0077ed;
+  --tp-surface-secondary: #f7f7f7;
+  --tp-shell-bg: #f2f2f2;
+  --tp-fill: #f7f7f7;
+  --tp-fill-hover: #f0f0f0;
+  --tp-border: #e5e5e5;
+  --tp-border-light: #f3f3f3;
+  --tp-divider: #f3f3f3;
+  --tp-text-primary: #303133;
+  --tp-text-title: #1e2939;
+  --tp-text-secondary: #606266;
+  --tp-text-tertiary: #8c8c8c;
+  --tp-text-placeholder: #c0c4cc;
+  --tp-brand: #4070ff;
+  --tp-brand-hover: #3366ff;
   --tp-brand-soft: #0a84ff;
-  --tp-success: #34c759;
-  --tp-warning: #ff9f0a;
-  --tp-danger: #ff3b30;
+  --tp-brand-tint: #edf2ff;
+  --tp-success: #2bc9a8;
+  --tp-warning: #ffb020;
+  --tp-danger: #f56c6c;
+  --tp-purple: #7b61ff;
 
   /* 排版（05 §8.2） */
   --tp-font-sans: -apple-system, 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -42,10 +50,10 @@
   --tp-space-12: 48px;
 
   /* 圆角 */
-  --tp-radius-s: 8px;
-  --tp-radius-m: 12px;
-  --tp-radius-l: 16px;
-  --tp-radius-xl: 20px;
+  --tp-radius-s: 6px;
+  --tp-radius-m: 8px;
+  --tp-radius-l: 10px;
+  --tp-radius-xl: 12px;
   --tp-radius-full: 999px;
 
   /* 阴影 */
@@ -72,17 +80,25 @@
   --tp-canvas: #141416;
   --tp-surface: #1c1c1e;
   --tp-surface-secondary: #2c2c2e;
-  --tp-border: rgba(255, 255, 255, 0.1);
-  --tp-divider: rgba(255, 255, 255, 0.2);
+  --tp-shell-bg: #1c1c1e;
+  --tp-fill: #2c2c2e;
+  --tp-fill-hover: #333336;
+  --tp-border: rgba(255, 255, 255, 0.12);
+  --tp-border-light: rgba(255, 255, 255, 0.08);
+  --tp-divider: rgba(255, 255, 255, 0.12);
   --tp-text-primary: #f5f5f7;
+  --tp-text-title: #f5f5f7;
   --tp-text-secondary: #a1a1a6;
   --tp-text-tertiary: #8e8e93;
-  --tp-brand: #0a84ff;
-  --tp-brand-hover: #409cff;
+  --tp-text-placeholder: #6e6e73;
+  --tp-brand: #4070ff;
+  --tp-brand-hover: #5b85ff;
   --tp-brand-soft: #64b5ff;
+  --tp-brand-tint: rgba(64, 112, 255, 0.18);
   --tp-success: #30d158;
-  --tp-warning: #ff9f0a;
-  --tp-danger: #ff453a;
+  --tp-warning: #ffb020;
+  --tp-danger: #ff5c5c;
+  --tp-purple: #9d8cff;
 
   /* 暗色靠边框提轮廓，阴影更重 */
   --tp-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.6);

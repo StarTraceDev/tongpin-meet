@@ -15,8 +15,22 @@ export interface Platform {
   shell: ShellPort
 }
 
-/** 子窗口种类：入会 / 预定 / 共享选择器 / 白板（05 §3.5） */
-export type SubWindowKey = 'join' | 'schedule' | 'sharePicker' | 'whiteboard'
+/** 子窗口种类（10-M13 §二全表）；尺寸与标题见 ./subwindows.ts */
+export type SubWindowKey =
+  | 'join'
+  | 'schedule'
+  | 'meetingDetail'
+  | 'history'
+  | 'sharePicker'
+  | 'whiteboard'
+  | 'checkin'
+  | 'vote'
+  | 'members'
+  | 'panelChat'
+  | 'panelBreak'
+  | 'panelMinutes'
+  | 'panelIntelligence'
+  | 'meeting'
 
 export interface SubWindowOptions {
   title?: string
@@ -39,9 +53,6 @@ export interface WindowPort {
   closeSub(key: SubWindowKey): Promise<void>
   closeAllSubs(): Promise<void>
   onSubClosed(cb: (key: SubWindowKey) => void): () => void
-
-  /** 会中面板展开时是否允许改变窗口宽度（Web 恒 false） */
-  readonly canResizeForPanel: boolean
 }
 
 export type CaptureSourceKind = 'screen' | 'window'

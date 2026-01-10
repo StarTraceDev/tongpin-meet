@@ -17,3 +17,5 @@ export type {
   UpdateStatus,
   WindowPort,
 } from './types'
+export { isSubWindowKey, SUB_WINDOW_KEYS, SUB_WINDOW_SPECS } from './subwindows'
+export type { SubWindowSpec } from './subwindows'

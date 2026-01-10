@@ -9,7 +9,7 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
-    "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.web.json --noEmit",
+    "typecheck": "tsc -p tsconfig.node.json --noEmit && vue-tsc -p tsconfig.web.json --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
     "pack": "pnpm build && electron-builder --dir",
@@ -20,20 +20,25 @@
   },
   "devDependencies": {
     "@tongpin/config": "workspace:*",
-    "@tongpin/platform": "workspace:*",
-    "@tongpin/tokens": "workspace:*",
     "@types/node": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
     "electron": "catalog:",
+    "electron-builder": "catalog:",
     "electron-vite": "catalog:",
     "eslint": "catalog:",
     "jsdom": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:",
-    "electron-builder": "catalog:"
+    "vue-tsc": "catalog:"
   },
   "dependencies": {
-    "electron-updater": "^6.0.0"
+    "@tongpin/app-core": "workspace:*",
+    "@tongpin/platform": "workspace:*",
+    "@tongpin/tokens": "workspace:*",
+    "electron-updater": "^6.0.0",
+    "vue": "catalog:",
+    "vue-router": "catalog:"
   },
   "description": "同频会议桌面客户端",
   "author": "同频会议"

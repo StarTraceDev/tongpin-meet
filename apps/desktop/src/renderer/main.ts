@@ -1,168 +1,31 @@
-import '@tongpin/tokens'
+import { appRoutes, createApp, subWindowRoutes } from '@tongpin/app-core'
+import { createElectronPlatform } from '@tongpin/platform/electron'
+import { createWebPlatform } from '@tongpin/platform/web'
+import { createWebHashHistory } from 'vue-router'
 
-import type { UpdateState } from '@tongpin/platform'
-import { createElectronPlatform, ELECTRON_CHANNELS } from '@tongpin/platform/electron'
+import DevPanel from './DevPanel.vue'
+import SharePicker from './subwindow/SharePicker.vue'
+import { readSubWindowRequest } from './subwindow/router'
 
-import { deepLinkText, readDeepLinkNotice } from './deep-link-view'
-import type { DesktopEnv } from './env'
-import { renderSubWindow } from './subwindow'
-import { SUB_WINDOWS } from './subwindows'
-import { updateText } from './update-view'
-import './shell.css'
+const env = window.tongpin
+/** 没有 preload 时（浏览器里直接开）退回 Web 实现，至少不白屏 */
+const platform = env === undefined ? createWebPlatform() : createElectronPlatform(env.bridge)
 
-const env = (globalThis as { tongpin?: DesktopEnv }).tongpin
+// 10-M13 P1 #7：Electron 走 file://，只能用 hash 路由
+const history = createWebHashHistory()
+const request = readSubWindowRequest(window.location.search)
 
-function isSubWindow(): boolean {
-  return new URLSearchParams(location.search).has('sub')
+if (request !== null) {
+  // 子窗口只挂一条路由：?sub=key 决定组件，共享选择器是唯一要 desktopCapturer 的实现
+  createApp({
+    platform,
+    history,
+    routes: subWindowRoutes(request, { sharePicker: SharePicker }),
+  }).mount('#app')
+} else {
+  createApp({
+    platform,
+    history,
+    routes: [...appRoutes, { path: '/dev', component: DevPanel, meta: { title: '调试' } }],
+  }).mount('#app')
 }
-
-function asButton(id: string): HTMLButtonElement | null {
-  const element = document.getElementById(id)
-  return element instanceof HTMLButtonElement ? element : null
-}
-
-function asVideo(id: string): HTMLVideoElement | null {
-  const element = document.getElementById(id)
-  return element instanceof HTMLVideoElement ? element : null
-}
-
-async function renderMain(): Promise<void> {
-  const app = document.getElementById('app')
-  if (app === null) return
-
-  const platform = env === undefined ? undefined : createElectronPlatform(env.bridge)
-  let storageNote = '—'
-  if (platform !== undefined) {
-    await platform.storage.set('desktop:lastOpened', new Date().toISOString())
-    storageNote = (await platform.storage.get('desktop:lastOpened')) ?? '—'
-  }
-
-  const buttons = (Object.keys(SUB_WINDOWS) as (keyof typeof SUB_WINDOWS)[])
-    .map((key) => `<button type="button" data-sub="${key}">${SUB_WINDOWS[key].title}</button>`)
-    .join('')
-
-  app.innerHTML = `
-    <main class="shell">
-      <h1>同频会议 · 桌面端</h1>
-      <p class="hint">主窗口已就绪（1065 × 700），IPC 桥 ${env === undefined ? '未接通' : '已接通'}。</p>
-      <dl>
-        <dt>平台</dt><dd>${env?.platform ?? 'unknown'}</dd>
-        <dt>Electron</dt><dd>${env?.versions.electron ?? '—'}</dd>
-        <dt>Chromium</dt><dd>${env?.versions.chrome ?? '—'}</dd>
-        <dt>本地存储回读</dt><dd>${storageNote}</dd>
-      </dl>
-      <section class="subs">
-        <h2>子窗口</h2>
-        <div class="row">${buttons}</div>
-        <p id="sub-status" class="hint">尚未打开子窗口。</p>
-      </section>
-      <section class="share">
-        <h2>屏幕共享</h2>
-        <div class="row">
-          <button id="share-start" type="button">共享屏幕</button>
-          <button id="share-stop" type="button" disabled>停止共享</button>
-        </div>
-        <p id="share-status" class="hint">未共享。</p>
-        <video id="share-preview" class="share-preview" autoplay muted playsinline hidden></video>
-      </section>
-      <section class="update">
-        <h2>自动更新</h2>
-        <div class="row">
-          <button id="update-check" type="button">检查更新</button>
-          <button id="update-install" type="button" disabled>重启安装</button>
-        </div>
-        <p id="update-status" class="hint">尚未检查更新。</p>
-      </section>
-      <section class="deeplink">
-        <h2>深链入口</h2>
-        <p id="deeplink-status" class="hint deeplink-note">用 tongpin://join?no=… 拉起应用后，会在这里显示会议号。</p>
-      </section>
-    </main>
-  `
-
-  for (const button of app.querySelectorAll<HTMLButtonElement>('[data-sub]')) {
-    button.addEventListener('click', () => {
-      const key = button.dataset.sub as keyof typeof SUB_WINDOWS | undefined
-      if (key === undefined || platform === undefined) return
-      void platform.window.openSub(key, { title: SUB_WINDOWS[key].title })
-    })
-  }
-
-  if (platform === undefined) return
-
-  platform.window.onSubClosed((key) => {
-    const status = document.getElementById('sub-status')
-    if (status !== null) status.textContent = `子窗口 ${key} 已关闭。`
-  })
-
-  const startButton = asButton('share-start')
-  const stopButton = asButton('share-stop')
-  const status = document.getElementById('share-status')
-  const preview = asVideo('share-preview')
-
-  const setSharing = (on: boolean): void => {
-    if (startButton !== null) startButton.disabled = on
-    if (stopButton !== null) stopButton.disabled = !on
-  }
-
-  startButton?.addEventListener('click', () => {
-    void (async (): Promise<void> => {
-      if (status !== null) status.textContent = '请选择要共享的屏幕或窗口…'
-      try {
-        const source = await platform.capture.pickSource()
-        if (source === null) {
-          if (status !== null) status.textContent = '未选择共享内容。'
-          return
-        }
-        if (status !== null) status.textContent = `正在共享：${source.name}`
-        if (preview !== null && source.stream !== undefined) {
-          preview.srcObject = source.stream
-          preview.hidden = false
-        }
-        setSharing(true)
-      } catch (error) {
-        const message = error instanceof Error ? error.message : '未知错误'
-        if (status !== null) status.textContent = `共享失败：${message}`
-      }
-    })()
-  })
-
-  stopButton?.addEventListener('click', () => {
-    void (async (): Promise<void> => {
-      await platform.capture.stop()
-      if (preview !== null) {
-        preview.srcObject = null
-        preview.hidden = true
-      }
-      if (status !== null) status.textContent = '已停止共享。'
-      setSharing(false)
-    })()
-  })
-
-  const updateStatus = document.getElementById('update-status')
-  const updateCheck = asButton('update-check')
-  const updateInstall = asButton('update-install')
-
-  const renderUpdate = (state: UpdateState): void => {
-    if (updateStatus !== null) updateStatus.textContent = updateText(state)
-    if (updateInstall !== null) updateInstall.disabled = state.status !== 'ready'
-  }
-
-  platform.update.onState(renderUpdate)
-  updateCheck?.addEventListener('click', () => {
-    void platform.update.check().then(renderUpdate)
-  })
-  updateInstall?.addEventListener('click', () => {
-    void platform.update.install()
-  })
-
-  const deepLinkStatus = document.getElementById('deeplink-status')
-  env?.bridge.on(ELECTRON_CHANNELS.appDeepLink, (payload) => {
-    if (deepLinkStatus !== null) {
-      deepLinkStatus.textContent = deepLinkText(readDeepLinkNotice(payload))
-    }
-  })
-}
-
-if (isSubWindow()) renderSubWindow(env)
-else void renderMain()

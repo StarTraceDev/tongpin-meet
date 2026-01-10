@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest'
 import { mainWindowOptions } from './window-options'
 
 describe('mainWindowOptions', () => {
-  it('主窗口 1065×700 且不可再小', () => {
+  it('主窗口 1100×600 且不可再小', () => {
     const options = mainWindowOptions('darwin', '/tmp/preload.mjs')
-    expect(options).toMatchObject({ width: 1065, height: 700, minWidth: 1065, minHeight: 700 })
+    expect(options).toMatchObject({ width: 1100, height: 600, minWidth: 1100, minHeight: 600 })
   })
 
   it('mac 用 hiddenInset 保留系统按钮；win/linux 无边框', () => {

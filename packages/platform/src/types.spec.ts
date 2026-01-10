@@ -19,7 +19,6 @@ function stubPlatform(): Platform {
       closeSub: noop,
       closeAllSubs: noop,
       onSubClosed: () => off,
-      canResizeForPanel: false,
     },
     capture: {
       pickSource: async () => null,
@@ -65,7 +64,6 @@ describe('Platform 契约', () => {
       'update',
       'window',
     ])
-    expect(platform.window.canResizeForPanel).toBe(false)
     expect(platform.update.supported).toBe(false)
     expect(platform.storage.secure).toBe(false)
   })

@@ -64,7 +64,6 @@ describe('createElectronPlatform', () => {
     const platform = createElectronPlatform(bridge)
     expect(platform.kind).toBe('electron')
     expect(platform.os).toBe('mac')
-    expect(platform.window.canResizeForPanel).toBe(true)
     expect(platform.storage.secure).toBe(true)
     expect(platform.update.supported).toBe(true)
   })

@@ -16,14 +16,14 @@ export interface MainWindowOptions {
   }
 }
 
-/** 06 §M10-1：1065×700 且不可再小；mac 用 hiddenInset，其他平台无边框自绘 */
+/** 10-M13 §二：主窗口 1100×600 且不可再小；mac 用 hiddenInset，其他平台保留系统边框 */
 export function mainWindowOptions(platform: string, preloadPath: string): MainWindowOptions {
   const mac = platform === 'darwin'
   return {
-    width: 1065,
-    height: 700,
-    minWidth: 1065,
-    minHeight: 700,
+    width: 1100,
+    height: 600,
+    minWidth: 1100,
+    minHeight: 600,
     show: false,
     title: '同频会议',
     titleBarStyle: mac ? 'hiddenInset' : 'default',

@@ -2,7 +2,10 @@
   "extends": "@tongpin/config/tsconfig/base.json",
   "compilerOptions": {
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": []
+    "types": ["vite/client"],
+    "paths": {
+      "@/*": ["./src/renderer/*"]
+    }
   },
-  "include": ["src/renderer/**/*.ts", "src/renderer/**/*.d.ts"]
+  "include": ["src/renderer/**/*.ts", "src/renderer/**/*.d.ts", "src/renderer/**/*.vue"]
 }

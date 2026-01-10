@@ -17,6 +17,7 @@ import '@tongpin/tokens'
 import './styles/element-plus.css'
 
 import AppRoot from './App.vue'
+import { configureHttp } from './apis/http'
 import { providePlatform } from './platform'
 import { createAppRouter } from './router'
 
@@ -38,6 +39,8 @@ export interface TongpinApp {
 
 /** 05 §3.3：壳只调这一处，业务代码从 @tongpin/app-core 出发 */
 export function createApp(options: CreateAppOptions): TongpinApp {
+  // token 存储与请求层都从这里拿到平台（O7/O8），必须在 router 装配前就绪
+  configureHttp(options.platform)
   const app = createVueApp(AppRoot)
   const pinia = createPinia()
   const router = createAppRouter({
@@ -63,4 +66,9 @@ export function createApp(options: CreateAppOptions): TongpinApp {
 
 export { PLATFORM_KEY, providePlatform, usePlatform } from './platform'
 export { appRoutes, createAppRouter, installAuthGuard, type AppRouterOptions } from './router'
+export { ROUTE_NAMES, type RouteName } from './router/names'
 export { useAuthStore } from './stores/auth'
+export { session, hydrateSession, onUnauthorized } from './apis/http'
+export { listMeetings } from './apis/meeting'
+export { default as SubWindowHost } from './subwindow/SubWindowHost.vue'
+export { subWindowRoutes, type SubWindowOverrides, type SubWindowRequest } from './subwindow/routes'

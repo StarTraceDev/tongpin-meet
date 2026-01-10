@@ -30,7 +30,6 @@ describe('createWebPlatform', () => {
     const platform = createWebPlatform()
     expect(platform.kind).toBe('web')
     expect(platform.os).toBe('web')
-    expect(platform.window.canResizeForPanel).toBe(false)
     expect(platform.storage.secure).toBe(false)
     expect(platform.update.supported).toBe(false)
   })

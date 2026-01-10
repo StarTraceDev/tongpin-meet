@@ -2,14 +2,8 @@ import { join } from 'node:path'
 
 import { BrowserWindow } from 'electron'
 
+import { SUB_WINDOW_SPECS } from '@tongpin/platform'
 import type { SubWindowKey, SubWindowOptions } from '@tongpin/platform'
-
-const SUB_WINDOW_DEFAULTS: Record<SubWindowKey, { width: number; height: number }> = {
-  join: { width: 480, height: 640 },
-  schedule: { width: 720, height: 760 },
-  sharePicker: { width: 960, height: 640 },
-  whiteboard: { width: 1280, height: 800 },
-}
 
 export interface WindowManagerOptions {
   mainWindow: BrowserWindow
@@ -43,13 +37,17 @@ export class WindowManager {
       return
     }
 
-    const size = SUB_WINDOW_DEFAULTS[key]
+    const spec = SUB_WINDOW_SPECS[key]
     const window = new BrowserWindow({
-      width: options.width ?? size.width,
-      height: options.height ?? size.height,
-      title: options.title ?? '',
+      width: options.width ?? spec.width,
+      height: options.height ?? spec.height,
+      title: options.title ?? spec.title,
       parent: this.opts.mainWindow,
       show: false,
+      // 与主窗口一致：macOS 用内嵌红绿灯，标题栏由渲染层画 36px
+      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
+      frame: process.platform === 'darwin',
+      backgroundColor: '#ffffff',
       webPreferences: {
         preload: join(this.opts.rendererDir, '../preload/index.mjs'),
         contextIsolation: true,

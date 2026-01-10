@@ -55,7 +55,6 @@ export function createElectronPlatform(bridge: ElectronBridge): Platform {
     closeAllSubs: (): Promise<void> => bridge.invoke(ELECTRON_CHANNELS.windowCloseAllSubs),
     onSubClosed: (cb: (key: SubWindowKey) => void): (() => void) =>
       bridge.on(ELECTRON_CHANNELS.eventSubClosed, (payload) => cb(payload as SubWindowKey)),
-    canResizeForPanel: true,
   }
 
   const capture: CapturePort = {

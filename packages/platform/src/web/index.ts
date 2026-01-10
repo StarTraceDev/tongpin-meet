@@ -47,7 +47,7 @@ export function createWebPlatform(options: WebPlatformOptions = {}): Platform {
   }
 
   const windowPort: WindowPort = {
-    // 浏览器控制条自己管最小化/最大化，这些方法保留为空实现，按钮由 canResizeForPanel 决定是否渲染
+    // 浏览器控制条自己管最小化/最大化，这些方法保留为空实现
     minimize: async () => undefined,
     toggleMaximize: async () => undefined,
     close: async () => {
@@ -90,7 +90,6 @@ export function createWebPlatform(options: WebPlatformOptions = {}): Platform {
         subClosed.delete(cb)
       }
     },
-    canResizeForPanel: false,
   }
 
   const capture: CapturePort = {

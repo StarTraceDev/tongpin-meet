@@ -28,7 +28,6 @@ describe('usePlatform', () => {
     await app.router.isReady()
 
     expect(container.querySelector('.probe-os')?.textContent).toBe('web')
-    expect(platform.window.canResizeForPanel).toBe(false)
   })
 
   it('没有 provider 时抛错并提示 createApp', () => {
