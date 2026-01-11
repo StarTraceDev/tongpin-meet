@@ -32,6 +32,12 @@ export const appRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/meeting/:id',
+    name: ROUTE_NAMES.meeting,
+    component: lazy(() => import('../views/meeting/MeetingRoom.vue')),
+    meta: { title: '会议室' },
+  },
+  {
     path: '/login',
     name: ROUTE_NAMES.login,
     component: lazy(() => import('../views/LoginView.vue')),

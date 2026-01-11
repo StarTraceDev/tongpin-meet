@@ -1,0 +1,100 @@
+<script setup lang="ts">
+import { ElMessage } from 'element-plus'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+import { useAuthStore } from '../../stores/auth'
+import { useMeetingStore } from '../../stores/meeting'
+import { useParticipantsStore } from '../../stores/participants'
+import { useRtcStore } from '../../stores/rtc'
+import MeetingStage from './components/MeetingStage.vue'
+import MeetingToolbar from './components/MeetingToolbar.vue'
+import MeetingTopBar from './components/MeetingTopBar.vue'
+import { useMeetingMount } from './composables/useMeetingMount'
+import { useMeetingWindow } from './composables/useMeetingWindow'
+import { useTitlebar } from './composables/useTitlebar'
+import '../../styles/meeting.css'
+
+const props = defineProps<{ payload?: { meetingId?: string } }>()
+
+const route = useRoute()
+const auth = useAuthStore()
+const meeting = useMeetingStore()
+const participants = useParticipantsStore()
+const rtc = useRtcStore()
+
+/** 桌面端从子窗口 payload 进会，web 端从 /meeting/:id 进会 */
+const meetingId = computed<string>(() => {
+  if (props.payload?.meetingId !== undefined) return props.payload.meetingId
+  const fromRoute = route.params.id
+  return Array.isArray(fromRoute) ? (fromRoute[0] ?? '') : (fromRoute ?? '')
+})
+
+const { elapsed, loading, error, retry } = useMeetingMount(() => meetingId.value)
+const { toggleFullscreen, openPanel, closeRoom } = useMeetingWindow()
+const { onDoubleClick } = useTitlebar(() => meeting.title)
+
+const selfName = computed<string>(() => participants.self?.name ?? auth.user?.name ?? '我')
+const startTime = computed<string>(() => {
+  const startAt = meeting.meeting?.startAt
+  if (startAt === undefined) return ''
+  const date = new Date(startAt)
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+})
+
+async function handleEnd(): Promise<void> {
+  await meeting.leave()
+  closeRoom()
+}
+</script>
+
+<template>
+  <div class="room">
+    <template v-if="meeting.title !== ''">
+      <MeetingTopBar
+        :start-time="startTime"
+        :elapsed="elapsed"
+        @dblclick="onDoubleClick"
+        @detail="openPanel('meetingDetail')"
+        @fullscreen="toggleFullscreen"
+      />
+      <div class="room-body">
+        <MeetingStage :name="selfName" :is-host="meeting.isHost" :mic-on="rtc.micOn" />
+      </div>
+      <MeetingToolbar
+        :mic-on="rtc.micOn"
+        :camera-on="rtc.cameraOn"
+        :member-count="participants.count"
+        @toggle-mic="rtc.toggleMic()"
+        @toggle-camera="rtc.toggleCamera()"
+        @share="ElMessage.info('屏幕共享将在 M13-8 接入')"
+        @members="ElMessage.info('成员面板将在 M13-4 接入')"
+        @chat="ElMessage.info('聊天面板将在 M13-4 接入')"
+        @more="ElMessage.info('更多菜单将在 M13-9 接入')"
+        @end="handleEnd"
+      />
+    </template>
+
+    <div v-else class="room-state">
+      <p v-if="loading">正在进入会议…</p>
+      <p v-else>{{ error === '' ? '会议不存在或已结束' : error }}</p>
+      <button v-if="!loading" class="room-state-btn" type="button" @click="retry">重试</button>
+      <button v-if="!loading" class="room-state-btn" type="button" @click="closeRoom">
+        返回首页
+      </button>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.room-state-btn {
+  height: 32px;
+  padding: 0 16px;
+  border: 1px solid var(--tp-border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--tp-text-primary);
+  font-size: 13px;
+  cursor: pointer;
+}
+</style>

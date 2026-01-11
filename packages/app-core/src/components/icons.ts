@@ -56,6 +56,57 @@ export const ICONS = {
       d: 'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z',
     },
   ],
+  signal: [{ tag: 'path', d: 'M4 20v-2M9 20v-6M14 20v-10M19 20V6' }],
+  forward: [
+    { tag: 'path', d: 'M14 4h6v6' },
+    { tag: 'path', d: 'M20 4 11 13' },
+    { tag: 'path', d: 'M18 14.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.5' },
+  ],
+  expand: [{ tag: 'path', d: 'M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5' }],
+  grid: [
+    { tag: 'rect', x: 3, y: 3, width: 7, height: 7, rx: 1.5 },
+    { tag: 'rect', x: 14, y: 3, width: 7, height: 7, rx: 1.5 },
+    { tag: 'rect', x: 14, y: 14, width: 7, height: 7, rx: 1.5 },
+    { tag: 'rect', x: 3, y: 14, width: 7, height: 7, rx: 1.5 },
+  ],
+  more: [
+    { tag: 'circle', cx: 5, cy: 12, r: 1 },
+    { tag: 'circle', cx: 12, cy: 12, r: 1 },
+    { tag: 'circle', cx: 19, cy: 12, r: 1 },
+  ],
+  'phone-off': [
+    {
+      tag: 'path',
+      d: 'M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91M2 2l20 20',
+    },
+  ],
+  mic: [
+    { tag: 'rect', x: 9, y: 2, width: 6, height: 11, rx: 3 },
+    { tag: 'path', d: 'M19 10v2a7 7 0 0 1-14 0v-2M12 19v3' },
+  ],
+  'mic-off': [
+    {
+      tag: 'path',
+      d: 'm2 2 20 20M15 9.34V5a3 3 0 0 0-5.68-1.33M9 9v3a3 3 0 0 0 5.12 2.12M19 10v2a7 7 0 0 1-.11 1.23M5 10v2a7 7 0 0 0 12 5M12 19v3',
+    },
+  ],
+  'cam-off': [
+    {
+      tag: 'path',
+      d: 'M10.66 6H14a2 2 0 0 1 2 2v2.34l1 1L22 8v8M16 16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2M2 2l20 20',
+    },
+  ],
+  msg: [{ tag: 'path', d: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' }],
+  emoji: [
+    { tag: 'circle', cx: 12, cy: 12, r: 9 },
+    { tag: 'path', d: 'M8 14.5a4.5 4.5 0 0 0 8 0' },
+    { tag: 'path', d: 'M9 9.5h.01M15 9.5h.01' },
+  ],
+  barrage: [
+    { tag: 'rect', x: 2, y: 4, width: 20, height: 13, rx: 2.5 },
+    { tag: 'path', d: 'M6.5 8.5h11M6.5 12h6' },
+    { tag: 'path', d: 'm7 17-1 4 4-4' },
+  ],
 } as const satisfies Record<string, readonly IconShape[]>
 
 export type IconName = keyof typeof ICONS

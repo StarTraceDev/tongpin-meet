@@ -1,0 +1,66 @@
+import type { MeetingJoinResult } from '@tongpin/shared/types'
+import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
+
+export type ParticipantRole = 'HOST' | 'COHOST' | 'MEMBER' | 'GUEST'
+
+/** 会中成员视图模型：视频墙、成员面板、姓名条都读这一份（M13-2/M13-4 复用） */
+export interface MeetingParticipant {
+  id: string
+  name: string
+  role: ParticipantRole
+  micOn: boolean
+  cameraOn: boolean
+  speaking: boolean
+}
+
+export const useParticipantsStore = defineStore('participants', () => {
+  const participants = ref<MeetingParticipant[]>([])
+  const selfId = ref<string | null>(null)
+
+  const count = computed<number>(() => participants.value.length)
+  const self = computed<MeetingParticipant | null>(
+    () => participants.value.find((item) => item.id === selfId.value) ?? null,
+  )
+  const hosts = computed<MeetingParticipant[]>(() =>
+    participants.value.filter((item) => item.role === 'HOST' || item.role === 'COHOST'),
+  )
+
+  /** 入会后把自己放进来（RTC 拿到远端成员后再增量合并，不整表覆盖） */
+  function setSelf(member: MeetingParticipant): void {
+    selfId.value = member.id
+    const index = participants.value.findIndex((item) => item.id === member.id)
+    if (index === -1) participants.value.push(member)
+    else participants.value[index] = member
+  }
+
+  function update(id: string, patch: Partial<MeetingParticipant>): void {
+    const index = participants.value.findIndex((item) => item.id === id)
+    const current = participants.value[index]
+    if (current === undefined) return
+    participants.value[index] = { ...current, ...patch }
+  }
+
+  function reset(): void {
+    participants.value = []
+    selfId.value = null
+  }
+
+  return { participants, selfId, count, self, hosts, setSelf, update, reset }
+})
+
+/** 入会接口只给 id/role/guestName，昵称由本地用户补齐 */
+export function toParticipant(
+  participant: MeetingJoinResult['participant'],
+  name: string,
+  role: ParticipantRole,
+): MeetingParticipant {
+  return {
+    id: participant.id,
+    name,
+    role,
+    micOn: true,
+    cameraOn: false,
+    speaking: false,
+  }
+}

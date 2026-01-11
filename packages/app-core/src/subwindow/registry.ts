@@ -1,6 +1,7 @@
 import type { SubWindowKey } from '@tongpin/platform'
 import type { Component } from 'vue'
 
+import MeetingRoom from '../views/meeting/MeetingRoom.vue'
 import JoinMeeting from './JoinMeeting.vue'
 import PendingPanel from './PendingPanel.vue'
 
@@ -10,6 +11,7 @@ import PendingPanel from './PendingPanel.vue'
  */
 const PANELS: Partial<Record<SubWindowKey, Component>> = {
   join: JoinMeeting,
+  meeting: MeetingRoom,
 }
 
 export function resolveSubWindowComponent(

@@ -1,0 +1,302 @@
+/* 会议室（10-M13 §二 / D12）：四段 = 顶栏 36 · 舞台 · 工具栏 80 */
+.room {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: #fbfbfc;
+  color: var(--tp-text-primary);
+  overflow: hidden;
+}
+
+/* 顶栏 36px：左「图标 + 会议详情 + 时间 + 信号 + 转发」，中计时器，右三枚 */
+.room-top {
+  height: 36px;
+  flex: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 14px 0 92px;
+  gap: 4px;
+  background: #fff;
+  border-bottom: 1px solid var(--tp-border-light);
+  font-size: 14px;
+  color: var(--tp-text-primary);
+  -webkit-app-region: drag;
+}
+
+.room-top .lead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.room-top .lead .logo {
+  width: 16px;
+  height: 18px;
+  color: var(--tp-brand);
+}
+
+.room-top .mbtn,
+.room-top .hbtn {
+  -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 6px;
+  color: var(--tp-text-secondary);
+}
+
+.room-top .mbtn {
+  width: 60px;
+  height: 28px;
+  font-size: 14px;
+  color: var(--tp-text-primary);
+}
+
+.room-top .hbtn {
+  width: 28px;
+  height: 28px;
+}
+
+.room-top .mbtn:hover,
+.room-top .hbtn:hover {
+  background: #e5e5e5;
+}
+
+.room-top .timer {
+  position: absolute;
+  top: 50%;
+  left: calc(50% - 20px);
+  transform: translateY(-50%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+  color: var(--tp-text-primary);
+  letter-spacing: 0.4px;
+}
+
+.room-top .right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 主体：舞台（M13-3 起右侧面板占真实宽度，把舞台压窄 = inset） */
+.room-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.room-stage {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  overflow: hidden;
+}
+
+.room-stage .stage-fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(148deg, #cbd7e9 0%, #e8edf6 46%, #dde5f1 100%);
+}
+
+/* 姓名条：主「主」角标 + 麦克风状态 + 名字 */
+.room-stage .namebar {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 0;
+  border-radius: 4px;
+  background: #2b2b2b;
+  color: #fff;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+.room-stage .namebar .host {
+  background: #ee853c;
+  height: 100%;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px 0 0 4px;
+}
+
+.room-stage .namebar .mic {
+  width: 18px;
+  height: 18px;
+  color: #fff;
+}
+
+/* 底部工具栏 80px */
+.room-bar {
+  height: 80px;
+  flex: none;
+  background: #fff;
+  border-top: 1px solid #e9e9eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  gap: 12px;
+}
+
+.chat-capsule {
+  height: 44px;
+  flex: none;
+  background: #f0f0f0;
+  border-radius: 20px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--tp-text-secondary);
+  cursor: text;
+}
+
+.chat-capsule .bar {
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  color: var(--tp-text-secondary);
+}
+
+.chat-capsule .bar.on {
+  color: var(--tp-brand);
+}
+
+.chat-capsule .emo {
+  width: 20px;
+  height: 20px;
+}
+
+.chat-capsule .pipe {
+  color: #848995;
+  font-size: 16px;
+  line-height: 1;
+  margin: 0 2px;
+}
+
+.chat-capsule .field {
+  width: 96px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #848995;
+  white-space: nowrap;
+}
+
+.room-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: none;
+}
+
+.tool {
+  width: 75px;
+  padding: 5px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.tool .ring {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: var(--tp-text-primary);
+}
+
+.tool .ring .ic {
+  width: 28px;
+  height: 28px;
+}
+
+.tool.lg .ring .ic {
+  width: 36px;
+  height: 36px;
+}
+
+.tool.xs .ring .ic {
+  width: 24px;
+  height: 24px;
+}
+
+.tool span {
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--tp-text-primary);
+  white-space: nowrap;
+}
+
+.tool:hover .ring {
+  background: #f0f0f0;
+}
+
+.tool.on .ring {
+  background: var(--tp-brand-tint);
+}
+
+.tool.on .ring,
+.tool.on span {
+  color: var(--tp-brand);
+}
+
+.tool .ring .level {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+  background: #4ecb8f;
+}
+
+.tool.danger .ring,
+.tool.danger span {
+  color: #d86048;
+}
+
+.tool.danger .ring .ic {
+  width: 26px;
+  height: 26px;
+}
+
+/* 进会失败 / 等候室 */
+.room-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 14px;
+  color: var(--tp-text-secondary);
+}

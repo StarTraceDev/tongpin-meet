@@ -1,4 +1,10 @@
-import type { ListMeetingsQuery, Meeting, Paginated } from '@tongpin/shared/types'
+import type {
+  ListMeetingsQuery,
+  Meeting,
+  MeetingJoinResult,
+  MeetingWaiting,
+  Paginated,
+} from '@tongpin/shared/types'
 
 import { request } from './http'
 
@@ -13,4 +19,30 @@ export function listMeetings(query: Partial<ListMeetingsQuery> = {}): Promise<Pa
     params.set('keyword', query.keyword.trim())
   }
   return request<Paginated<Meeting>>(`/meetings?${params.toString()}`)
+}
+
+/** 会议详情（进会议室时拿标题/会议号/主持人） */
+export function getMeeting(id: string): Promise<Meeting> {
+  return request<Meeting>(`/meetings/${encodeURIComponent(id)}`)
+}
+
+/** 入会：拿到 participant 与 RTC token；等候室返回 { waiting: true, entryId } */
+export function joinMeeting(
+  id: string,
+  options: { password?: string } = {},
+): Promise<MeetingJoinResult | MeetingWaiting> {
+  return request<MeetingJoinResult | MeetingWaiting>(`/meetings/${encodeURIComponent(id)}:join`, {
+    method: 'POST',
+    body: JSON.stringify(options),
+  })
+}
+
+/** 离会；已离会时服务端幂等，失败也不阻塞关窗 */
+export function leaveMeeting(id: string): Promise<void> {
+  return request<void>(`/meetings/${encodeURIComponent(id)}:leave`, { method: 'POST' })
+}
+
+/** 结束会议（仅主持人） */
+export function endMeeting(id: string): Promise<Meeting> {
+  return request<Meeting>(`/meetings/${encodeURIComponent(id)}:end`, { method: 'POST' })
 }

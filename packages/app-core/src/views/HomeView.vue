@@ -110,7 +110,12 @@ function openMeeting(meeting: Meeting): void {
     void router.push({ name: ROUTE_NAMES.meetingEnded, params: { id: meeting.id } })
     return
   }
-  ElMessage.info('会议室将在 M13-1 接入')
+  // 桌面端会议室是独立窗 1065×710（10-M13 §二），web 端同一 tab 走路由
+  if (platform.kind === 'electron') {
+    void platform.window.openSub('meeting', { payload: { meetingId: meeting.id } })
+    return
+  }
+  void router.push({ name: ROUTE_NAMES.meeting, params: { id: meeting.id } })
 }
 
 onMounted(() => {
