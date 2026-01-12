@@ -54,6 +54,16 @@ export function useMeetingMount(meetingId: () => string): {
 
     elapsedSeconds.value = 0
     await rtc.connect(meeting.rtc?.token ?? '')
+
+    // 远端成员由 RTC 提供（mock 阶段是合成成员），角色一律 MEMBER；自己已在上面放好
+    if (rtc.members.length > 0) {
+      const selfMember = participants.self
+      const remotes = rtc.members.map((member) => ({
+        ...member,
+        role: 'MEMBER' as const,
+      }))
+      participants.replaceAll(selfMember === null ? remotes : [selfMember, ...remotes])
+    }
     startClock()
   }
 

@@ -3,13 +3,13 @@ import { ElMessage } from 'element-plus'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { useAuthStore } from '../../stores/auth'
 import { useMeetingStore } from '../../stores/meeting'
 import { useParticipantsStore } from '../../stores/participants'
 import { useRtcStore } from '../../stores/rtc'
 import MeetingStage from './components/MeetingStage.vue'
 import MeetingToolbar from './components/MeetingToolbar.vue'
 import MeetingTopBar from './components/MeetingTopBar.vue'
+import { useMeetingLayout } from './composables/useMeetingLayout'
 import { useMeetingMount } from './composables/useMeetingMount'
 import { useMeetingWindow } from './composables/useMeetingWindow'
 import { useTitlebar } from './composables/useTitlebar'
@@ -18,7 +18,6 @@ import '../../styles/meeting.css'
 const props = defineProps<{ payload?: { meetingId?: string } }>()
 
 const route = useRoute()
-const auth = useAuthStore()
 const meeting = useMeetingStore()
 const participants = useParticipantsStore()
 const rtc = useRtcStore()
@@ -33,8 +32,8 @@ const meetingId = computed<string>(() => {
 const { elapsed, loading, error, retry } = useMeetingMount(() => meetingId.value)
 const { toggleFullscreen, openPanel, closeRoom } = useMeetingWindow()
 const { onDoubleClick } = useTitlebar(() => meeting.title)
+const { layoutMode, setLayoutPreference } = useMeetingLayout()
 
-const selfName = computed<string>(() => participants.self?.name ?? auth.user?.name ?? '我')
 const startTime = computed<string>(() => {
   const startAt = meeting.meeting?.startAt
   if (startAt === undefined) return ''
@@ -54,12 +53,15 @@ async function handleEnd(): Promise<void> {
       <MeetingTopBar
         :start-time="startTime"
         :elapsed="elapsed"
+        :layout-mode="layoutMode"
+        :member-count="participants.count"
         @dblclick="onDoubleClick"
         @detail="openPanel('meetingDetail')"
         @fullscreen="toggleFullscreen"
+        @select-layout="setLayoutPreference"
       />
       <div class="room-body">
-        <MeetingStage :name="selfName" :is-host="meeting.isHost" :mic-on="rtc.micOn" />
+        <MeetingStage :participants="participants.participants" :layout="layoutMode" />
       </div>
       <MeetingToolbar
         :mic-on="rtc.micOn"

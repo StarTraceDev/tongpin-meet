@@ -300,3 +300,324 @@
   font-size: 14px;
   color: var(--tp-text-secondary);
 }
+
+/* ============ 视频墙（D12 单人 / D13 宫格与 5 种布局） ============ */
+.vg {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  background: #fff;
+}
+
+.vg-solo {
+  display: block;
+}
+
+.stage-tile {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.stage-main {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  border-radius: var(--tp-radius-m);
+  overflow: hidden;
+}
+
+/* 一屏 9 等分 */
+.grid9 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 8px;
+  width: 100%;
+  height: 100%;
+}
+
+.gtile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f1f4;
+  border-radius: var(--tp-radius-m);
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+}
+
+.gtile .pic {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #cfd8ea, #9aa9c6);
+}
+
+.gtile .pic.host {
+  background: linear-gradient(160deg, #ffd6a5, #ff9a76);
+}
+
+.gtile.speak {
+  box-shadow: inset 0 0 0 2px var(--tp-brand);
+}
+
+.gtile .lbl {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  max-width: calc(100% - 16px);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 11px;
+  color: var(--tp-text-secondary);
+}
+
+.gtile .lbl .ic {
+  width: 11px;
+  height: 11px;
+}
+
+.gtile .more-n {
+  font-size: 12px;
+  color: var(--tp-text-tertiary);
+}
+
+/* 右侧成员列表：主画面 + 竖排成员条 */
+.vg-speakerRight {
+  flex-direction: row;
+  gap: 8px;
+  padding: 8px;
+}
+
+.vg-speakerRight .strip.side {
+  width: 180px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 顶部成员列表：横排成员条 + 主画面 */
+.vg-speakerTop {
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+.vg-speakerTop .strip.top {
+  height: 96px;
+  flex: none;
+  display: flex;
+  gap: 8px;
+}
+
+.strip .gtile {
+  flex: 1;
+}
+
+/* 成员条只有 84–96px 高，头像缩到 32 免得和左下角名字压在一起 */
+.strip .gtile .pic {
+  width: 32px;
+  height: 32px;
+}
+
+.strip .gtile .lbl {
+  left: 6px;
+  bottom: 6px;
+  padding: 1px 4px;
+}
+
+/* 上 / 下 L 型：5 人条 + 主画面 + 2 人侧栏 */
+.vg-layoutLTop,
+.vg-layoutLBottom {
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+.vg-layoutLTop .strip.top,
+.vg-layoutLBottom .strip.bottom {
+  height: 84px;
+  flex: none;
+  display: flex;
+  gap: 8px;
+}
+
+.vg-layoutLTop .l-body,
+.vg-layoutLBottom .l-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 8px;
+}
+
+.l-body .strip.side {
+  width: 160px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ============ 布局选择器（顶栏宫格按钮弹出） ============ */
+.room-top .hbtn.hover {
+  background: #e5e5e5;
+}
+
+.layout-anchor {
+  position: relative;
+  display: flex;
+}
+
+.layout-pop {
+  /* D13：弹层在窗口水平居中、贴顶栏下沿（mockup.css 写 right:0，截图实测是居中） */
+  position: fixed;
+  top: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px;
+  background: #fff;
+  border-radius: var(--tp-radius-m);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+  -webkit-app-region: no-drag;
+}
+
+.layout-opt {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px 4px;
+  border: 0;
+  border-radius: var(--tp-radius-m);
+  background: transparent;
+  cursor: pointer;
+}
+
+.layout-opt:hover {
+  background: var(--tp-fill);
+}
+
+.layout-opt.on {
+  background: #eff6ff;
+  box-shadow: inset 0 0 0 2px #3b82f6;
+}
+
+.layout-opt.off {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.layout-opt span {
+  font-size: 12px;
+  color: var(--tp-text-primary);
+  white-space: nowrap;
+}
+
+.layout-opt.off span {
+  color: var(--tp-text-placeholder);
+}
+
+.layout-tip {
+  display: none;
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: #000;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.layout-opt.off:hover .layout-tip {
+  display: block;
+}
+
+.pv {
+  width: 80px;
+  height: 50px;
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 4px;
+  background: #f2f3f5;
+  overflow: hidden;
+}
+
+.pv.vertical {
+  flex-direction: column;
+}
+
+.pv .p-main {
+  flex: 1;
+  border-radius: 2px;
+  background: #dfe3ea;
+}
+
+.pv .p-side {
+  width: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pv .p-side i {
+  flex: 1;
+  border-radius: 2px;
+  background: #dfe3ea;
+}
+
+.pv .p-top {
+  height: 12px;
+  display: flex;
+  gap: 3px;
+}
+
+.pv .p-top i {
+  flex: 1;
+  border-radius: 2px;
+  background: #dfe3ea;
+}
+
+.pv .p-row {
+  flex: 1;
+  display: flex;
+  gap: 3px;
+}
+
+.pv .p-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 3px;
+}
+
+.pv .p-grid i {
+  border-radius: 2px;
+  background: #dfe3ea;
+}

@@ -1,14 +1,39 @@
 <script setup lang="ts">
-import AppIcon from '../../../components/AppIcon.vue'
+import { ref } from 'vue'
 
-defineProps<{
+import AppIcon from '../../../components/AppIcon.vue'
+import type { LayoutMode, LayoutPreference } from '../composables/useMeetingLayout'
+import MeetingLayoutSelect from './MeetingLayoutSelect.vue'
+
+const props = defineProps<{
   /** 顶栏左侧显示的会议开始时间 HH:mm */
   startTime: string
   /** 居中计时器 mm:ss */
   elapsed: string
+  layoutMode: LayoutMode
+  memberCount: number
 }>()
 
-defineEmits<{ detail: []; fullscreen: [] }>()
+const emit = defineEmits<{
+  detail: []
+  fullscreen: []
+  'select-layout': [value: Exclude<LayoutPreference, null>]
+}>()
+
+const layoutOpen = ref(false)
+
+function toggleLayout(): void {
+  layoutOpen.value = !layoutOpen.value
+}
+
+function selectLayout(value: Exclude<LayoutPreference, null>): void {
+  emit('select-layout', value)
+  layoutOpen.value = false
+}
+
+/** 选择器高亮项：solo 时没有选中项（单人态不入选项） */
+const currentPreference = (): LayoutPreference =>
+  props.layoutMode === 'solo' ? null : props.layoutMode
 </script>
 
 <template>
@@ -26,9 +51,24 @@ defineEmits<{ detail: []; fullscreen: [] }>()
     </div>
     <div class="timer">{{ elapsed }}</div>
     <div class="right">
-      <button class="hbtn" type="button" title="布局">
-        <AppIcon name="grid" :size="20" />
-      </button>
+      <div class="layout-anchor">
+        <button
+          class="hbtn"
+          :class="{ hover: layoutOpen }"
+          type="button"
+          title="布局"
+          @click="toggleLayout"
+        >
+          <AppIcon name="grid" :size="20" />
+        </button>
+        <MeetingLayoutSelect
+          v-if="layoutOpen"
+          :model-value="currentPreference()"
+          :member-count="memberCount"
+          @select="selectLayout"
+          @close="layoutOpen = false"
+        />
+      </div>
       <button class="hbtn" type="button" title="设置">
         <AppIcon name="settings" :size="18" />
       </button>

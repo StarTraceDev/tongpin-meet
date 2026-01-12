@@ -1,24 +1,17 @@
 <script setup lang="ts">
-import AppIcon from '../../../components/AppIcon.vue'
+import type { MeetingParticipant } from '../../../stores/participants'
+import type { LayoutMode } from '../composables/useMeetingLayout'
+import VideoGrid from './VideoGrid.vue'
 
-withDefaults(
-  defineProps<{
-    name: string
-    isHost?: boolean
-    micOn?: boolean
-  }>(),
-  { isHost: false, micOn: true },
-)
+defineProps<{
+  participants: MeetingParticipant[]
+  layout: LayoutMode
+}>()
 </script>
 
 <template>
-  <!-- M13-1：视频墙占位（M13-2 换成 ParticipantTile / VideoGrid），保留 D12 的渐变与姓名条 -->
+  <!-- 视频区：布局在这里切，瓦片只负责画自己那一份 store 状态 -->
   <div class="room-stage">
-    <div class="stage-fill" />
-    <div class="namebar">
-      <span v-if="isHost" class="host">主</span>
-      <AppIcon class="mic" :name="micOn ? 'mic' : 'mic-off'" :size="18" />
-      <span>{{ name }}</span>
-    </div>
+    <VideoGrid :participants="participants" :layout="layout" />
   </div>
 </template>

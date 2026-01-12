@@ -41,12 +41,17 @@ export const useParticipantsStore = defineStore('participants', () => {
     participants.value[index] = { ...current, ...patch }
   }
 
+  /** RTC 连上后整体覆盖（自己 + 远端），避免旧成员残留 */
+  function replaceAll(list: MeetingParticipant[]): void {
+    participants.value = list
+  }
+
   function reset(): void {
     participants.value = []
     selfId.value = null
   }
 
-  return { participants, selfId, count, self, hosts, setSelf, update, reset }
+  return { participants, selfId, count, self, hosts, setSelf, update, replaceAll, reset }
 })
 
 /** 入会接口只给 id/role/guestName，昵称由本地用户补齐 */

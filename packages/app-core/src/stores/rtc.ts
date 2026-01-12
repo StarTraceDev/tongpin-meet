@@ -2,9 +2,12 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 import { createMockRtcAdapter } from '../rtc/mock'
-import type { RtcAdapter, RtcStatus } from '../rtc/types'
+import type { RtcAdapter, RtcMember, RtcStatus } from '../rtc/types'
 
-let adapter: RtcAdapter = createMockRtcAdapter()
+/** D13 验证用：VITE_MOCK_MEMBERS=11 时 mock 造 11 个远端成员；生产不带该变量 → 0 */
+const MOCK_MEMBERS = Number(import.meta.env.VITE_MOCK_MEMBERS ?? 0) || 0
+
+let adapter: RtcAdapter = createMockRtcAdapter({ extraParticipants: MOCK_MEMBERS })
 
 /** 测试或接 LiveKit 时替换实现（M13 阶段固定 mock） */
 export function setRtcAdapter(next: RtcAdapter): void {
@@ -18,6 +21,8 @@ export const useRtcStore = defineStore('rtc', () => {
   const cameraOn = ref(false)
   const sharing = ref(false)
   const error = ref('')
+  /** 远端成员镜像；说话态/开关麦都从这里读，瓦片不各自探测（O14） */
+  const members = ref<RtcMember[]>([])
 
   async function connect(token: string): Promise<void> {
     status.value = 'connecting'
@@ -26,6 +31,7 @@ export const useRtcStore = defineStore('rtc', () => {
       await adapter.connect(token)
       await adapter.setMicEnabled(micOn.value)
       await adapter.setCameraEnabled(cameraOn.value)
+      members.value = adapter.roster()
       status.value = 'connected'
     } catch (err) {
       status.value = 'disconnected'
@@ -37,6 +43,7 @@ export const useRtcStore = defineStore('rtc', () => {
     await adapter.disconnect()
     status.value = 'idle'
     sharing.value = false
+    members.value = []
   }
 
   async function toggleMic(): Promise<void> {
@@ -60,6 +67,7 @@ export const useRtcStore = defineStore('rtc', () => {
     cameraOn.value = false
     sharing.value = false
     error.value = ''
+    members.value = []
   }
 
   return {
@@ -68,6 +76,7 @@ export const useRtcStore = defineStore('rtc', () => {
     cameraOn,
     sharing,
     error,
+    members,
     connect,
     disconnect,
     toggleMic,
