@@ -64,8 +64,11 @@ export class WindowManager {
     window.once('ready-to-show', () => window.show())
     window.on('closed', () => {
       this.subs.delete(key)
-      const main = this.opts.mainWindow
-      if (!main.isDestroyed()) main.webContents.send('window:sub-closed', key)
+      // 会议室本身也是子窗口，面板脱离后的“合并回去”靠这条事件，
+      // 所以必须广播给所有存活的窗口，而不是只发给主窗口。
+      for (const target of BrowserWindow.getAllWindows()) {
+        if (!target.isDestroyed()) target.webContents.send('window:sub-closed', key)
+      }
       for (const listener of this.closedListeners) listener(key)
     })
     this.subs.set(key, window)

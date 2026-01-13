@@ -1,21 +1,26 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useMeetingStore } from '../../stores/meeting'
+import type { SidePanelKey } from '../../stores/panels'
 import { useParticipantsStore } from '../../stores/participants'
 import { useRtcStore } from '../../stores/rtc'
 import MeetingStage from './components/MeetingStage.vue'
+import SidePanelsDock from './components/SidePanelsDock.vue'
 import MeetingToolbar from './components/MeetingToolbar.vue'
 import MeetingTopBar from './components/MeetingTopBar.vue'
 import { useMeetingLayout } from './composables/useMeetingLayout'
 import { useMeetingMount } from './composables/useMeetingMount'
+import { useSidePanels } from './composables/useSidePanels'
 import { useMeetingWindow } from './composables/useMeetingWindow'
 import { useTitlebar } from './composables/useTitlebar'
 import '../../styles/meeting.css'
 
-const props = defineProps<{ payload?: { meetingId?: string } }>()
+const props = defineProps<{
+  payload?: { meetingId?: string; panels?: SidePanelKey[] }
+}>()
 
 const route = useRoute()
 const meeting = useMeetingStore()
@@ -33,6 +38,16 @@ const { elapsed, loading, error, retry } = useMeetingMount(() => meetingId.value
 const { toggleFullscreen, openPanel, closeRoom } = useMeetingWindow()
 const { onDoubleClick } = useTitlebar(() => meeting.title)
 const { layoutMode, setLayoutPreference } = useMeetingLayout()
+const { panels, openPanel: openSidePanel, detachPanel } = useSidePanels(() => meetingId.value)
+
+/** 深链带面板（`payload.panels` / `?panels=a,b`）时按顺序铺开，便于直达多面板态 */
+onMounted(() => {
+  const fromQuery = route.query.panels
+  const list =
+    props.payload?.panels ??
+    (typeof fromQuery === 'string' ? (fromQuery.split(',') as SidePanelKey[]) : [])
+  for (const key of list) panels.open(key)
+})
 
 const startTime = computed<string>(() => {
   const startAt = meeting.meeting?.startAt
@@ -62,6 +77,7 @@ async function handleEnd(): Promise<void> {
       />
       <div class="room-body">
         <MeetingStage :participants="participants.participants" :layout="layoutMode" />
+        <SidePanelsDock v-if="panels.hasPanels" @detach="detachPanel" />
       </div>
       <MeetingToolbar
         :mic-on="rtc.micOn"
@@ -70,8 +86,8 @@ async function handleEnd(): Promise<void> {
         @toggle-mic="rtc.toggleMic()"
         @toggle-camera="rtc.toggleCamera()"
         @share="ElMessage.info('屏幕共享将在 M13-8 接入')"
-        @members="ElMessage.info('成员面板将在 M13-4 接入')"
-        @chat="ElMessage.info('聊天面板将在 M13-4 接入')"
+        @members="openSidePanel('members')"
+        @chat="openSidePanel('chat')"
         @more="ElMessage.info('更多菜单将在 M13-9 接入')"
         @end="handleEnd"
       />

@@ -15,6 +15,10 @@ class FakeWindow {
     created.push(this)
   }
 
+  static getAllWindows(): FakeWindow[] {
+    return created.filter((window) => !window.isDestroyed())
+  }
+
   isDestroyed(): boolean {
     return this.destroyed
   }

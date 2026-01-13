@@ -3,6 +3,7 @@ import type { Component } from 'vue'
 
 import MeetingRoom from '../views/meeting/MeetingRoom.vue'
 import JoinMeeting from './JoinMeeting.vue'
+import PanelWindow from './PanelWindow.vue'
 import PendingPanel from './PendingPanel.vue'
 
 /**
@@ -12,6 +13,13 @@ import PendingPanel from './PendingPanel.vue'
 const PANELS: Partial<Record<SubWindowKey, Component>> = {
   join: JoinMeeting,
   meeting: MeetingRoom,
+  members: PanelWindow,
+  panelChat: PanelWindow,
+  panelMinutes: PanelWindow,
+  panelIntelligence: PanelWindow,
+  panelBreak: PanelWindow,
+  checkin: PanelWindow,
+  vote: PanelWindow,
 }
 
 export function resolveSubWindowComponent(

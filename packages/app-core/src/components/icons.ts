@@ -45,6 +45,10 @@ export const ICONS = {
   down: [{ tag: 'path', d: 'm6 9 6 6 6-6' }],
   x: [{ tag: 'path', d: 'M18 6 6 18M6 6l12 12' }],
   check: [{ tag: 'path', d: 'M20 6 9 17l-5-5' }],
+  file: [
+    { tag: 'path', d: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z' },
+    { tag: 'path', d: 'M14 2v6h6' },
+  ],
   clock: [
     { tag: 'circle', cx: 12, cy: 12, r: 10 },
     { tag: 'path', d: 'M12 6v6l4 2' },
@@ -63,6 +67,10 @@ export const ICONS = {
     { tag: 'path', d: 'M18 14.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.5' },
   ],
   expand: [{ tag: 'path', d: 'M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5' }],
+  detach: [
+    { tag: 'rect', x: 3, y: 4, width: 18, height: 16, rx: 2 },
+    { tag: 'path', d: 'M9 12h8M13 8l4 4-4 4' },
+  ],
   grid: [
     { tag: 'rect', x: 3, y: 3, width: 7, height: 7, rx: 1.5 },
     { tag: 'rect', x: 14, y: 3, width: 7, height: 7, rx: 1.5 },
