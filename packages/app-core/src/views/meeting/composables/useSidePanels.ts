@@ -1,6 +1,7 @@
-import { onBeforeUnmount, onMounted } from 'vue'
+import { onBeforeUnmount, onMounted, watch } from 'vue'
 
 import { usePlatform } from '../../../platform'
+import { useChatStore } from '../../../stores/chat'
 import { usePanelsStore, type SidePanelKey } from '../../../stores/panels'
 import { PANEL_BY_SUBWINDOW, PANEL_SPECS } from '../panels/spec'
 
@@ -17,8 +18,17 @@ export function useSidePanels(meetingId: () => string): {
   detachPanel: (key: SidePanelKey) => void
 } {
   const panels = usePanelsStore()
+  const chat = useChatStore()
   const platform = usePlatform()
   let unsubscribe: (() => void) | null = null
+
+  /** 聊天面板一露出来就清未读（红点只在面板没打开时累积） */
+  watch(
+    () => panels.active,
+    (active) => {
+      if (active === 'chat' && !panels.detached.includes('chat')) chat.markRead()
+    },
+  )
 
   function openPanel(key: SidePanelKey): void {
     // 已脱离的面板：点工具栏就是把子窗收回来

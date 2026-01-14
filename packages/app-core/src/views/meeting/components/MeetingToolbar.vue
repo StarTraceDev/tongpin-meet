@@ -1,30 +1,63 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
 import AppIcon from '../../../components/AppIcon.vue'
 
-defineProps<{
+const props = defineProps<{
   micOn: boolean
   cameraOn: boolean
   memberCount: number
+  barrageOn: boolean
+  unread: number
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   'toggle-mic': []
   'toggle-camera': []
+  'toggle-barrage': []
+  'send-chat': [text: string]
   share: []
   members: []
   chat: []
   more: []
   end: []
 }>()
+
+const draft = ref('')
+
+/** 胶囊里的输入框回车直接发弹幕+聊天，空串不发 */
+function submit(): void {
+  const text = draft.value.trim()
+  if (text === '') return
+  emit('send-chat', text)
+  draft.value = ''
+}
+
+const badge = (count: number): string => (count > 9 ? '9+' : String(count))
 </script>
 
 <template>
   <footer class="room-bar">
     <div class="chat-capsule" role="button" tabindex="0" @click="$emit('chat')">
-      <AppIcon class="bar on" name="barrage" :size="18" />
+      <button
+        class="bar"
+        :class="{ on: props.barrageOn }"
+        type="button"
+        :title="props.barrageOn ? '关闭弹幕' : '开启弹幕'"
+        @click.stop="$emit('toggle-barrage')"
+      >
+        <AppIcon name="barrage" :size="18" />
+      </button>
       <span class="pipe">｜</span>
       <AppIcon class="emo" name="emoji" :size="20" />
-      <span class="field">说点什么...</span>
+      <input
+        v-model="draft"
+        class="field"
+        type="text"
+        placeholder="说点什么..."
+        @click.stop
+        @keyup.enter="submit"
+      />
     </div>
 
     <div class="room-actions">
@@ -50,7 +83,10 @@ defineEmits<{
         <span>管理成员({{ memberCount }})</span>
       </button>
       <button class="tool" type="button" @click="$emit('chat')">
-        <span class="ring"><AppIcon class="ic" name="msg" :size="28" /></span>
+        <span class="ring">
+          <AppIcon class="ic" name="msg" :size="28" />
+          <span v-if="props.unread > 0" class="badge">{{ badge(props.unread) }}</span>
+        </span>
         <span>聊天</span>
       </button>
       <button class="tool xs" type="button" @click="$emit('more')">

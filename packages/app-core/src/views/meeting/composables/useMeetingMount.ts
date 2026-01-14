@@ -1,6 +1,7 @@
 import { computed, onMounted, onUnmounted, ref, type ComputedRef } from 'vue'
 
 import { useAuthStore } from '../../../stores/auth'
+import { useChatStore } from '../../../stores/chat'
 import { useMeetingStore } from '../../../stores/meeting'
 import {
   toParticipant,
@@ -28,6 +29,8 @@ export function useMeetingMount(meetingId: () => string): {
   const auth = useAuthStore()
   const meeting = useMeetingStore()
   const participants = useParticipantsStore()
+  const chat = useChatStore()
+  let offChat: (() => void) | undefined
   const rtc = useRtcStore()
 
   const elapsedSeconds = ref(0)
@@ -64,6 +67,9 @@ export function useMeetingMount(meetingId: () => string): {
       }))
       participants.replaceAll(selfMember === null ? remotes : [selfMember, ...remotes])
     }
+    offChat = rtc.onChatMessage((message) => {
+      chat.receive(message)
+    })
     startClock()
   }
 
@@ -74,9 +80,12 @@ export function useMeetingMount(meetingId: () => string): {
   onUnmounted(() => {
     if (timer !== undefined) clearInterval(timer)
     timer = undefined
+    offChat?.()
+    offChat = undefined
     void rtc.disconnect()
     void meeting.leave()
     participants.reset()
+    chat.reset()
   })
 
   return {

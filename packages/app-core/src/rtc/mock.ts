@@ -1,4 +1,4 @@
-import type { RtcAdapter, RtcAdapterOptions, RtcMember } from './types'
+import type { RtcAdapter, RtcAdapterOptions, RtcChatMessage, RtcMember } from './types'
 
 const NAMES = [
   '李明',
@@ -22,6 +22,10 @@ export function createMockRtcAdapter(options: RtcAdapterOptions = {}): RtcAdapte
   const delay = options.connectDelayMs ?? 200
   const extra = options.extraParticipants ?? 0
   let connected = false
+
+  const chatListeners = new Set<(message: RtcChatMessage) => void>()
+  const replies = ['收到', '好的', '我这边同步一下', '没问题', '稍等我看下']
+  let seq = 0
 
   const wait = async (): Promise<void> => {
     if (delay <= 0) return
@@ -60,6 +64,31 @@ export function createMockRtcAdapter(options: RtcAdapterOptions = {}): RtcAdapte
     },
     roster(): RtcMember[] {
       return connected ? roster() : []
+    },
+    sendChat(): void {
+      if (!connected) return
+      const members = roster()
+      const speaker = members[0]
+      if (speaker === undefined) return
+      seq += 1
+      const text = replies[seq % replies.length] ?? '收到'
+      setTimeout(() => {
+        if (!connected) return
+        const message: RtcChatMessage = {
+          id: `mock_chat_${String(seq)}`,
+          senderId: speaker.id,
+          senderName: speaker.name,
+          text,
+          at: Date.now(),
+        }
+        for (const listener of chatListeners) listener(message)
+      }, 700)
+    },
+    onChatMessage(listener: (message: RtcChatMessage) => void): () => void {
+      chatListeners.add(listener)
+      return () => {
+        chatListeners.delete(listener)
+      }
     },
   }
 }

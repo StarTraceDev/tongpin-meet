@@ -46,12 +46,19 @@ export const useParticipantsStore = defineStore('participants', () => {
     participants.value = list
   }
 
+  /** 主持人「全体静音 / 解除全体静音」：只改成员状态，真正下发给 RTC 由 M13-8 接 */
+  function setAllMic(on: boolean): void {
+    participants.value = participants.value.map((item) =>
+      item.role === 'HOST' ? item : { ...item, micOn: on },
+    )
+  }
+
   function reset(): void {
     participants.value = []
     selfId.value = null
   }
 
-  return { participants, selfId, count, self, hosts, setSelf, update, replaceAll, reset }
+  return { participants, selfId, count, self, hosts, setSelf, update, replaceAll, setAllMic, reset }
 })
 
 /** 入会接口只给 id/role/guestName，昵称由本地用户补齐 */

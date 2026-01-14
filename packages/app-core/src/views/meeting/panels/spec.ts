@@ -6,19 +6,21 @@ import type { SidePanelKey } from '../../../stores/panels'
 export interface PanelSpec {
   title: string
   icon: IconName
+  /** 停靠时的宽度：聊天按 D18 是 380，其余按 D15 是 400 */
+  width: number
   /** 脱离时开的子窗口（尺寸见 SUB_WINDOW_SPECS） */
   subWindow: SubWindowKey
 }
 
 /** 面板元信息：标题 / 图标 / 脱离后的子窗口 key */
 export const PANEL_SPECS: Record<SidePanelKey, PanelSpec> = {
-  members: { title: '成员', icon: 'users', subWindow: 'members' },
-  chat: { title: '聊天', icon: 'msg', subWindow: 'panelChat' },
-  minutes: { title: '纪要', icon: 'file', subWindow: 'panelMinutes' },
-  intelligence: { title: '智能助手', icon: 'zap', subWindow: 'panelIntelligence' },
-  break: { title: '休息', icon: 'clock', subWindow: 'panelBreak' },
-  checkin: { title: '签到', icon: 'check', subWindow: 'checkin' },
-  vote: { title: '投票', icon: 'check', subWindow: 'vote' },
+  members: { title: '成员', icon: 'users', width: 400, subWindow: 'members' },
+  chat: { title: '聊天', icon: 'msg', width: 380, subWindow: 'panelChat' },
+  minutes: { title: '纪要', icon: 'file', width: 400, subWindow: 'panelMinutes' },
+  intelligence: { title: '智能助手', icon: 'zap', width: 400, subWindow: 'panelIntelligence' },
+  break: { title: '休息', icon: 'clock', width: 400, subWindow: 'panelBreak' },
+  checkin: { title: '签到', icon: 'check', width: 400, subWindow: 'checkin' },
+  vote: { title: '投票', icon: 'check', width: 400, subWindow: 'vote' },
 }
 
 /** 子窗口 key → 面板 key（脱离窗关闭后要合并回主窗） */

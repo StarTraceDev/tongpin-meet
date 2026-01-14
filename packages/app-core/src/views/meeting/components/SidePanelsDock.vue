@@ -15,9 +15,9 @@ const emit = defineEmits<{ detach: [key: SidePanelKey] }>()
 const visible = computed<SidePanelKey[]>(() => panels.visible)
 const isMulti = computed<boolean>(() => visible.value.length > 1)
 
-/** 单面板 400 占满；多面板时选中项 50%（200），其余平分剩下的 200 */
+/** 单面板按各自宽度占满（成员 400 / 聊天 380）；多面板时选中项 50%（200），其余平分剩下的 200 */
 function widthOf(key: SidePanelKey): number {
-  if (!isMulti.value) return 400
+  if (!isMulti.value) return PANEL_SPECS[key].width
   if (key === panels.active) return 200
   const others = visible.value.length - 1
   return Math.floor(200 / Math.max(others, 1))

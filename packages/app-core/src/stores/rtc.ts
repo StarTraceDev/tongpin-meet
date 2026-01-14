@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 import { createMockRtcAdapter } from '../rtc/mock'
-import type { RtcAdapter, RtcMember, RtcStatus } from '../rtc/types'
+import type { RtcAdapter, RtcChatMessage, RtcMember, RtcStatus } from '../rtc/types'
 
 /** D13 验证用：VITE_MOCK_MEMBERS=11 时 mock 造 11 个远端成员；生产不带该变量 → 0 */
 const MOCK_MEMBERS = Number(import.meta.env.VITE_MOCK_MEMBERS ?? 0) || 0
@@ -61,6 +61,16 @@ export const useRtcStore = defineStore('rtc', () => {
     await adapter.setScreenSharing(on)
   }
 
+  /** 发送聊天：本地回显在 chat store，这里只交给适配层 */
+  function sendChat(text: string): void {
+    adapter.sendChat(text)
+  }
+
+  /** 订阅远端聊天，返回退订函数 */
+  function onChatMessage(listener: (message: RtcChatMessage) => void): () => void {
+    return adapter.onChatMessage(listener)
+  }
+
   function reset(): void {
     status.value = 'idle'
     micOn.value = true
@@ -82,6 +92,8 @@ export const useRtcStore = defineStore('rtc', () => {
     toggleMic,
     toggleCamera,
     setSharing,
+    sendChat,
+    onChatMessage,
     reset,
   }
 })

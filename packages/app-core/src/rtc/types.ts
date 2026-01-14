@@ -13,6 +13,15 @@ export interface RtcMember {
   speaking: boolean
 }
 
+/** 会中聊天消息；真接 LiveKit 时从 DataChannel 解析出同一形状 */
+export interface RtcChatMessage {
+  id: string
+  senderId: string
+  senderName: string
+  text: string
+  at: number
+}
+
 export interface RtcAdapter {
   connect(token: string): Promise<void>
   disconnect(): Promise<void>
@@ -21,6 +30,10 @@ export interface RtcAdapter {
   setScreenSharing(on: boolean): Promise<void>
   /** 当前连接里的成员（不含本地；本地由 meeting/participants store 自己放） */
   roster(): RtcMember[]
+  /** 发一条聊天消息；本地回显由 chat store 负责，这里只负责“发出去” */
+  sendChat(text: string): void
+  /** 订阅远端聊天消息，返回退订函数 */
+  onChatMessage(listener: (message: RtcChatMessage) => void): () => void
 }
 
 export interface RtcAdapterOptions {

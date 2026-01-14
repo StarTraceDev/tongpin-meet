@@ -3,6 +3,8 @@ import { ElMessage } from 'element-plus'
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
+import { useAuthStore } from '../../stores/auth'
+import { useChatStore } from '../../stores/chat'
 import { useMeetingStore } from '../../stores/meeting'
 import type { SidePanelKey } from '../../stores/panels'
 import { useParticipantsStore } from '../../stores/participants'
@@ -26,6 +28,8 @@ const route = useRoute()
 const meeting = useMeetingStore()
 const participants = useParticipantsStore()
 const rtc = useRtcStore()
+const chat = useChatStore()
+const auth = useAuthStore()
 
 /** 桌面端从子窗口 payload 进会，web 端从 /meeting/:id 进会 */
 const meetingId = computed<string>(() => {
@@ -56,6 +60,18 @@ const startTime = computed<string>(() => {
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 })
 
+/** 工具栏胶囊回车：自己回显一条，同时丢给适配层（真实实现会广播给远端） */
+function sendChat(text: string): void {
+  const name = participants.self?.name ?? auth.user?.name ?? '我'
+  const id = participants.self?.id ?? 'self'
+  chat.send(text, { id, name })
+  rtc.sendChat(text)
+}
+
+function toggleBarrage(): void {
+  chat.setBarrage(!chat.barrageOn)
+}
+
 async function handleEnd(): Promise<void> {
   await meeting.leave()
   closeRoom()
@@ -83,8 +99,12 @@ async function handleEnd(): Promise<void> {
         :mic-on="rtc.micOn"
         :camera-on="rtc.cameraOn"
         :member-count="participants.count"
+        :barrage-on="chat.barrageOn"
+        :unread="chat.unread"
         @toggle-mic="rtc.toggleMic()"
         @toggle-camera="rtc.toggleCamera()"
+        @toggle-barrage="toggleBarrage"
+        @send-chat="sendChat"
         @share="ElMessage.info('屏幕共享将在 M13-8 接入')"
         @members="openSidePanel('members')"
         @chat="openSidePanel('chat')"
