@@ -2,6 +2,7 @@ import { onBeforeUnmount, onMounted, watch } from 'vue'
 
 import { usePlatform } from '../../../platform'
 import { useChatStore } from '../../../stores/chat'
+import { useMeetingStore } from '../../../stores/meeting'
 import { usePanelsStore, type SidePanelKey } from '../../../stores/panels'
 import { PANEL_BY_SUBWINDOW, PANEL_SPECS } from '../panels/spec'
 
@@ -19,6 +20,7 @@ export function useSidePanels(meetingId: () => string): {
 } {
   const panels = usePanelsStore()
   const chat = useChatStore()
+  const meeting = useMeetingStore()
   const platform = usePlatform()
   let unsubscribe: (() => void) | null = null
 
@@ -49,7 +51,7 @@ export function useSidePanels(meetingId: () => string): {
     const spec = PANEL_SPECS[key]
     void platform.window.openSub(spec.subWindow, {
       title: `${spec.title} · 同频会议`,
-      payload: { meetingId: meetingId(), panel: key },
+      payload: { meetingId: meetingId(), panel: key, isHost: meeting.isHost },
     })
     panels.setDetached(key, true)
   }

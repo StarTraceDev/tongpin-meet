@@ -44,6 +44,12 @@ export const ICONS = {
   right: [{ tag: 'path', d: 'm9 18 6-6-6-6' }],
   down: [{ tag: 'path', d: 'm6 9 6 6 6-6' }],
   x: [{ tag: 'path', d: 'M18 6 6 18M6 6l12 12' }],
+  chart: [
+    { tag: 'path', d: 'M3 3v18h18' },
+    { tag: 'path', d: 'M18 17V9' },
+    { tag: 'path', d: 'M13 17V5' },
+    { tag: 'path', d: 'M8 17v-3' },
+  ],
   check: [{ tag: 'path', d: 'M20 6 9 17l-5-5' }],
   file: [
     { tag: 'path', d: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z' },

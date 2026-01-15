@@ -10,6 +10,8 @@ export interface PanelSpec {
   width: number
   /** 脱离时开的子窗口（尺寸见 SUB_WINDOW_SPECS） */
   subWindow: SubWindowKey
+  /** 子窗口标题居中（D21/D27 的签到、投票是居中标题） */
+  centered?: boolean
 }
 
 /** 面板元信息：标题 / 图标 / 脱离后的子窗口 key */
@@ -18,9 +20,9 @@ export const PANEL_SPECS: Record<SidePanelKey, PanelSpec> = {
   chat: { title: '聊天', icon: 'msg', width: 380, subWindow: 'panelChat' },
   minutes: { title: '纪要', icon: 'file', width: 400, subWindow: 'panelMinutes' },
   intelligence: { title: '智能助手', icon: 'zap', width: 400, subWindow: 'panelIntelligence' },
-  break: { title: '休息', icon: 'clock', width: 400, subWindow: 'panelBreak' },
-  checkin: { title: '签到', icon: 'check', width: 400, subWindow: 'checkin' },
-  vote: { title: '投票', icon: 'check', width: 400, subWindow: 'vote' },
+  break: { title: '休息', icon: 'clock', width: 380, subWindow: 'panelBreak' },
+  checkin: { title: '签到', icon: 'check', width: 400, subWindow: 'checkin', centered: true },
+  vote: { title: '投票', icon: 'check', width: 400, subWindow: 'vote', centered: true },
 }
 
 /** 子窗口 key → 面板 key（脱离窗关闭后要合并回主窗） */

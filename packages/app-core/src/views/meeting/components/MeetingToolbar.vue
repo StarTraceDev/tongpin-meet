@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+import type { SidePanelKey } from '../../../stores/panels'
+
 import AppIcon from '../../../components/AppIcon.vue'
+import MoreMenu from './MoreMenu.vue'
+
+type MorePick = SidePanelKey | 'recording'
 
 const props = defineProps<{
   micOn: boolean
@@ -9,6 +14,7 @@ const props = defineProps<{
   memberCount: number
   barrageOn: boolean
   unread: number
+  voteCount: number
 }>()
 
 const emit = defineEmits<{
@@ -19,11 +25,17 @@ const emit = defineEmits<{
   share: []
   members: []
   chat: []
-  more: []
+  'open-panel': [panel: MorePick]
   end: []
 }>()
 
 const draft = ref('')
+const moreOpen = ref(false)
+
+function pickPanel(panel: SidePanelKey | 'recording'): void {
+  moreOpen.value = false
+  emit('open-panel', panel)
+}
 
 /** 胶囊里的输入框回车直接发弹幕+聊天，空串不发 */
 function submit(): void {
@@ -89,10 +101,19 @@ const badge = (count: number): string => (count > 9 ? '9+' : String(count))
         </span>
         <span>聊天</span>
       </button>
-      <button class="tool xs" type="button" @click="$emit('more')">
-        <span class="ring"><AppIcon class="ic" name="more" :size="24" :stroke-width="3" /></span>
-        <span>更多</span>
-      </button>
+      <div class="more-anchor">
+        <button class="tool xs" type="button" @click="moreOpen = !moreOpen">
+          <span class="ring"><AppIcon class="ic" name="more" :size="24" :stroke-width="3" /></span>
+          <span>更多</span>
+        </button>
+        <MoreMenu
+          v-if="moreOpen"
+          class="more-pop"
+          :vote-count="props.voteCount"
+          @pick="pickPanel"
+          @close="moreOpen = false"
+        />
+      </div>
     </div>
 
     <button class="tool danger" type="button" @click="$emit('end')">

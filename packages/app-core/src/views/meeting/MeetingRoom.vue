@@ -5,10 +5,12 @@ import { useRoute } from 'vue-router'
 
 import { useAuthStore } from '../../stores/auth'
 import { useChatStore } from '../../stores/chat'
+import { useInteractionStore } from '../../stores/interaction'
 import { useMeetingStore } from '../../stores/meeting'
 import type { SidePanelKey } from '../../stores/panels'
 import { useParticipantsStore } from '../../stores/participants'
 import { useRtcStore } from '../../stores/rtc'
+import BreakStage from './components/BreakStage.vue'
 import MeetingStage from './components/MeetingStage.vue'
 import SidePanelsDock from './components/SidePanelsDock.vue'
 import MeetingToolbar from './components/MeetingToolbar.vue'
@@ -29,6 +31,7 @@ const meeting = useMeetingStore()
 const participants = useParticipantsStore()
 const rtc = useRtcStore()
 const chat = useChatStore()
+const interaction = useInteractionStore()
 const auth = useAuthStore()
 
 /** 桌面端从子窗口 payload 进会，web 端从 /meeting/:id 进会 */
@@ -43,6 +46,9 @@ const { toggleFullscreen, openPanel, closeRoom } = useMeetingWindow()
 const { onDoubleClick } = useTitlebar(() => meeting.title)
 const { layoutMode, setLayoutPreference } = useMeetingLayout()
 const { panels, openPanel: openSidePanel, detachPanel } = useSidePanels(() => meetingId.value)
+const ongoingVotes = computed<number>(
+  () => interaction.votes.filter((vote) => vote.status === 'ONGOING').length,
+)
 
 /** 深链带面板（`payload.panels` / `?panels=a,b`）时按顺序铺开，便于直达多面板态 */
 onMounted(() => {
@@ -51,7 +57,20 @@ onMounted(() => {
     props.payload?.panels ??
     (typeof fromQuery === 'string' ? (fromQuery.split(',') as SidePanelKey[]) : [])
   for (const key of list) panels.open(key)
+  if (meetingId.value !== '') {
+    void interaction.loadVotes(meetingId.value).catch(() => undefined)
+    void interaction.loadBreaks(meetingId.value).catch(() => undefined)
+  }
 })
+
+/** 更多菜单：录制留到 M13-8，其余都开对应面板 */
+function openFromMore(panel: SidePanelKey | 'recording'): void {
+  if (panel === 'recording') {
+    ElMessage.info('会议录制将在 M13-8 接入')
+    return
+  }
+  openSidePanel(panel)
+}
 
 const startTime = computed<string>(() => {
   const startAt = meeting.meeting?.startAt
@@ -92,7 +111,8 @@ async function handleEnd(): Promise<void> {
         @select-layout="setLayoutPreference"
       />
       <div class="room-body">
-        <MeetingStage :participants="participants.participants" :layout="layoutMode" />
+        <BreakStage v-if="interaction.activeBreak !== null" />
+        <MeetingStage v-else :participants="participants.participants" :layout="layoutMode" />
         <SidePanelsDock v-if="panels.hasPanels" @detach="detachPanel" />
       </div>
       <MeetingToolbar
@@ -101,6 +121,7 @@ async function handleEnd(): Promise<void> {
         :member-count="participants.count"
         :barrage-on="chat.barrageOn"
         :unread="chat.unread"
+        :vote-count="ongoingVotes"
         @toggle-mic="rtc.toggleMic()"
         @toggle-camera="rtc.toggleCamera()"
         @toggle-barrage="toggleBarrage"
@@ -108,7 +129,7 @@ async function handleEnd(): Promise<void> {
         @share="ElMessage.info('屏幕共享将在 M13-8 接入')"
         @members="openSidePanel('members')"
         @chat="openSidePanel('chat')"
-        @more="ElMessage.info('更多菜单将在 M13-9 接入')"
+        @open-panel="openFromMore"
         @end="handleEnd"
       />
     </template>

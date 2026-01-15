@@ -16,6 +16,9 @@ const panel = computed(() => PANEL_BY_SUBWINDOW[subKey])
 const title = computed<string>(() =>
   panel.value === undefined ? '面板' : PANEL_SPECS[panel.value].title,
 )
+const centered = computed<boolean>(() =>
+  panel.value === undefined ? false : PANEL_SPECS[panel.value].centered === true,
+)
 
 function close(): void {
   void platform.window.closeSub(subKey)
@@ -23,10 +26,10 @@ function close(): void {
 </script>
 
 <template>
-  <div class="panel-window">
+  <div class="panel-window" :class="{ centered }">
     <header class="panel-window-head">
       <AppIcon
-        v-if="panel !== undefined"
+        v-if="panel !== undefined && !centered"
         class="pw-ic"
         :name="PANEL_SPECS[panel].icon"
         :size="18"
