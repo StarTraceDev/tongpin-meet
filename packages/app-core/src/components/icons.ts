@@ -59,6 +59,23 @@ export const ICONS = {
     { tag: 'circle', cx: 12, cy: 12, r: 10 },
     { tag: 'path', d: 'M12 6v6l4 2' },
   ],
+  sparkle: [
+    { tag: 'path', d: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z' },
+    { tag: 'path', d: 'M18 15l.9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9L18 15Z' },
+  ],
+  send: [
+    { tag: 'path', d: 'm22 2-7 20-4-9-9-4Z' },
+    { tag: 'path', d: 'M22 2 11 13' },
+  ],
+  play: [{ tag: 'path', d: 'm8 5 11 7-11 7V5Z' }],
+  pause: [
+    { tag: 'rect', x: 7, y: 5, width: 3, height: 14, rx: 1 },
+    { tag: 'rect', x: 14, y: 5, width: 3, height: 14, rx: 1 },
+  ],
+  copy: [
+    { tag: 'rect', x: 9, y: 9, width: 12, height: 12, rx: 2 },
+    { tag: 'path', d: 'M5 15V5a2 2 0 0 1 2-2h10' },
+  ],
   inbox: [
     { tag: 'path', d: 'M22 12h-6l-2 3h-4l-2-3H2' },
     {

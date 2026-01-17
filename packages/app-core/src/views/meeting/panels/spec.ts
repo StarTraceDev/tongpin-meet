@@ -18,8 +18,8 @@ export interface PanelSpec {
 export const PANEL_SPECS: Record<SidePanelKey, PanelSpec> = {
   members: { title: '成员', icon: 'users', width: 400, subWindow: 'members' },
   chat: { title: '聊天', icon: 'msg', width: 380, subWindow: 'panelChat' },
-  minutes: { title: '纪要', icon: 'file', width: 400, subWindow: 'panelMinutes' },
-  intelligence: { title: '智能助手', icon: 'zap', width: 400, subWindow: 'panelIntelligence' },
+  minutes: { title: '会议纪要', icon: 'file', width: 380, subWindow: 'panelMinutes' },
+  intelligence: { title: '智能助手', icon: 'sparkle', width: 380, subWindow: 'panelIntelligence' },
   break: { title: '休息', icon: 'clock', width: 380, subWindow: 'panelBreak' },
   checkin: { title: '签到', icon: 'check', width: 400, subWindow: 'checkin', centered: true },
   vote: { title: '投票', icon: 'check', width: 400, subWindow: 'vote', centered: true },
