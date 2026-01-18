@@ -5,6 +5,7 @@ import MeetingRoom from '../views/meeting/MeetingRoom.vue'
 import JoinMeeting from './JoinMeeting.vue'
 import PanelWindow from './PanelWindow.vue'
 import PendingPanel from './PendingPanel.vue'
+import WhiteboardWindow from './WhiteboardWindow.vue'
 
 /**
  * key → 组件（10-M13 O2/O16）。壳可以覆盖任意项（共享选择器只有 Electron 实现）；
@@ -13,6 +14,7 @@ import PendingPanel from './PendingPanel.vue'
 const PANELS: Partial<Record<SubWindowKey, Component>> = {
   join: JoinMeeting,
   meeting: MeetingRoom,
+  whiteboard: WhiteboardWindow,
   members: PanelWindow,
   panelChat: PanelWindow,
   panelMinutes: PanelWindow,

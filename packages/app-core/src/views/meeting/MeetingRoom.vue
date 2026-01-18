@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
+import { usePlatform } from '../../platform'
 import { useAuthStore } from '../../stores/auth'
 import { useChatStore } from '../../stores/chat'
 import { useInteractionStore } from '../../stores/interaction'
@@ -15,6 +16,7 @@ import MeetingStage from './components/MeetingStage.vue'
 import SidePanelsDock from './components/SidePanelsDock.vue'
 import MeetingToolbar from './components/MeetingToolbar.vue'
 import MeetingTopBar from './components/MeetingTopBar.vue'
+import Whiteboard from './whiteboard/Whiteboard.vue'
 import { useMeetingLayout } from './composables/useMeetingLayout'
 import { useMeetingMount } from './composables/useMeetingMount'
 import { useSidePanels } from './composables/useSidePanels'
@@ -27,6 +29,7 @@ const props = defineProps<{
 }>()
 
 const route = useRoute()
+const platform = usePlatform()
 const meeting = useMeetingStore()
 const participants = useParticipantsStore()
 const rtc = useRtcStore()
@@ -63,10 +66,24 @@ onMounted(() => {
   }
 })
 
-/** 更多菜单：录制留到 M13-8，其余都开对应面板 */
-function openFromMore(panel: SidePanelKey | 'recording'): void {
+type MorePick = SidePanelKey | 'recording' | 'whiteboard'
+
+/** 白板内嵌时占掉视频区，并让工具栏的共享按钮变成「停止共享」 */
+const whiteboardOpen = ref(false)
+
+/** 更多菜单：录制留到 M13-8，白板内嵌，其余都开对应面板 */
+function openWhiteboardWindow(): void {
+  if (meetingId.value === '') return
+  platform.window.openSub('whiteboard', { payload: { meetingId: meetingId.value } })
+}
+
+function openFromMore(panel: MorePick): void {
   if (panel === 'recording') {
     ElMessage.info('会议录制将在 M13-8 接入')
+    return
+  }
+  if (panel === 'whiteboard') {
+    whiteboardOpen.value = true
     return
   }
   openSidePanel(panel)
@@ -111,7 +128,13 @@ async function handleEnd(): Promise<void> {
         @select-layout="setLayoutPreference"
       />
       <div class="room-body">
-        <BreakStage v-if="interaction.activeBreak !== null" />
+        <Whiteboard
+          v-if="whiteboardOpen"
+          embedded
+          @close="whiteboardOpen = false"
+          @detach="openWhiteboardWindow"
+        />
+        <BreakStage v-else-if="interaction.activeBreak !== null" />
         <MeetingStage v-else :participants="participants.participants" :layout="layoutMode" />
         <SidePanelsDock v-if="panels.hasPanels" @detach="detachPanel" />
       </div>
@@ -122,11 +145,14 @@ async function handleEnd(): Promise<void> {
         :barrage-on="chat.barrageOn"
         :unread="chat.unread"
         :vote-count="ongoingVotes"
+        :share-active="whiteboardOpen"
         @toggle-mic="rtc.toggleMic()"
         @toggle-camera="rtc.toggleCamera()"
         @toggle-barrage="toggleBarrage"
         @send-chat="sendChat"
-        @share="ElMessage.info('屏幕共享将在 M13-8 接入')"
+        @share="
+          whiteboardOpen ? (whiteboardOpen = false) : ElMessage.info('屏幕共享将在 M13-8 接入')
+        "
         @members="openSidePanel('members')"
         @chat="openSidePanel('chat')"
         @open-panel="openFromMore"

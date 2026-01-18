@@ -6,7 +6,7 @@ import type { SidePanelKey } from '../../../stores/panels'
 import AppIcon from '../../../components/AppIcon.vue'
 import MoreMenu from './MoreMenu.vue'
 
-type MorePick = SidePanelKey | 'recording'
+type MorePick = SidePanelKey | 'recording' | 'whiteboard'
 
 const props = defineProps<{
   micOn: boolean
@@ -15,6 +15,7 @@ const props = defineProps<{
   barrageOn: boolean
   unread: number
   voteCount: number
+  shareActive?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -32,7 +33,7 @@ const emit = defineEmits<{
 const draft = ref('')
 const moreOpen = ref(false)
 
-function pickPanel(panel: SidePanelKey | 'recording'): void {
+function pickPanel(panel: MorePick): void {
   moreOpen.value = false
   emit('open-panel', panel)
 }
@@ -86,9 +87,9 @@ const badge = (count: number): string => (count > 9 ? '9+' : String(count))
         </span>
         <span>{{ cameraOn ? '关闭视频' : '开启视频' }}</span>
       </button>
-      <button class="tool" type="button" @click="$emit('share')">
+      <button class="tool" :class="{ on: props.shareActive }" type="button" @click="$emit('share')">
         <span class="ring"><AppIcon class="ic" name="monitor" :size="28" /></span>
-        <span>共享屏幕</span>
+        <span>{{ props.shareActive ? '停止共享' : '共享屏幕' }}</span>
       </button>
       <button class="tool" type="button" @click="$emit('members')">
         <span class="ring"><AppIcon class="ic" name="users" :size="28" /></span>

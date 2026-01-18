@@ -76,6 +76,41 @@ export const ICONS = {
     { tag: 'rect', x: 9, y: 9, width: 12, height: 12, rx: 2 },
     { tag: 'path', d: 'M5 15V5a2 2 0 0 1 2-2h10' },
   ],
+  undo: [
+    { tag: 'path', d: 'M9 14 4 9l5-5' },
+    { tag: 'path', d: 'M4 9h10a6 6 0 0 1 0 12h-3' },
+  ],
+  redo: [
+    { tag: 'path', d: 'm15 14 5-5-5-5' },
+    { tag: 'path', d: 'M20 9H10a6 6 0 0 0 0 12h3' },
+  ],
+  'plus-page': [
+    { tag: 'rect', x: 4, y: 3, width: 16, height: 18, rx: 2 },
+    { tag: 'path', d: 'M12 8v8M8 12h8' },
+  ],
+  pen: [{ tag: 'path', d: 'M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z' }],
+  arrow: [
+    { tag: 'path', d: 'M7 17 17 7' },
+    { tag: 'path', d: 'M7 7h10v10' },
+  ],
+  eraser: [
+    {
+      tag: 'path',
+      d: 'm7 21-4-4a2 2 0 0 1 0-2.8l9.2-9.2a2 2 0 0 1 2.8 0l4 4a2 2 0 0 1 0 2.8L13 21H7Z',
+    },
+    { tag: 'path', d: 'm12 8 6 6' },
+  ],
+  trash: [
+    { tag: 'path', d: 'M3 6h18' },
+    { tag: 'path', d: 'M8 6V4h8v2' },
+    { tag: 'path', d: 'm6 6 1 14h10l1-14' },
+  ],
+  download: [
+    { tag: 'path', d: 'M12 3v12' },
+    { tag: 'path', d: 'm7 10 5 5 5-5' },
+    { tag: 'path', d: 'M4 21h16' },
+  ],
+  left: [{ tag: 'path', d: 'm15 18-6-6 6-6' }],
   inbox: [
     { tag: 'path', d: 'M22 12h-6l-2 3h-4l-2-3H2' },
     {
