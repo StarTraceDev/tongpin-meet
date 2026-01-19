@@ -5,6 +5,8 @@ export const ROUTE_NAMES = {
   meeting: 'meeting',
   meetingEnded: 'meeting-ended',
   device: 'device',
+  recordings: 'recordings',
+  settings: 'settings',
   subWindow: 'sub-window',
   notFound: 'not-found',
 } as const

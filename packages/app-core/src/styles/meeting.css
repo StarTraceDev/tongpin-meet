@@ -2710,3 +2710,36 @@
 .wb-tool:hover .ring {
   background: var(--tp-fill-hover);
 }
+
+.share-stage {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+}
+
+.share-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 36px 48px;
+  border-radius: var(--tp-radius-l);
+  background: var(--tp-canvas);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+  color: var(--tp-brand);
+}
+
+.share-title {
+  margin: 0;
+  color: var(--tp-text-title);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.share-hint {
+  margin: 0;
+  color: var(--tp-text-tertiary);
+  font-size: 12px;
+}

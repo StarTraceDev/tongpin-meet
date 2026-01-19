@@ -59,6 +59,14 @@ export const ICONS = {
     { tag: 'circle', cx: 12, cy: 12, r: 10 },
     { tag: 'path', d: 'M12 6v6l4 2' },
   ],
+  info: [
+    { tag: 'circle', cx: 12, cy: 12, r: 10 },
+    { tag: 'path', d: 'M12 16v-4M12 8h.01' },
+  ],
+  volume: [
+    { tag: 'path', d: 'M11 5 6 9H2v6h4l5 4V5Z' },
+    { tag: 'path', d: 'M15.5 8.5a5 5 0 0 1 0 7' },
+  ],
   sparkle: [
     { tag: 'path', d: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z' },
     { tag: 'path', d: 'M18 15l.9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9L18 15Z' },

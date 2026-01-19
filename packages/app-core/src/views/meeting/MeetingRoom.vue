@@ -3,6 +3,7 @@ import { ElMessage } from 'element-plus'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
+import AppIcon from '../../components/AppIcon.vue'
 import { usePlatform } from '../../platform'
 import { useAuthStore } from '../../stores/auth'
 import { useChatStore } from '../../stores/chat'
@@ -49,6 +50,27 @@ const { toggleFullscreen, openPanel, closeRoom } = useMeetingWindow()
 const { onDoubleClick } = useTitlebar(() => meeting.title)
 const { layoutMode, setLayoutPreference } = useMeetingLayout()
 const { panels, openPanel: openSidePanel, detachPanel } = useSidePanels(() => meetingId.value)
+const sharing = ref(false)
+let shareStream: MediaStream | null = null
+
+/** 桌面端走 M10-4 的自定义选择器，web 端走系统 getDisplayMedia */
+async function toggleShare(): Promise<void> {
+  if (sharing.value) {
+    shareStream?.getTracks().forEach((track) => track.stop())
+    shareStream = null
+    sharing.value = false
+    await rtc.setSharing(false)
+    ElMessage.success('已停止共享')
+    return
+  }
+  const source = await platform.capture.pickSource()
+  if (source === null) return
+  shareStream = source.stream ?? null
+  sharing.value = true
+  await rtc.setSharing(true)
+  ElMessage.success(`正在共享：${source.name}`)
+}
+
 const ongoingVotes = computed<number>(
   () => interaction.votes.filter((vote) => vote.status === 'ONGOING').length,
 )
@@ -135,7 +157,18 @@ async function handleEnd(): Promise<void> {
           @detach="openWhiteboardWindow"
         />
         <BreakStage v-else-if="interaction.activeBreak !== null" />
-        <MeetingStage v-else :participants="participants.participants" :layout="layoutMode" />
+        <MeetingStage
+          v-else-if="!sharing"
+          :participants="participants.participants"
+          :layout="layoutMode"
+        />
+        <div v-else class="share-stage">
+          <div class="share-card">
+            <AppIcon name="monitor" :size="34" />
+            <p class="share-title">正在共享屏幕</p>
+            <p class="share-hint">共享内容只对其他参会人可见，点击工具栏「停止共享」结束</p>
+          </div>
+        </div>
         <SidePanelsDock v-if="panels.hasPanels" @detach="detachPanel" />
       </div>
       <MeetingToolbar
@@ -145,14 +178,12 @@ async function handleEnd(): Promise<void> {
         :barrage-on="chat.barrageOn"
         :unread="chat.unread"
         :vote-count="ongoingVotes"
-        :share-active="whiteboardOpen"
+        :share-active="sharing"
         @toggle-mic="rtc.toggleMic()"
         @toggle-camera="rtc.toggleCamera()"
         @toggle-barrage="toggleBarrage"
         @send-chat="sendChat"
-        @share="
-          whiteboardOpen ? (whiteboardOpen = false) : ElMessage.info('屏幕共享将在 M13-8 接入')
-        "
+        @share="toggleShare"
         @members="openSidePanel('members')"
         @chat="openSidePanel('chat')"
         @open-panel="openFromMore"

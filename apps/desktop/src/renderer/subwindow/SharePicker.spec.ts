@@ -48,32 +48,51 @@ function cards(root: HTMLElement): HTMLButtonElement[] {
   return Array.from(root.querySelectorAll<HTMLButtonElement>('.source-card'))
 }
 
+function primary(root: HTMLElement): HTMLButtonElement | null {
+  return root.querySelector<HTMLButtonElement>('.btn.primary')
+}
+
 describe('SharePicker', () => {
-  it('按候选源渲染缩略图卡片', async () => {
+  it('渲染 4 个共享类型与候选源缩略图', async () => {
     const { platform, root } = await setup()
 
     expect(platform.capture.listSources).toHaveBeenCalledWith('session-1')
+    expect(root.querySelectorAll('.mode-card')).toHaveLength(4)
     expect(cards(root)).toHaveLength(2)
     expect(root.querySelector('.source-name')?.textContent).toBe('显示器 1')
     expect(root.querySelector('.source-card img')?.getAttribute('src')).toBe(
       'data:image/png;base64,AA',
     )
+    expect(primary(root)?.textContent).toContain('开始共享')
   })
 
-  it('点卡片后把 sourceId 交回主进程并关窗', async () => {
+  it('选中卡片后点「开始共享」把 sourceId 交回主进程并关窗', async () => {
     const { platform, root } = await setup()
 
     cards(root)[1]?.click()
+    await flush()
+    primary(root)?.click()
     await flush()
 
     expect(platform.capture.chooseSource).toHaveBeenCalledWith('session-1', 'window:5:0')
     expect(platform.window.closeSub).toHaveBeenCalledWith('sharePicker')
   })
 
+  it('选「白板」时回传 whiteboard', async () => {
+    const { platform, root } = await setup()
+
+    root.querySelectorAll<HTMLButtonElement>('.mode-card')[1]?.click()
+    await flush()
+    primary(root)?.click()
+    await flush()
+
+    expect(platform.capture.chooseSource).toHaveBeenCalledWith('session-1', 'whiteboard')
+  })
+
   it('取消传 null，避免主进程一直等', async () => {
     const { platform, root } = await setup()
 
-    root.querySelector<HTMLButtonElement>('#pick-cancel')?.click()
+    root.querySelector<HTMLButtonElement>('.btn.ghost')?.click()
     await flush()
 
     expect(platform.capture.chooseSource).toHaveBeenCalledWith('session-1', null)
@@ -83,6 +102,6 @@ describe('SharePicker', () => {
     const { root } = await setup(async () => [])
 
     expect(cards(root)).toHaveLength(0)
-    expect(root.querySelector('#picker-status')?.textContent).toContain('没有可共享')
+    expect(root.querySelector('.picker-empty')?.textContent).toContain('没有可共享')
   })
 })

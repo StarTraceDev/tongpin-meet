@@ -29,6 +29,18 @@ export const appRoutes: RouteRecordRaw[] = [
         component: lazy(() => import('../views/HomeView.vue')),
         meta: { title: '会议' },
       },
+      {
+        path: 'recordings',
+        name: ROUTE_NAMES.recordings,
+        component: lazy(() => import('../views/RecordingsView.vue')),
+        meta: { title: '录制' },
+      },
+      {
+        path: 'settings',
+        name: ROUTE_NAMES.settings,
+        component: lazy(() => import('../views/SettingsView.vue')),
+        meta: { title: '设置' },
+      },
     ],
   },
   {
