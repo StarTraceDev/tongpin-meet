@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import AppIcon from '../../components/AppIcon.vue'
+import { ROUTE_NAMES } from '../../router/names'
 import { usePlatform } from '../../platform'
 import { useAuthStore } from '../../stores/auth'
 import { useChatStore } from '../../stores/chat'
@@ -17,6 +18,7 @@ import MeetingStage from './components/MeetingStage.vue'
 import SidePanelsDock from './components/SidePanelsDock.vue'
 import MeetingToolbar from './components/MeetingToolbar.vue'
 import MeetingTopBar from './components/MeetingTopBar.vue'
+import SpeakingPill from './components/SpeakingPill.vue'
 import Whiteboard from './whiteboard/Whiteboard.vue'
 import { useMeetingLayout } from './composables/useMeetingLayout'
 import { useMeetingMount } from './composables/useMeetingMount'
@@ -30,6 +32,7 @@ const props = defineProps<{
 }>()
 
 const route = useRoute()
+const router = useRouter()
 const platform = usePlatform()
 const meeting = useMeetingStore()
 const participants = useParticipantsStore()
@@ -70,6 +73,13 @@ async function toggleShare(): Promise<void> {
   await rtc.setSharing(true)
   ElMessage.success(`正在共享：${source.name}`)
 }
+
+const speakingName = computed<string>(() => {
+  const talking = participants.participants.find(
+    (item) => item.speaking && item.id !== participants.self?.id,
+  )
+  return talking?.name ?? ''
+})
 
 const ongoingVotes = computed<number>(
   () => interaction.votes.filter((vote) => vote.status === 'ONGOING').length,
@@ -130,15 +140,45 @@ function toggleBarrage(): void {
   chat.setBarrage(!chat.barrageOn)
 }
 
-async function handleEnd(): Promise<void> {
-  await meeting.leave()
-  closeRoom()
+const leaveOpen = ref(false)
+const ended = ref(false)
+
+/**
+ * 主持人可以「全员结束」，参会人只有「离开会议」。
+ * web 端结束后跳结束页（/meetings/:id/ended）；桌面端会议室是独立子窗，
+ * 子窗路由里没有结束页，就地显示结束卡片再关窗。
+ */
+async function confirmLeave(all: boolean): Promise<void> {
+  leaveOpen.value = false
+  try {
+    if (all) await meeting.end()
+    else await meeting.leave()
+  } finally {
+    if (platform.kind === 'electron') ended.value = true
+    else void router.replace({ name: ROUTE_NAMES.meetingEnded, params: { id: meetingId.value } })
+  }
+}
+
+function backHome(): void {
+  if (platform.kind === 'electron') {
+    closeRoom()
+    return
+  }
+  void router.replace({ name: ROUTE_NAMES.home })
 }
 </script>
 
 <template>
   <div class="room">
-    <template v-if="meeting.title !== ''">
+    <div v-if="ended" class="room-ended">
+      <h2>会议已结束</h2>
+      <p class="room-ended-meta">{{ meeting.title }}</p>
+      <div class="room-ended-actions">
+        <button class="sub-primary" type="button" @click="backHome">返回首页</button>
+      </div>
+    </div>
+
+    <template v-else-if="meeting.title !== ''">
       <MeetingTopBar
         :start-time="startTime"
         :elapsed="elapsed"
@@ -169,6 +209,10 @@ async function handleEnd(): Promise<void> {
             <p class="share-hint">共享内容只对其他参会人可见，点击工具栏「停止共享」结束</p>
           </div>
         </div>
+        <SpeakingPill
+          v-if="speakingName !== '' && !sharing && !whiteboardOpen"
+          :name="speakingName"
+        />
         <SidePanelsDock v-if="panels.hasPanels" @detach="detachPanel" />
       </div>
       <MeetingToolbar
@@ -179,6 +223,7 @@ async function handleEnd(): Promise<void> {
         :unread="chat.unread"
         :vote-count="ongoingVotes"
         :share-active="sharing"
+        :leave-open="leaveOpen"
         @toggle-mic="rtc.toggleMic()"
         @toggle-camera="rtc.toggleCamera()"
         @toggle-barrage="toggleBarrage"
@@ -187,8 +232,19 @@ async function handleEnd(): Promise<void> {
         @members="openSidePanel('members')"
         @chat="openSidePanel('chat')"
         @open-panel="openFromMore"
-        @end="handleEnd"
+        @end="leaveOpen = !leaveOpen"
       />
+
+      <div v-if="rtc.status === 'reconnecting'" class="reconnect-bar">
+        网络连接已断开，正在重连…
+      </div>
+
+      <div v-if="leaveOpen" class="leave-pop">
+        <button v-if="meeting.isHost" class="leave-all" type="button" @click="confirmLeave(true)">
+          全员结束会议
+        </button>
+        <button class="leave-one" type="button" @click="confirmLeave(false)">离开会议</button>
+      </div>
     </template>
 
     <div v-else class="room-state">

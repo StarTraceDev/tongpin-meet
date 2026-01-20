@@ -52,6 +52,11 @@ async function reload(): Promise<void> {
   }
 }
 
+function openVote(vote: Vote): void {
+  if (vote.status === 'PUBLISHED' || vote.status === 'CLOSED') void openResults(vote)
+  else openDetail(vote)
+}
+
 function openDetail(vote: Vote): void {
   current.value = vote
   answers.value = {}
@@ -180,11 +185,7 @@ function optionCount(resultsValue: VoteResults, questionId: string, optionId: st
           :key="vote.id"
           class="vote-row"
           type="button"
-          @click="
-            vote.status === 'PUBLISHED' || vote.status === 'CLOSED'
-              ? openResults(vote)
-              : openDetail(vote)
-          "
+          @click="openVote(vote)"
         >
           <div class="vote-row-head">
             <strong>{{ vote.title }}</strong>

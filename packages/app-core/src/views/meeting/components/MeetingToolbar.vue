@@ -16,6 +16,7 @@ const props = defineProps<{
   unread: number
   voteCount: number
   shareActive?: boolean
+  leaveOpen?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -117,9 +118,14 @@ const badge = (count: number): string => (count > 9 ? '9+' : String(count))
       </div>
     </div>
 
-    <button class="tool danger" type="button" @click="$emit('end')">
+    <button
+      class="tool danger"
+      :class="{ muted: props.leaveOpen }"
+      type="button"
+      @click="$emit('end')"
+    >
       <span class="ring"><AppIcon class="ic" name="phone-off" :size="26" /></span>
-      <span>结束会议</span>
+      <span>{{ props.leaveOpen ? '取消' : '结束会议' }}</span>
     </button>
   </footer>
 </template>

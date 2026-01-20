@@ -73,11 +73,25 @@ export function useMeetingMount(meetingId: () => string): {
     startClock()
   }
 
+  /** 断网时先标为「重连中」，恢复后重新 connect（mock 阶段等价于立刻连上） */
+  function onOffline(): void {
+    rtc.status = 'reconnecting'
+  }
+
+  function onOnline(): void {
+    if (rtc.status !== 'reconnecting') return
+    void rtc.connect(meeting.rtc?.token ?? '')
+  }
+
   onMounted(() => {
+    window.addEventListener('offline', onOffline)
+    window.addEventListener('online', onOnline)
     void mount()
   })
 
   onUnmounted(() => {
+    window.removeEventListener('offline', onOffline)
+    window.removeEventListener('online', onOnline)
     if (timer !== undefined) clearInterval(timer)
     timer = undefined
     offChat?.()

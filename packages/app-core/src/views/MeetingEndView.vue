@@ -5,6 +5,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { request } from '../apis/http'
+import { usePlatform } from '../platform'
 import { fetchMinutes, generateMinutes, saveMinutes } from '../apis/minutes'
 
 interface MeetingDetail {
@@ -14,6 +15,21 @@ interface MeetingDetail {
 
 const route = useRoute()
 const router = useRouter()
+const platform = usePlatform()
+
+/** 桌面端的结束页开在会议室子窗口里，返回要关窗而不是把子窗导航去首页 */
+function goHome(): void {
+  if (platform.kind === 'electron') {
+    void closeSubWindow()
+    return
+  }
+  void router.push({ name: 'home' })
+}
+
+async function closeSubWindow(): Promise<void> {
+  await platform.window.closeSub('meeting')
+  await platform.window.closeAllSubs()
+}
 const meetingId = computed(() => String(route.params.id ?? ''))
 const meeting = ref<Meeting | null>(null)
 const minutes = ref<Minutes | null>(null)
@@ -90,7 +106,7 @@ async function generate(): Promise<void> {
 <template>
   <el-container class="page">
     <el-header class="header">
-      <el-button text @click="router.push({ name: 'home' })">← 返回</el-button>
+      <el-button text @click="goHome">← 返回</el-button>
       <strong>会议结束</strong>
       <span class="spacer" />
       <el-tag :type="minutes?.status === 'GENERATING' ? 'warning' : 'info'">{{
