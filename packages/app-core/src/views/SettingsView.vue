@@ -45,6 +45,13 @@ onMounted(() => {
   })()
 })
 
+type ToggleKey = 'muteOnJoin' | 'cameraOffOnJoin' | 'meetingReminder' | 'minimizeToTray'
+
+function toggle(key: ToggleKey): void {
+  settings[key] = !settings[key]
+  persist()
+}
+
 function persist(): void {
   void platform.storage.set(STORAGE_KEY, JSON.stringify(settings))
 }
@@ -97,10 +104,7 @@ function persist(): void {
             type="button"
             role="switch"
             :aria-checked="settings.muteOnJoin"
-            @click="
-              settings.muteOnJoin = !settings.muteOnJoin
-              persist()
-            "
+            @click="toggle('muteOnJoin')"
           >
             <i />
           </button>
@@ -114,10 +118,7 @@ function persist(): void {
             type="button"
             role="switch"
             :aria-checked="settings.cameraOffOnJoin"
-            @click="
-              settings.cameraOffOnJoin = !settings.cameraOffOnJoin
-              persist()
-            "
+            @click="toggle('cameraOffOnJoin')"
           >
             <i />
           </button>
@@ -134,10 +135,7 @@ function persist(): void {
             type="button"
             role="switch"
             :aria-checked="settings.meetingReminder"
-            @click="
-              settings.meetingReminder = !settings.meetingReminder
-              persist()
-            "
+            @click="toggle('meetingReminder')"
           >
             <i />
           </button>
@@ -151,10 +149,7 @@ function persist(): void {
             type="button"
             role="switch"
             :aria-checked="settings.minimizeToTray"
-            @click="
-              settings.minimizeToTray = !settings.minimizeToTray
-              persist()
-            "
+            @click="toggle('minimizeToTray')"
           >
             <i />
           </button>

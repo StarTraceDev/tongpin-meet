@@ -43,6 +43,11 @@ async function finish(sourceId: string | null): Promise<void> {
   await platform.window.closeSub('sharePicker')
 }
 
+function selectListing(listing: CaptureSourceListing): void {
+  mode.value = 'screen'
+  chosen.value = listing.id
+}
+
 function pickMode(next: Mode): void {
   mode.value = next
   if (next !== 'screen') chosen.value = next
@@ -119,10 +124,7 @@ onUnmounted(() => {
             class="source-card"
             :class="{ on: chosen === listing.id }"
             type="button"
-            @click="
-              mode = 'screen'
-              chosen = listing.id
-            "
+            @click="selectListing(listing)"
           >
             <span class="source-thumb">
               <img :src="listing.thumbnail" alt="" decoding="async" />

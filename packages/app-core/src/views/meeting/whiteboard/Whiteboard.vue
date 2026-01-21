@@ -184,6 +184,11 @@ function onPointerUp(): void {
   }
 }
 
+function chooseTool(next: 'pen' | 'arrow'): void {
+  tool.value = next
+  panelOpen.value = true
+}
+
 function undo(): void {
   const stroke = strokes.value.pop()
   if (stroke !== undefined) redoStack.value.push([stroke])
@@ -340,10 +345,7 @@ onBeforeUnmount(() => {
           class="wb-tool"
           :class="{ on: tool === 'pen' }"
           type="button"
-          @click="
-            tool = 'pen'
-            panelOpen = true
-          "
+          @click="chooseTool('pen')"
         >
           <span class="ring"><AppIcon name="pen" :size="20" /></span>
           <span>画笔</span>
@@ -352,10 +354,7 @@ onBeforeUnmount(() => {
           class="wb-tool"
           :class="{ on: tool === 'arrow' }"
           type="button"
-          @click="
-            tool = 'arrow'
-            panelOpen = true
-          "
+          @click="chooseTool('arrow')"
         >
           <span class="ring"><AppIcon name="arrow" :size="20" /></span>
           <span>箭头</span>

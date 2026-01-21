@@ -32,6 +32,11 @@ onMounted(async () => {
   if (meetingId.value !== '') await interaction.loadBreaks(meetingId.value)
 })
 
+function pickMinutes(value: number): void {
+  minutes.value = value
+  open.value = false
+}
+
 async function start(): Promise<void> {
   try {
     await interaction.startBreak(meetingId.value, {
@@ -72,15 +77,7 @@ async function imBack(): Promise<void> {
           分钟
           <ul v-if="open" class="break-options">
             <li v-for="option in [5, 10, 15, 30]" :key="option">
-              <button
-                type="button"
-                @click="
-                  minutes = option
-                  open = false
-                "
-              >
-                {{ option }} 分钟
-              </button>
+              <button type="button" @click="pickMinutes(option)">{{ option }} 分钟</button>
             </li>
           </ul>
         </div>

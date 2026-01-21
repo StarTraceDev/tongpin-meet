@@ -118,6 +118,16 @@ async function signIn(): Promise<void> {
   }
 }
 
+function openRecords(): void {
+  tab.value = 'records'
+  void loadCounts()
+}
+
+function pickDuration(value: number): void {
+  durationMin.value = value
+  durationOpen.value = false
+}
+
 async function loadCounts(): Promise<void> {
   if (meetingId.value === '') return
   for (const item of interaction.checkins.slice(0, 10)) {
@@ -162,10 +172,7 @@ function formatTime(iso: string): string {
         class="panel-tab"
         :class="{ on: tab === 'records' }"
         type="button"
-        @click="
-          tab = 'records'
-          loadCounts()
-        "
+        @click="openRecords"
       >
         签到记录
       </button>
@@ -187,10 +194,7 @@ function formatTime(iso: string): string {
               type="button"
               class="checkin-duration"
               :class="{ on: durationMin === option }"
-              @click="
-                durationMin = option
-                durationOpen = false
-              "
+              @click="pickDuration(option)"
             >
               {{ option }}分钟
             </button>
