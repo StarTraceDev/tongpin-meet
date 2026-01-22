@@ -56,6 +56,9 @@ jobs:
         if: hashFiles('server/prisma/schema.prisma') != ''
         run: pnpm --filter @tongpin/server exec prisma validate
 
+      - name: 卡口：前端产物体积（O18）
+        run: node scripts/check-bundle-size.mjs
+
       - name: 卡口：app-core 平台边界
         run: bash scripts/check-boundaries.sh
 

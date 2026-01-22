@@ -8,6 +8,18 @@ export default defineConfig({
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
+  build: {
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('/node_modules/vue') || id.includes('/node_modules/pinia'))
+            return 'vue-vendor'
+          return undefined
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     // 本地后端换端口时不用改代码：VITE_PROXY_TARGET=http://127.0.0.1:3210 pnpm dev

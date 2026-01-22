@@ -37,7 +37,17 @@ export default defineConfig({
       },
     },
     build: {
-      rollupOptions: { input: 'src/renderer/index.html' },
+      sourcemap: false,
+      rollupOptions: {
+        input: 'src/renderer/index.html',
+        output: {
+          manualChunks(id: string) {
+            if (id.includes('/node_modules/vue') || id.includes('/node_modules/pinia'))
+              return 'vue-vendor'
+            return undefined
+          },
+        },
+      },
     },
   },
 })

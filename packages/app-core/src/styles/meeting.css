@@ -2832,3 +2832,27 @@
 .room-ended-actions .sub-primary {
   width: 180px;
 }
+
+.room-ended-doc {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto 20px;
+  padding: 16px 18px;
+  border-radius: var(--tp-radius-m);
+  background: var(--tp-brand-tint);
+  text-align: left;
+}
+
+.room-ended-doc-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--tp-brand);
+}
+
+.room-ended-doc-body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--tp-text-primary);
+  white-space: pre-wrap;
+}

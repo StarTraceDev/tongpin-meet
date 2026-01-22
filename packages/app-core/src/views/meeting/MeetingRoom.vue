@@ -3,9 +3,11 @@ import { ElMessage } from 'element-plus'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import { fetchMinutes, generateMinutes } from '../../apis/minutes'
 import AppIcon from '../../components/AppIcon.vue'
 import { ROUTE_NAMES } from '../../router/names'
 import { usePlatform } from '../../platform'
+import type { Minutes } from '@tongpin/shared/types'
 import { useAuthStore } from '../../stores/auth'
 import { useChatStore } from '../../stores/chat'
 import { useInteractionStore } from '../../stores/interaction'
@@ -142,6 +144,42 @@ function toggleBarrage(): void {
 
 const leaveOpen = ref(false)
 const ended = ref(false)
+const endedMinutes = ref<Minutes | null>(null)
+const endedDocLoading = ref(false)
+
+const endedSummary = computed<string>(() => {
+  const content = endedMinutes.value?.content.trim() ?? ''
+  if (content === '') return ''
+  return content.length > 160 ? `${content.slice(0, 160)}…` : content
+})
+
+const endedDocStatus = computed<string>(() => {
+  const status = endedMinutes.value?.status
+  if (status === 'GENERATING') return '纪要生成中…'
+  if (status === 'READY') return '会议纪要已生成'
+  return ''
+})
+
+/**
+ * 结束事件 → 结束页 → 拉纪要（O15）。桌面端子窗没有结束页，
+ * 就在结束卡片里把同一份纪要拉出来，保证两条路径都能看到结果。
+ */
+async function loadEndedMinutes(): Promise<void> {
+  endedDocLoading.value = true
+  try {
+    await generateMinutes(meetingId.value)
+  } catch {
+    // 已经生成过（或没有权限）时忽略，仍然尝试读取
+  }
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const doc = await fetchMinutes(meetingId.value).catch(() => null)
+    if (doc === null) break
+    endedMinutes.value = doc
+    if (doc.status !== 'GENERATING') break
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+  }
+  endedDocLoading.value = false
+}
 
 /**
  * 主持人可以「全员结束」，参会人只有「离开会议」。
@@ -154,8 +192,10 @@ async function confirmLeave(all: boolean): Promise<void> {
     if (all) await meeting.end()
     else await meeting.leave()
   } finally {
-    if (platform.kind === 'electron') ended.value = true
-    else void router.replace({ name: ROUTE_NAMES.meetingEnded, params: { id: meetingId.value } })
+    if (platform.kind === 'electron') {
+      ended.value = true
+      void loadEndedMinutes()
+    } else void router.replace({ name: ROUTE_NAMES.meetingEnded, params: { id: meetingId.value } })
   }
 }
 
@@ -173,6 +213,11 @@ function backHome(): void {
     <div v-if="ended" class="room-ended">
       <h2>会议已结束</h2>
       <p class="room-ended-meta">{{ meeting.title }}</p>
+      <div v-if="endedDocStatus !== '' || endedSummary !== ''" class="room-ended-doc">
+        <p class="room-ended-doc-title">{{ endedDocStatus }}</p>
+        <p v-if="endedSummary !== ''" class="room-ended-doc-body">{{ endedSummary }}</p>
+        <p v-else-if="endedDocLoading" class="room-ended-doc-body">正在整理本次会议的结论与待办…</p>
+      </div>
       <div class="room-ended-actions">
         <button class="sub-primary" type="button" @click="backHome">返回首页</button>
       </div>
