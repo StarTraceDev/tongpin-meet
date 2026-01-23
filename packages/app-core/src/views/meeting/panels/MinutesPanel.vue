@@ -135,7 +135,7 @@ onBeforeUnmount(stopTimer)
       <div class="minutes-role">会议助手 <span>刚刚</span></div>
       <div class="minutes-bubble">已生成阶段性纪要，含 3 个结论与 2 项待办。</div>
 
-      <div class="minutes-doc" :class="{ expanded }">
+      <div v-if="content.trim() !== ''" class="minutes-doc" :class="{ expanded }">
         <button class="minutes-copy" type="button" @click="copyDoc">
           <AppIcon name="copy" :size="13" />
           <span>复制</span>

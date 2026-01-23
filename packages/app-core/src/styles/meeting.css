@@ -2856,3 +2856,54 @@
   color: var(--tp-text-primary);
   white-space: pre-wrap;
 }
+
+/* 纪要/助手在多面板 200 宽时：收紧内边距、压字号，避免内容被横向裁掉 */
+@container (max-width: 240px) {
+  .minutes-panel,
+  .assistant-panel {
+    padding: 12px 10px 0;
+  }
+
+  .minutes-summary {
+    padding: 10px 12px;
+  }
+
+  .minutes-summary strong {
+    font-size: 13px;
+  }
+
+  .minutes-summary p,
+  .minutes-doc {
+    font-size: 12px;
+    line-height: 1.65;
+  }
+
+  .minutes-doc {
+    padding: 10px 10px 12px;
+  }
+
+  .minutes-copy {
+    position: static;
+    float: right;
+    font-size: 11px;
+  }
+
+  .minutes-role,
+  .minutes-meta {
+    font-size: 11px;
+  }
+
+  .assistant-msg p {
+    font-size: 12px;
+  }
+
+  .minutes-foot,
+  .assistant-foot {
+    padding: 8px 0 10px;
+  }
+
+  .assistant-chip {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
