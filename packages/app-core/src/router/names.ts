@@ -6,6 +6,7 @@ export const ROUTE_NAMES = {
   meetingEnded: 'meeting-ended',
   device: 'device',
   recordings: 'recordings',
+  contacts: 'contacts',
   settings: 'settings',
   subWindow: 'sub-window',
   notFound: 'not-found',

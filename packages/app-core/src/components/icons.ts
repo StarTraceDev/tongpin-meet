@@ -181,6 +181,15 @@ export const ICONS = {
     { tag: 'path', d: 'M6.5 8.5h11M6.5 12h6' },
     { tag: 'path', d: 'm7 17-1 4 4-4' },
   ],
+  user: [
+    { tag: 'circle', cx: 12, cy: 8, r: 4 },
+    { tag: 'path', d: 'M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5' },
+  ],
+  'user-plus': [
+    { tag: 'circle', cx: 9, cy: 8, r: 4 },
+    { tag: 'path', d: 'M2 21c0-3.6 3.1-6 7-6 1 0 2 .2 2.8.5' },
+    { tag: 'path', d: 'M18 14v6M15 17h6' },
+  ],
 } as const satisfies Record<string, readonly IconShape[]>
 
 export type IconName = keyof typeof ICONS

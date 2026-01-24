@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ElMessage } from 'element-plus'
 import { onMounted, reactive, ref } from 'vue'
 
 import AppIcon from '../components/AppIcon.vue'
@@ -29,6 +30,15 @@ const settings = reactive({
   meetingReminder: true,
   minimizeToTray: false,
   language: '简体中文',
+  cameraId: '默认摄像头',
+  resolution: '720p',
+  mirrorPreview: true,
+  micId: '默认麦克风',
+  speakerId: '默认扬声器',
+  autoConnectAudio: true,
+  autoRecord: false,
+  recordQuality: '高清',
+  recordDir: '',
 })
 
 const STORAGE_KEY = 'settings.general'
@@ -45,11 +55,37 @@ onMounted(() => {
   })()
 })
 
-type ToggleKey = 'muteOnJoin' | 'cameraOffOnJoin' | 'meetingReminder' | 'minimizeToTray'
+type ToggleKey =
+  | 'muteOnJoin'
+  | 'cameraOffOnJoin'
+  | 'meetingReminder'
+  | 'minimizeToTray'
+  | 'mirrorPreview'
+  | 'autoConnectAudio'
+  | 'autoRecord'
 
 function toggle(key: ToggleKey): void {
   settings[key] = !settings[key]
   persist()
+}
+
+const version = import.meta.env.VITE_APP_VERSION ?? '0.1.0'
+
+function pickRecordDir(): void {
+  ElMessage.info('目录选择需要主进程 dialog，M15 接入')
+}
+
+async function checkUpdate(): Promise<void> {
+  try {
+    await platform.update.check()
+    ElMessage.success('已开始检查更新')
+  } catch {
+    ElMessage.info('当前平台不支持自动更新')
+  }
+}
+
+function openDoc(label: string): void {
+  ElMessage.info(`${label}页面将在 M15 补齐`)
 }
 
 function persist(): void {
@@ -164,9 +200,125 @@ function persist(): void {
         </div>
       </template>
 
-      <p v-else class="settings-pending">
-        「{{ SECTIONS.find((item) => item.key === section)?.label }}」设置将在 M14 接入
-      </p>
+      <template v-else-if="section === 'video'">
+        <div class="setting-row">
+          <span class="setting-label">摄像头</span>
+          <select v-model="settings.cameraId" class="setting-select" @change="persist">
+            <option>默认摄像头</option>
+            <option>内置摄像头</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">视频分辨率</span>
+          <select v-model="settings.resolution" class="setting-select" @change="persist">
+            <option>720p</option>
+            <option>1080p</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div>
+            <p class="setting-label">预览画面镜像</p>
+            <p class="setting-desc">仅影响自己的预览，不改变其他参会人看到的画面</p>
+          </div>
+          <button
+            class="switch"
+            :class="{ on: settings.mirrorPreview }"
+            type="button"
+            role="switch"
+            :aria-checked="settings.mirrorPreview"
+            @click="toggle('mirrorPreview')"
+          >
+            <i />
+          </button>
+        </div>
+      </template>
+
+      <template v-else-if="section === 'audio'">
+        <div class="setting-row">
+          <span class="setting-label">麦克风</span>
+          <select v-model="settings.micId" class="setting-select" @change="persist">
+            <option>默认麦克风</option>
+            <option>内置麦克风</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">扬声器</span>
+          <select v-model="settings.speakerId" class="setting-select" @change="persist">
+            <option>默认扬声器</option>
+            <option>内置扬声器</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div>
+            <p class="setting-label">入会时自动连接音频</p>
+            <p class="setting-desc">进入会议后自动加入音频，不再弹「加入音频」按钮</p>
+          </div>
+          <button
+            class="switch"
+            :class="{ on: settings.autoConnectAudio }"
+            type="button"
+            role="switch"
+            :aria-checked="settings.autoConnectAudio"
+            @click="toggle('autoConnectAudio')"
+          >
+            <i />
+          </button>
+        </div>
+      </template>
+
+      <template v-else-if="section === 'recording'">
+        <div class="setting-row">
+          <span class="setting-label">录制画质</span>
+          <select v-model="settings.recordQuality" class="setting-select" @change="persist">
+            <option>高清</option>
+            <option>标清</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">保存位置</span>
+          <div class="setting-inline">
+            <span class="setting-path">{{
+              settings.recordDir === '' ? '默认（影片/同频会议）' : settings.recordDir
+            }}</span>
+            <button class="ghost-btn" type="button" @click="pickRecordDir">选择</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div>
+            <p class="setting-label">入会自动录制</p>
+            <p class="setting-desc">仅主持人生效，其他参会人会看到录制提示</p>
+          </div>
+          <button
+            class="switch"
+            :class="{ on: settings.autoRecord }"
+            type="button"
+            role="switch"
+            :aria-checked="settings.autoRecord"
+            @click="toggle('autoRecord')"
+          >
+            <i />
+          </button>
+        </div>
+      </template>
+
+      <template v-else-if="section === 'about'">
+        <div class="setting-row">
+          <span class="setting-label">同频会议</span>
+          <span class="setting-path">v{{ version }}</span>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">版本更新</span>
+          <button class="ghost-btn" type="button" @click="checkUpdate">检查更新</button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">服务条款</span>
+          <button class="ghost-btn" type="button" @click="openDoc('服务条款')">查看</button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">隐私政策</span>
+          <button class="ghost-btn" type="button" @click="openDoc('隐私政策')">查看</button>
+        </div>
+      </template>
     </section>
   </div>
 </template>
@@ -241,6 +393,33 @@ function persist(): void {
 .setting-label {
   color: var(--tp-text-primary);
   font-size: 15px;
+}
+
+.setting-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.setting-path {
+  color: var(--tp-text-secondary);
+  font-size: 13px;
+}
+
+.ghost-btn {
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid var(--tp-border);
+  border-radius: var(--tp-radius-s);
+  background: #fff;
+  color: var(--tp-text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ghost-btn:hover {
+  background: var(--tp-fill);
 }
 
 .setting-desc {

@@ -30,6 +30,12 @@ export const appRoutes: RouteRecordRaw[] = [
         meta: { title: '会议' },
       },
       {
+        path: 'contacts',
+        name: ROUTE_NAMES.contacts,
+        component: lazy(() => import('../views/ContactsView.vue')),
+        meta: { title: '通讯录' },
+      },
+      {
         path: 'recordings',
         name: ROUTE_NAMES.recordings,
         component: lazy(() => import('../views/RecordingsView.vue')),

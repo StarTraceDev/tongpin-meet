@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ElMessage } from 'element-plus'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -16,11 +15,7 @@ const initials = computed(() => auth.user?.name?.slice(0, 1) ?? '')
 const onHome = computed(() => route.name === ROUTE_NAMES.home)
 const onRecordings = computed(() => route.name === ROUTE_NAMES.recordings)
 const onSettings = computed(() => route.name === ROUTE_NAMES.settings)
-
-/** 会外页（通讯录/录制）排在 M14，先给明确提示而不是 404 */
-function pending(label: string): void {
-  ElMessage.info(`${label}将在 M14 接入`)
-}
+const onContacts = computed(() => route.name === ROUTE_NAMES.contacts)
 
 function onLogout(): void {
   menuOpen.value = false
@@ -53,7 +48,12 @@ function onLogout(): void {
           <AppIcon name="video" :size="22" />
           <span>会议</span>
         </button>
-        <button class="nav-item" type="button" @click="pending('通讯录')">
+        <button
+          class="nav-item"
+          :class="{ active: onContacts }"
+          type="button"
+          @click="router.push({ name: ROUTE_NAMES.contacts })"
+        >
           <AppIcon name="users" :size="22" />
           <span>通讯录</span>
         </button>

@@ -2,52 +2,18 @@
 import { computed, onMounted, ref } from 'vue'
 
 import AppIcon from '../components/AppIcon.vue'
+import { listRecordings, type RecordingItem } from '../apis/recording'
 
-interface RecordingItem {
-  id: string
-  title: string
-  startedAt: string
-  duration: string
-  expiresIn: string
-  expiresSoon: boolean
-}
-
-/**
- * M9 只落了 Recording/RecordingSegment 两张表，没有 REST。
- * 设计稿（D35/D36）需要内容，验收期用 VITE_MOCK_RECORDINGS 打开示例数据。
- */
-const MOCK: RecordingItem[] = [
-  {
-    id: 'rec_1',
-    title: '7517的快速会议',
-    startedAt: '2026-11-06 15:38:18',
-    duration: '00:11',
-    expiresIn: '6天/23:58:31',
-    expiresSoon: false,
-  },
-  {
-    id: 'rec_2',
-    title: '产品周会 · 第三季度复盘',
-    startedAt: '2026-11-05 14:00:22',
-    duration: '42:10',
-    expiresIn: '5天/22:41:08',
-    expiresSoon: false,
-  },
-  {
-    id: 'rec_3',
-    title: '客户需求对齐',
-    startedAt: '2026-11-04 10:30:05',
-    duration: '28:36',
-    expiresIn: '4天/18:12:44',
-    expiresSoon: true,
-  },
-]
-
-const useMock = Number(import.meta.env.VITE_MOCK_RECORDINGS ?? 0) === 1
-
-const items = ref<RecordingItem[]>(useMock ? MOCK : [])
+const items = ref<RecordingItem[]>([])
 const keyword = ref('')
-const activeId = ref<string | null>(useMock ? (MOCK[0]?.id ?? null) : null)
+const activeId = ref<string | null>(null)
+
+onMounted(() => {
+  void (async (): Promise<void> => {
+    items.value = await listRecordings()
+    activeId.value = items.value[0]?.id ?? null
+  })()
+})
 
 const visible = computed(() => {
   const word = keyword.value.trim()
@@ -56,12 +22,6 @@ const visible = computed(() => {
 })
 
 const active = computed(() => items.value.find((item) => item.id === activeId.value) ?? null)
-
-onMounted(() => {
-  if (!useMock) {
-    items.value = []
-  }
-})
 </script>
 
 <template>
