@@ -34,6 +34,8 @@ export interface ElectronBridge {
  * 05 §3.4/§3.5：Electron 端实现。窗口、采集、存储、更新、通知、外壳都走 IPC，
  * 渲染进程因此不需要 import electron，也不需要判断 process.platform。
  */
+const APP_MODE_IDS = new Set(['whiteboard', 'audio', 'document'])
+
 export function createElectronPlatform(bridge: ElectronBridge): Platform {
   let pendingNotifyClick: (() => void) | undefined
   let activeCapture: MediaStream | undefined
@@ -65,6 +67,10 @@ export function createElectronPlatform(bridge: ElectronBridge): Platform {
         ELECTRON_CHANNELS.capturePickSource,
       )
       if (listing === null) return null
+      // 白板/仅电脑声音/文档没有真实采集源，交给上层按 id 分支处理
+      if (APP_MODE_IDS.has(listing.id)) {
+        return { id: listing.id, name: listing.name, kind: listing.kind }
+      }
       const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false })
       activeCapture?.getTracks().forEach((track) => track.stop())
       activeCapture = stream

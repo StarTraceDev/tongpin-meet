@@ -60,6 +60,11 @@ let shareStream: MediaStream | null = null
 
 /** 桌面端走 M10-4 的自定义选择器，web 端走系统 getDisplayMedia */
 async function toggleShare(): Promise<void> {
+  // 白板占着视频区时，共享按钮就是「停止共享」：先收起白板
+  if (whiteboardOpen.value) {
+    whiteboardOpen.value = false
+    return
+  }
   if (sharing.value) {
     shareStream?.getTracks().forEach((track) => track.stop())
     shareStream = null
@@ -70,6 +75,14 @@ async function toggleShare(): Promise<void> {
   }
   const source = await platform.capture.pickSource()
   if (source === null) return
+  if (source.id === 'whiteboard') {
+    whiteboardOpen.value = true
+    return
+  }
+  if (source.id === 'audio' || source.id === 'document') {
+    ElMessage.info(`${source.name}共享将在 M15 接入`)
+    return
+  }
   shareStream = source.stream ?? null
   sharing.value = true
   await rtc.setSharing(true)
@@ -100,12 +113,12 @@ onMounted(() => {
   }
 })
 
-type MorePick = SidePanelKey | 'recording' | 'whiteboard'
+type MorePick = SidePanelKey | 'recording'
 
 /** 白板内嵌时占掉视频区，并让工具栏的共享按钮变成「停止共享」 */
 const whiteboardOpen = ref(false)
 
-/** 更多菜单：录制留到 M13-8，白板内嵌，其余都开对应面板 */
+/** 白板从「共享 → 白板」进入；脱离按钮把它开成 1200×800 独立窗 */
 function openWhiteboardWindow(): void {
   if (meetingId.value === '') return
   platform.window.openSub('whiteboard', { payload: { meetingId: meetingId.value } })
@@ -114,10 +127,6 @@ function openWhiteboardWindow(): void {
 function openFromMore(panel: MorePick): void {
   if (panel === 'recording') {
     ElMessage.info('会议录制将在 M13-8 接入')
-    return
-  }
-  if (panel === 'whiteboard') {
-    whiteboardOpen.value = true
     return
   }
   openSidePanel(panel)
@@ -267,7 +276,7 @@ function backHome(): void {
         :barrage-on="chat.barrageOn"
         :unread="chat.unread"
         :vote-count="ongoingVotes"
-        :share-active="sharing"
+        :share-active="sharing || whiteboardOpen"
         :leave-open="leaveOpen"
         @toggle-mic="rtc.toggleMic()"
         @toggle-camera="rtc.toggleCamera()"

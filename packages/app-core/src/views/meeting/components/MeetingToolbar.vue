@@ -6,7 +6,7 @@ import type { SidePanelKey } from '../../../stores/panels'
 import AppIcon from '../../../components/AppIcon.vue'
 import MoreMenu from './MoreMenu.vue'
 
-type MorePick = SidePanelKey | 'recording' | 'whiteboard'
+type MorePick = SidePanelKey | 'recording'
 
 const props = defineProps<{
   micOn: boolean

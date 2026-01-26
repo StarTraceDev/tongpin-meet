@@ -61,6 +61,16 @@ describe('SourcePicker', () => {
     expect(harness.closed()).toBe(0)
   })
 
+  it('白板/音频/文档这些非采集模式也能回传，并带出伪源', async () => {
+    const harness = setup()
+    const { result } = await startPick(harness)
+
+    expect(harness.picker.settle('session-1', 'whiteboard')).toBe(true)
+
+    await expect(result).resolves.toMatchObject({ id: 'whiteboard', name: '白板' })
+    expect(harness.picker.takeSelected(7)).toEqual({ id: 'whiteboard', name: '白板' })
+  })
+
   it('取消按钮回传 null，不留下待消费的源', async () => {
     const harness = setup()
     const { result } = await startPick(harness)

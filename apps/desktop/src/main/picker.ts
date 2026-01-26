@@ -4,6 +4,16 @@ import type { CaptureSourceListing } from '@tongpin/platform'
 
 import { toCaptureListings, type DesktopSourceLike } from './sources'
 
+/**
+ * 共享面板里除了真实屏幕/窗口，还有几个「非采集」模式：白板、仅电脑声音、文档。
+ * 它们没有 desktopCapturer 源，但要走同一条回传链路，所以在这里造伪源。
+ */
+const APP_MODES: Record<string, CaptureSourceListing> = {
+  whiteboard: { id: 'whiteboard', name: '白板', kind: 'window', thumbnail: '' },
+  audio: { id: 'audio', name: '仅电脑声音', kind: 'screen', thumbnail: '' },
+  document: { id: 'document', name: '文档', kind: 'window', thumbnail: '' },
+}
+
 /** 选中的源只保留给紧接着的那一次 getDisplayMedia，过期作废 */
 const SELECTION_TTL_MS = 60_000
 /** 用户把选择器晾着不管时，不能让业务一直 await */
@@ -88,7 +98,10 @@ export class SourcePicker {
   settle(sessionId: string, sourceId: string | null): boolean {
     const pending = this.pending
     if (pending === null || pending.sessionId !== sessionId) return false
-    const listing = sourceId === null ? null : pending.listings.find((item) => item.id === sourceId)
+    const listing =
+      sourceId === null
+        ? null
+        : (pending.listings.find((item) => item.id === sourceId) ?? APP_MODES[sourceId] ?? null)
     this.finish(listing ?? null, false)
     return true
   }

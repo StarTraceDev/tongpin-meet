@@ -6,7 +6,7 @@ import AppIcon from '../../../components/AppIcon.vue'
 
 defineProps<{ voteCount: number }>()
 
-type MorePick = SidePanelKey | 'recording' | 'whiteboard'
+type MorePick = SidePanelKey | 'recording'
 
 const emit = defineEmits<{ pick: [panel: MorePick]; close: [] }>()
 
@@ -23,7 +23,6 @@ const items: Item[] = [
   { key: 'break', label: '休息一下', icon: 'clock' },
   { key: 'checkin', label: '签到', icon: 'check' },
   { key: 'recording', label: '会议录制', icon: 'record' },
-  { key: 'whiteboard', label: '白板', icon: 'pen' },
 ]
 </script>
 
