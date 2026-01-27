@@ -18,6 +18,7 @@ export interface Platform {
 /** 子窗口种类（10-M13 §二全表）；尺寸与标题见 ./subwindows.ts */
 export type SubWindowKey =
   | 'join'
+  | 'quick'
   | 'schedule'
   | 'meetingDetail'
   | 'history'

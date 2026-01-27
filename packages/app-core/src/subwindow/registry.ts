@@ -3,6 +3,8 @@ import type { Component } from 'vue'
 
 import MeetingRoom from '../views/meeting/MeetingRoom.vue'
 import JoinMeeting from './JoinMeeting.vue'
+import QuickMeeting from './QuickMeeting.vue'
+import HistoryWindow from './HistoryWindow.vue'
 import PanelWindow from './PanelWindow.vue'
 import PendingPanel from './PendingPanel.vue'
 import WhiteboardWindow from './WhiteboardWindow.vue'
@@ -13,6 +15,8 @@ import WhiteboardWindow from './WhiteboardWindow.vue'
  */
 const PANELS: Partial<Record<SubWindowKey, Component>> = {
   join: JoinMeeting,
+  quick: QuickMeeting,
+  history: HistoryWindow,
   meeting: MeetingRoom,
   whiteboard: WhiteboardWindow,
   members: PanelWindow,

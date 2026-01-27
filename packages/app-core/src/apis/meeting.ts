@@ -1,4 +1,5 @@
 import type {
+  CreateMeetingInput,
   ListMeetingsQuery,
   Meeting,
   MeetingJoinResult,
@@ -7,6 +8,14 @@ import type {
 } from '@tongpin/shared/types'
 
 import { request } from './http'
+
+/** 建会：快速会议的即时会议与预定会议共用 */
+export function createMeeting(input: CreateMeetingInput): Promise<Meeting> {
+  return request<Meeting>('/meetings', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
 
 /** 会议列表。字段名对齐 04 §5.3 的 query 参数，组件里不再手拼 URL（O3） */
 export function listMeetings(query: Partial<ListMeetingsQuery> = {}): Promise<Paginated<Meeting>> {

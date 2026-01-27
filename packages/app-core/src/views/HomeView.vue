@@ -102,7 +102,15 @@ function openEntry(key: (typeof entries)[number]['key']): void {
     void platform.window.openSub('schedule', { title: '预定会议' })
     return
   }
-  ElMessage.info(key === 'quick' ? '快速会议将在 M13-1 接入' : '共享屏幕将在 M13-8 接入')
+  if (key === 'quick') {
+    void platform.window.openSub('quick', { title: '快速会议' })
+    return
+  }
+  ElMessage.info('共享屏幕将在 M13-8 接入')
+}
+
+function openHistory(): void {
+  void platform.window.openSub('history', { title: '历史会议' })
 }
 
 function openMeeting(meeting: Meeting): void {
@@ -148,7 +156,7 @@ onMounted(() => {
           <AppIcon name="search" :size="16" />
           <input v-model="keyword" type="search" placeholder="搜索" aria-label="搜索会议" />
         </label>
-        <button class="link-more" type="button" @click="ElMessage.info('历史记录将在 M13-9 接入')">
+        <button class="link-more" type="button" @click="openHistory">
           历史记录
           <AppIcon name="right" :size="12" />
         </button>

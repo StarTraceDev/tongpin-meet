@@ -10,6 +10,7 @@ export interface SubWindowSpec {
 
 export const SUB_WINDOW_SPECS: Record<SubWindowKey, SubWindowSpec> = {
   join: { title: '加入会议', width: 450, height: 700 },
+  quick: { title: '快速会议', width: 450, height: 700 },
   schedule: { title: '预定会议', width: 450, height: 700 },
   meetingDetail: { title: '会议详情', width: 450, height: 700 },
   history: { title: '历史记录', width: 550, height: 700 },
