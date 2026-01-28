@@ -239,7 +239,7 @@ function backHome(): void {
         :layout-mode="layoutMode"
         :member-count="participants.count"
         @dblclick="onDoubleClick"
-        @detail="openPanel('meetingDetail')"
+        @detail="openPanel('meetingDetail', { meetingId })"
         @fullscreen="toggleFullscreen"
         @select-layout="setLayoutPreference"
       />

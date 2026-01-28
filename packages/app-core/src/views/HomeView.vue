@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
-import { onMounted, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import type { Meeting } from '@tongpin/shared/types'
@@ -16,6 +16,10 @@ const router = useRouter()
 const meetings = ref<Meeting[]>([])
 const loading = ref(false)
 const keyword = ref('')
+
+function refreshOnFocus(): void {
+  void load()
+}
 
 const entries = [
   { key: 'join', label: '加入会议', icon: 'plus', tone: 'amber' },
@@ -128,6 +132,12 @@ function openMeeting(meeting: Meeting): void {
 
 onMounted(() => {
   void load()
+  // 子窗口（预定/快速会议）建完会回来时，主窗重新聚焦即刷新列表
+  globalThis.addEventListener('focus', refreshOnFocus)
+})
+
+onBeforeUnmount(() => {
+  globalThis.removeEventListener('focus', refreshOnFocus)
 })
 </script>
 

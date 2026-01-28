@@ -12,7 +12,10 @@ export function useMeetingWindow(): {
   isDesktop: boolean
   fullscreen: Ref<boolean>
   toggleFullscreen: () => Promise<void>
-  openPanel: (key: 'meetingDetail' | 'checkin' | 'vote' | 'members' | 'panelChat') => void
+  openPanel: (
+    key: 'meetingDetail' | 'checkin' | 'vote' | 'members' | 'panelChat',
+    payload?: Record<string, unknown>,
+  ) => void
   closeRoom: () => void
 } {
   const platform = usePlatform()
@@ -25,8 +28,11 @@ export function useMeetingWindow(): {
     await platform.window.setFullscreen(fullscreen.value)
   }
 
-  function openPanel(key: 'meetingDetail' | 'checkin' | 'vote' | 'members' | 'panelChat'): void {
-    void platform.window.openSub(key, {})
+  function openPanel(
+    key: 'meetingDetail' | 'checkin' | 'vote' | 'members' | 'panelChat',
+    payload?: Record<string, unknown>,
+  ): void {
+    void platform.window.openSub(key, payload === undefined ? {} : { payload })
   }
 
   function closeRoom(): void {
