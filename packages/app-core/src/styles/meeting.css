@@ -626,6 +626,98 @@
 .side-dock {
   flex: none;
   display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--tp-border);
+  background: var(--tp-canvas);
+}
+
+.dock-tabs {
+  display: flex;
+  flex: none;
+  height: 44px;
+  border-bottom: 1px solid var(--tp-border-light);
+}
+
+.dock-tab {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: var(--tp-surface-secondary);
+  color: var(--tp-text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dock-tab.on {
+  flex: 0 0 50%;
+  background: var(--tp-canvas);
+  color: var(--tp-text-title);
+  border-bottom-color: transparent;
+}
+
+.dock-tab:not(.on) + .dock-tab:not(.on)::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 0;
+  width: 1px;
+  background: var(--tp-border);
+  content: '';
+}
+
+.dock-tab-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dock-tab-actions {
+  display: flex;
+  flex: none;
+  gap: 2px;
+  margin-left: 4px;
+}
+
+.dock-act {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: var(--tp-radius-s);
+  background: transparent;
+  color: var(--tp-text-secondary);
+  cursor: pointer;
+  place-items: center;
+}
+
+.dock-act:hover {
+  background: var(--tp-fill);
+}
+
+.dock-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dock-body > * {
+  min-height: 0;
+}
+
+.side-dock-old {
+  flex: none;
+  display: flex;
   height: 100%;
   background: #fff;
   border-left: 1px solid var(--tp-border);

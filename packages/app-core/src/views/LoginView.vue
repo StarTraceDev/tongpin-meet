@@ -190,7 +190,8 @@ async function startDeviceLogin(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  height: 100%;
+  min-height: 100%;
 }
 
 .login-card {
