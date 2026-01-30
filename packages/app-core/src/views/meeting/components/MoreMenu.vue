@@ -19,6 +19,7 @@ interface Item {
 const items: Item[] = [
   { key: 'intelligence', label: '智能助手', icon: 'zap' },
   { key: 'minutes', label: '会议纪要', icon: 'file' },
+  { key: 'files', label: '会议文件', icon: 'download' },
   { key: 'vote', label: '投票', icon: 'chart' },
   { key: 'break', label: '休息一下', icon: 'clock' },
   { key: 'checkin', label: '签到', icon: 'check' },

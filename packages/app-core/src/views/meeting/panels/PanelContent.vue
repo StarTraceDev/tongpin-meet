@@ -7,6 +7,7 @@ import AssistantPanel from './AssistantPanel.vue'
 import BreakPanel from './BreakPanel.vue'
 import ChatPanel from './ChatPanel.vue'
 import CheckInPanel from './CheckInPanel.vue'
+import FilePanel from './FilePanel.vue'
 import MembersPanel from './MembersPanel.vue'
 import MinutesPanel from './MinutesPanel.vue'
 import VotePanel from './VotePanel.vue'
@@ -18,7 +19,8 @@ const spec = computed(() => PANEL_SPECS[props.panel])
 </script>
 
 <template>
-  <MembersPanel v-if="panel === 'members'" />
+  <FilePanel v-if="panel === 'files'" />
+  <MembersPanel v-else-if="panel === 'members'" />
   <ChatPanel v-else-if="panel === 'chat'" />
   <CheckInPanel v-else-if="panel === 'checkin'" />
   <VotePanel v-else-if="panel === 'vote'" />

@@ -2,11 +2,12 @@
 import type { IconName } from '../../../components/icons'
 import PanelHeader from './PanelHeader.vue'
 
-defineProps<{
+const props = defineProps<{
   title: string
   icon: IconName
   active: boolean
   width: number
+  detachable?: boolean
 }>()
 
 defineEmits<{ activate: []; close: []; detach: [] }>()
@@ -24,6 +25,7 @@ defineEmits<{ activate: []; close: []; detach: [] }>()
       :title="title"
       :icon="icon"
       :active="active"
+      :detachable="props.detachable"
       @close="$emit('close')"
       @detach="$emit('detach')"
     />

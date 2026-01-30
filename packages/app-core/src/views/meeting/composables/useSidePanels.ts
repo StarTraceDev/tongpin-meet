@@ -33,10 +33,11 @@ export function useSidePanels(meetingId: () => string): {
   )
 
   function openPanel(key: SidePanelKey): void {
+    const spec = PANEL_SPECS[key]
     // 已脱离的面板：点工具栏就是把子窗收回来
-    if (panels.detached.includes(key)) {
+    if (spec.subWindow !== null && panels.detached.includes(key)) {
       panels.setDetached(key, false)
-      void platform.window.closeSub(PANEL_SPECS[key].subWindow)
+      void platform.window.closeSub(spec.subWindow)
       return
     }
     // 已选中：再点一次收起（工具栏按钮是开关）
@@ -49,6 +50,7 @@ export function useSidePanels(meetingId: () => string): {
 
   function detachPanel(key: SidePanelKey): void {
     const spec = PANEL_SPECS[key]
+    if (spec.subWindow === null) return
     void platform.window.openSub(spec.subWindow, {
       title: `${spec.title} · 同频会议`,
       payload: { meetingId: meetingId(), panel: key, isHost: meeting.isHost },

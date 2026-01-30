@@ -44,6 +44,7 @@ function titleOf(key: SidePanelKey): string {
           <span class="dock-tab-title">{{ titleOf(key) }}</span>
           <span v-if="key === panels.active" class="dock-tab-actions">
             <button
+              v-if="PANEL_SPECS[key].subWindow !== null"
               type="button"
               class="dock-act"
               title="脱离为独立窗口"
@@ -68,6 +69,7 @@ function titleOf(key: SidePanelKey): string {
       :icon="PANEL_SPECS[visible[0]].icon"
       :active="true"
       :width="width"
+      :detachable="PANEL_SPECS[visible[0]].subWindow !== null"
       @close="panels.close(visible[0])"
       @detach="emit('detach', visible[0])"
     >

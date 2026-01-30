@@ -113,6 +113,10 @@ export const ICONS = {
     { tag: 'path', d: 'M8 6V4h8v2' },
     { tag: 'path', d: 'm6 6 1 14h10l1-14' },
   ],
+  upload: [
+    { tag: 'path', d: 'M12 19V5' },
+    { tag: 'path', d: 'm5 12 7-7 7 7' },
+  ],
   download: [
     { tag: 'path', d: 'M12 3v12' },
     { tag: 'path', d: 'm7 10 5 5 5-5' },

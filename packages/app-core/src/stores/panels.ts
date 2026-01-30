@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 
 /** 会中可停靠的面板（10-M13 §二：面板是 inset 挤压，不改变窗口宽度） */
 export type SidePanelKey =
-  'members' | 'chat' | 'minutes' | 'intelligence' | 'break' | 'checkin' | 'vote'
+  'members' | 'chat' | 'minutes' | 'intelligence' | 'break' | 'checkin' | 'vote' | 'files'
 
 /**
  * 面板三态的唯一真相（10-M13 O14）：
