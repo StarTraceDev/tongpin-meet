@@ -907,6 +907,52 @@
   color: var(--tp-text-secondary);
 }
 
+.member-mic-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.member-more-wrap {
+  position: relative;
+}
+
+.member-menu {
+  position: absolute;
+  right: 0;
+  top: 22px;
+  z-index: 30;
+  min-width: 108px;
+  padding: 4px;
+  border-radius: var(--tp-radius-s);
+  background: var(--tp-canvas);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 14%);
+}
+
+.member-menu-item {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--tp-danger);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.member-menu-item:hover {
+  background: var(--tp-fill);
+}
+
+.panel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .member-more {
   flex: none;
   width: 24px;

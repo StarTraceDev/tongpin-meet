@@ -1,5 +1,6 @@
 import { computed, onMounted, onUnmounted, ref, type ComputedRef } from 'vue'
 
+import { listParticipants } from '../../../apis/participant'
 import { useAuthStore } from '../../../stores/auth'
 import { useChatStore } from '../../../stores/chat'
 import { useMeetingStore } from '../../../stores/meeting'
@@ -35,6 +36,7 @@ export function useMeetingMount(meetingId: () => string): {
 
   const elapsedSeconds = ref(0)
   let timer: ReturnType<typeof setInterval> | undefined
+  let rosterTimer: ReturnType<typeof setInterval> | undefined
 
   function startClock(): void {
     if (timer !== undefined) return
@@ -70,7 +72,22 @@ export function useMeetingMount(meetingId: () => string): {
     offChat = rtc.onChatMessage((message) => {
       chat.receive(message)
     })
+    await refreshParticipants()
+    rosterTimer = setInterval(() => {
+      void refreshParticipants()
+    }, 5000)
     startClock()
+  }
+
+  /** 成员表以服务端为准；RTC 只补说话态 */
+  async function refreshParticipants(): Promise<void> {
+    if (meetingId() === '') return
+    try {
+      const list = await listParticipants(meetingId())
+      if (list.items.length > 0) participants.syncFromServer(list.items)
+    } catch {
+      // 轮询失败不打断会中体验，下一轮再试
+    }
   }
 
   /** 断网时先标为「重连中」，恢复后重新 connect（mock 阶段等价于立刻连上） */
@@ -94,6 +111,8 @@ export function useMeetingMount(meetingId: () => string): {
     window.removeEventListener('online', onOnline)
     if (timer !== undefined) clearInterval(timer)
     timer = undefined
+    if (rosterTimer !== undefined) clearInterval(rosterTimer)
+    rosterTimer = undefined
     offChat?.()
     offChat = undefined
     void rtc.disconnect()

@@ -20,6 +20,7 @@ import {
   joinAsGuestSchema,
   joinMeetingSchema,
   listMeetingsQuerySchema,
+  muteParticipantSchema,
   transferHostSchema,
   updateMeetingSchema,
 } from '../../../../packages/shared/src/schemas'
@@ -30,6 +31,8 @@ import type {
   Meeting,
   MeetingCreated,
   MeetingJoinResult,
+  MeetingParticipant,
+  MeetingParticipantList,
   MeetingWaiting,
   Paginated,
   RtcToken,
@@ -49,6 +52,7 @@ class JoinMeetingDto extends createZodDto(joinMeetingSchema) {}
 class JoinAsGuestDto extends createZodDto(joinAsGuestSchema) {}
 class ClaimHostDto extends createZodDto(claimHostSchema) {}
 class TransferHostDto extends createZodDto(transferHostSchema) {}
+class MuteParticipantDto extends createZodDto(muteParticipantSchema) {}
 
 @Controller('meetings')
 export class MeetingController {
@@ -140,6 +144,49 @@ export class MeetingController {
   @HttpCode(204)
   leave(@CurrentUser() user: AuthUser, @Param('id') id: string): Promise<void> {
     return this.meetings.leave(user, id)
+  }
+
+  @Get(':id/participants')
+  @UseGuards(JwtAuthGuard)
+  participants(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+  ): Promise<MeetingParticipantList> {
+    return this.meetings.listParticipants(user, id)
+  }
+
+  @Post(':id/participants/:participantId\\:mute')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  muteParticipant(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Param('participantId') participantId: string,
+    @Body() body: MuteParticipantDto,
+  ): Promise<MeetingParticipant> {
+    return this.meetings.muteParticipant(user, id, participantId, body.muted)
+  }
+
+  @Post(':id/participants/:participantId\\:remove')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(204)
+  removeParticipant(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Param('participantId') participantId: string,
+  ): Promise<void> {
+    return this.meetings.removeParticipant(user, id, participantId)
+  }
+
+  @Post(':id/participants\\:muteAll')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  muteAll(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Body() body: MuteParticipantDto,
+  ): Promise<{ updated: number }> {
+    return this.meetings.muteAll(user, id, body.muted)
   }
 
   @Post(':id\\:end')

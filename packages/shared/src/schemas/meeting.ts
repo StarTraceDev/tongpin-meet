@@ -154,3 +154,26 @@ export const waitingEntrySchema = z.object({
 export const transferHostSchema = z.object({
   userId: z.string().min(1),
 })
+
+/** 会中成员；mediaState 拍平成 audioOn/videoOn/screenSharing，online = 已入会且未离会 */
+export const meetingParticipantSchema = z.object({
+  id: z.string().min(1),
+  meetingId: z.string().min(1),
+  userId: z.string().nullable(),
+  name: z.string().min(1),
+  role: participantRoleSchema,
+  audioOn: z.boolean(),
+  videoOn: z.boolean(),
+  screenSharing: z.boolean(),
+  online: z.boolean(),
+  joinedAt: isoDateTimeSchema.nullable(),
+  leftAt: isoDateTimeSchema.nullable(),
+})
+
+export const meetingParticipantListSchema = z.object({
+  items: z.array(meetingParticipantSchema),
+  total: z.number().int().nonnegative(),
+})
+
+/** 主持人控制成员：静音/解除静音、移出会议 */
+export const muteParticipantSchema = z.object({ muted: z.boolean() })

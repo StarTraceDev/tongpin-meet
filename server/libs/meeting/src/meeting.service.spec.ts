@@ -53,6 +53,7 @@ interface Mocks {
   participantCreate: ReturnType<typeof vi.fn>
   participantUpdate: ReturnType<typeof vi.fn>
   participantUpdateMany: ReturnType<typeof vi.fn>
+  participantFindMany: ReturnType<typeof vi.fn>
   eventAggregate: ReturnType<typeof vi.fn>
   eventCreate: ReturnType<typeof vi.fn>
   waitingCreate: ReturnType<typeof vi.fn>
@@ -76,6 +77,7 @@ function makePrisma(): { prisma: PrismaService; mocks: Mocks } {
     participantCreate: vi.fn(),
     participantUpdate: vi.fn(),
     participantUpdateMany: vi.fn(),
+    participantFindMany: vi.fn(),
     eventAggregate: vi.fn(),
     eventCreate: vi.fn(),
     waitingCreate: vi.fn(),
@@ -101,6 +103,8 @@ function makePrisma(): { prisma: PrismaService; mocks: Mocks } {
       create: mocks.participantCreate,
       update: mocks.participantUpdate,
       updateMany: mocks.participantUpdateMany,
+      findMany: mocks.participantFindMany,
+      findFirst: mocks.participantFindUnique,
     },
     meetingEvent: {
       aggregate: mocks.eventAggregate,
@@ -406,6 +410,95 @@ describe('MeetingService 等候室', () => {
     expect(mocks.waitingUpdate).toHaveBeenCalledWith({
       where: { id: 'w_1' },
       data: { status: 'ADMITTED' },
+    })
+  })
+
+  describe('会中成员', () => {
+    const guest = {
+      id: 'p_2',
+      meetingId: 'm_1',
+      userId: null,
+      guestName: '访客',
+      role: 'GUEST',
+      mediaState: { audioOn: true, videoOn: false, screenSharing: false },
+      joinedAt: new Date('2026-01-01T02:00:00.000Z'),
+      leftAt: null,
+      createdAt: new Date('2026-01-01T02:00:00.000Z'),
+    }
+
+    it('listParticipants 把 mediaState 拍平并算出 online', async () => {
+      const { prisma, mocks } = makePrisma()
+      mocks.meetingFindFirst.mockResolvedValue(meetingRow())
+      mocks.participantFindMany.mockResolvedValue([guest])
+      const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
+
+      const result = await service.listParticipants(host, 'm_1')
+
+      expect(result.total).toBe(1)
+      expect(result.items[0]).toMatchObject({
+        id: 'p_2',
+        name: '访客',
+        role: 'GUEST',
+        audioOn: true,
+        online: true,
+      })
+    })
+
+    it('muteParticipant 非主持人被拒绝', async () => {
+      const { prisma, mocks } = makePrisma()
+      mocks.meetingFindFirst.mockResolvedValue(meetingRow({ hostId: 'user_2' }))
+      mocks.participantFindUnique.mockResolvedValue({ ...guest, role: 'ATTENDEE' })
+      const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
+
+      await expect(service.muteParticipant(host, 'm_1', 'p_2', true)).rejects.toMatchObject({
+        status: 403,
+      })
+    })
+
+    it('muteParticipant 写回 audioOn=false', async () => {
+      const { prisma, mocks } = makePrisma()
+      mocks.meetingFindFirst.mockResolvedValue(meetingRow())
+      mocks.participantFindUnique
+        .mockResolvedValueOnce({ ...guest, role: 'HOST' })
+        .mockResolvedValueOnce(guest)
+      mocks.participantUpdate.mockResolvedValue({
+        ...guest,
+        mediaState: { audioOn: false, videoOn: false, screenSharing: false },
+      })
+      const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
+
+      const updated = await service.muteParticipant(host, 'm_1', 'p_2', true)
+
+      expect(mocks.participantUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { mediaState: { audioOn: false, videoOn: false, screenSharing: false } },
+        }),
+      )
+      expect(updated.audioOn).toBe(false)
+    })
+
+    it('removeParticipant 不能移出主持人', async () => {
+      const { prisma, mocks } = makePrisma()
+      mocks.meetingFindFirst.mockResolvedValue(meetingRow())
+      mocks.participantFindUnique.mockResolvedValue({ ...guest, role: 'HOST' })
+      const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
+
+      await expect(service.removeParticipant(host, 'm_1', 'p_2')).rejects.toMatchObject({
+        status: 403,
+      })
+    })
+
+    it('muteAll 只处理非主持人成员', async () => {
+      const { prisma, mocks } = makePrisma()
+      mocks.meetingFindFirst.mockResolvedValue(meetingRow())
+      mocks.participantFindMany.mockResolvedValue([guest])
+      mocks.participantUpdate.mockResolvedValue(guest)
+      const service = new MeetingService(prisma, makeIdempotency(), makeRtc())
+
+      const result = await service.muteAll(host, 'm_1', true)
+
+      expect(result.updated).toBe(1)
+      expect(mocks.participantUpdate).toHaveBeenCalledOnce()
     })
   })
 })

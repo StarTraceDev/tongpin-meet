@@ -3,7 +3,7 @@ import { randomInt, randomUUID } from 'node:crypto'
 import { Inject, Injectable } from '@nestjs/common'
 import argon2 from 'argon2'
 
-import { meetingSettingsSchema } from '../../../../packages/shared/src/schemas'
+import { mediaStateSchema, meetingSettingsSchema } from '../../../../packages/shared/src/schemas'
 import { canRunMeetingAction, ERROR_CODES } from '../../../../packages/shared/src/constants'
 import type {
   AuthUser,
@@ -15,6 +15,8 @@ import type {
   Meeting,
   MeetingCreated,
   MeetingJoinResult,
+  MeetingParticipant,
+  MeetingParticipantList,
   MeetingWaiting,
   Paginated,
   RtcToken,
@@ -187,6 +189,90 @@ export class MeetingService {
       pageSize: query.pageSize,
       total,
     }
+  }
+
+  /** 会中成员列表：主持人、普通参会人都能看 */
+  async listParticipants(user: AuthUser, id: string): Promise<MeetingParticipantList> {
+    await this.findVisible(user, id)
+    const rows = await this.prisma.meetingParticipant.findMany({
+      where: { meetingId: id },
+      include: { user: { select: { id: true, name: true } } },
+      orderBy: [{ createdAt: 'asc' }],
+    })
+    return { items: rows.map(toParticipant), total: rows.length }
+  }
+
+  /** 主持人/联席主持人静音某个成员；不能操作主持人 */
+  async muteParticipant(
+    user: AuthUser,
+    id: string,
+    participantId: string,
+    muted: boolean,
+  ): Promise<MeetingParticipant> {
+    const meeting = await this.findVisible(user, id)
+    const self = await this.prisma.meetingParticipant.findFirst({
+      where: { meetingId: id, userId: user.id },
+    })
+    const isHost = meeting.hostId === user.id || self?.role === 'COHOST'
+    if (!isHost) throw new ApiError(10003, '只有主持人可以管理成员', 403)
+
+    const row = await this.prisma.meetingParticipant.findFirst({
+      where: { id: participantId, meetingId: id },
+      include: { user: { select: { id: true, name: true } } },
+    })
+    if (row === null) throw new ApiError(10000, '成员不存在', 404)
+    if (row.role === 'HOST' && row.userId !== user.id) {
+      throw new ApiError(10003, '不能静音主持人', 403)
+    }
+    const media = mediaStateSchema.parse(row.mediaState)
+    const updated = await this.prisma.meetingParticipant.update({
+      where: { id: row.id },
+      data: { mediaState: { ...media, audioOn: !muted } },
+      include: { user: { select: { id: true, name: true } } },
+    })
+    return toParticipant(updated)
+  }
+
+  /** 主持人移出成员（软离会，保留记录） */
+  async removeParticipant(user: AuthUser, id: string, participantId: string): Promise<void> {
+    const meeting = await this.findVisible(user, id)
+    if (meeting.hostId !== user.id) {
+      throw new ApiError(10003, '只有主持人可以移出成员', 403)
+    }
+    const row = await this.prisma.meetingParticipant.findFirst({
+      where: { id: participantId, meetingId: id },
+    })
+    if (row === null) throw new ApiError(10000, '成员不存在', 404)
+    if (row.role === 'HOST' || row.userId === meeting.hostId) {
+      throw new ApiError(10003, '不能移出主持人', 403)
+    }
+    const media = mediaStateSchema.parse(row.mediaState)
+    await this.prisma.meetingParticipant.update({
+      where: { id: row.id },
+      data: {
+        leftAt: new Date(),
+        mediaState: { ...media, audioOn: false, videoOn: false, screenSharing: false },
+      },
+    })
+  }
+
+  /** 开启/解除全体静音；只动普通成员，跳过主持人自己 */
+  async muteAll(user: AuthUser, id: string, muted: boolean): Promise<{ updated: number }> {
+    const meeting = await this.findVisible(user, id)
+    if (meeting.hostId !== user.id) {
+      throw new ApiError(10003, '只有主持人可以全体静音', 403)
+    }
+    const rows = await this.prisma.meetingParticipant.findMany({
+      where: { meetingId: id, leftAt: null, role: { not: 'HOST' } },
+    })
+    for (const row of rows) {
+      const media = mediaStateSchema.parse(row.mediaState)
+      await this.prisma.meetingParticipant.update({
+        where: { id: row.id },
+        data: { mediaState: { ...media, audioOn: !muted } },
+      })
+    }
+    return { updated: rows.length }
   }
 
   async detail(user: AuthUser, id: string): Promise<{ meeting: Meeting; etag: string }> {
@@ -735,5 +821,32 @@ function buildJoinResult(
       role: participant.role as MeetingJoinResult['participant']['role'],
       guestName: participant.guestName,
     },
+  }
+}
+
+function toParticipant(row: {
+  id: string
+  meetingId: string
+  userId: string | null
+  guestName: string | null
+  role: string
+  mediaState: unknown
+  joinedAt: Date | null
+  leftAt: Date | null
+  user?: { name: string } | null
+}): MeetingParticipant {
+  const media = mediaStateSchema.parse(row.mediaState)
+  return {
+    id: row.id,
+    meetingId: row.meetingId,
+    userId: row.userId,
+    name: row.user?.name ?? row.guestName ?? '参会人',
+    role: row.role as MeetingParticipant['role'],
+    audioOn: media.audioOn,
+    videoOn: media.videoOn,
+    screenSharing: media.screenSharing,
+    online: row.joinedAt !== null && row.leftAt === null,
+    joinedAt: row.joinedAt === null ? null : row.joinedAt.toISOString(),
+    leftAt: row.leftAt === null ? null : row.leftAt.toISOString(),
   }
 }

@@ -1,4 +1,7 @@
-import type { MeetingJoinResult } from '@tongpin/shared/types'
+import type {
+  MeetingJoinResult,
+  MeetingParticipant as ServerParticipant,
+} from '@tongpin/shared/types'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
@@ -53,12 +56,44 @@ export const useParticipantsStore = defineStore('participants', () => {
     )
   }
 
+  const roleOf = (role: ServerParticipant['role']): ParticipantRole => {
+    if (role === 'HOST') return 'HOST'
+    if (role === 'COHOST') return 'COHOST'
+    if (role === 'GUEST') return 'GUEST'
+    return 'MEMBER'
+  }
+
+  /** 服务端成员表是权威数据；说话态仍用本地 RTC 的值 */
+  function syncFromServer(list: ServerParticipant[]): void {
+    const speaking = new Map(participants.value.map((item) => [item.id, item.speaking]))
+    participants.value = list.map((item) => ({
+      id: item.id,
+      name: item.name,
+      role: roleOf(item.role),
+      micOn: item.audioOn,
+      cameraOn: item.videoOn,
+      speaking: speaking.get(item.id) ?? false,
+    }))
+  }
+
   function reset(): void {
     participants.value = []
     selfId.value = null
   }
 
-  return { participants, selfId, count, self, hosts, setSelf, update, replaceAll, setAllMic, reset }
+  return {
+    participants,
+    selfId,
+    count,
+    self,
+    hosts,
+    setSelf,
+    update,
+    replaceAll,
+    syncFromServer,
+    setAllMic,
+    reset,
+  }
 })
 
 /** 入会接口只给 id/role/guestName，昵称由本地用户补齐 */
