@@ -4,6 +4,12 @@
  */
 import type { z } from 'zod'
 
+import type {
+  recordingSchema,
+  recordingListSchema,
+  recordingDetailSchema,
+  recordingSegmentSchema,
+} from '../schemas/recording'
 import type { auditLogItemSchema, auditLogListSchema, auditLogQuerySchema } from '../schemas/audit'
 import type {
   exportOperationActionSchema,
@@ -329,6 +335,10 @@ export type MeetingFile = z.infer<typeof meetingFileSchema>
 export type UploadSession = z.infer<typeof uploadSessionSchema>
 export type DownloadUrl = z.infer<typeof downloadUrlSchema>
 export type CreateUploadInput = z.infer<typeof createUploadSchema>
+export type Recording = z.infer<typeof recordingSchema>
+export type RecordingList = z.infer<typeof recordingListSchema>
+export type RecordingDetail = z.infer<typeof recordingDetailSchema>
+export type RecordingSegment = z.infer<typeof recordingSegmentSchema>
 export type Minutes = z.infer<typeof minutesSchema>
 export type UpdateMinutesInput = z.infer<typeof updateMinutesSchema>
 

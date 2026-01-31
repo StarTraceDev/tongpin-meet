@@ -2,26 +2,49 @@
 import { computed, onMounted, ref } from 'vue'
 
 import AppIcon from '../components/AppIcon.vue'
-import { listRecordings, type RecordingItem } from '../apis/recording'
+import { getRecording, listRecordings } from '../apis/recording'
+import type { Recording, RecordingDetail } from '@tongpin/shared/types'
 
-const items = ref<RecordingItem[]>([])
+const items = ref<Recording[]>([])
+const detail = ref<RecordingDetail | null>(null)
 const keyword = ref('')
 const activeId = ref<string | null>(null)
 
 onMounted(() => {
   void (async (): Promise<void> => {
-    items.value = await listRecordings()
+    const list = await listRecordings()
+    items.value = list.items
     activeId.value = items.value[0]?.id ?? null
+    if (activeId.value !== null) detail.value = await getRecording(activeId.value)
   })()
 })
 
 const visible = computed(() => {
   const word = keyword.value.trim()
   if (word === '') return items.value
-  return items.value.filter((item) => item.title.includes(word))
+  return items.value.filter((item) => item.meetingTitle.includes(word))
 })
 
 const active = computed(() => items.value.find((item) => item.id === activeId.value) ?? null)
+
+function formatTime(iso: string): string {
+  const date = new Date(iso)
+  return `${String(date.getMonth() + 1)}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+}
+
+function formatDuration(seconds: number | null): string {
+  if (seconds === null) return '—'
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
+function selectItem(id: string): void {
+  activeId.value = id
+  void (async (): Promise<void> => {
+    detail.value = await getRecording(id)
+  })()
+}
 </script>
 
 <template>
@@ -43,18 +66,20 @@ const active = computed(() => items.value.find((item) => item.id === activeId.va
           class="rec-row"
           :class="{ on: item.id === activeId }"
           type="button"
-          @click="activeId = item.id"
+          @click="selectItem(item.id)"
         >
           <span class="rec-thumb">
             <AppIcon name="play" :size="18" />
           </span>
           <span class="rec-main">
-            <span class="rec-title">{{ item.title }}</span>
-            <span class="rec-time">{{ item.startedAt }}</span>
+            <span class="rec-title">{{ item.meetingTitle }}</span>
+            <span class="rec-time">{{ formatTime(item.startedAt) }}</span>
           </span>
           <span class="rec-expire">
-            <span class="rec-expire-label">失效时间</span>
-            <span class="rec-expire-value">{{ item.expiresIn }}</span>
+            <span class="rec-expire-label">{{
+              item.status === 'RECORDING' ? '录制中' : '时长'
+            }}</span>
+            <span class="rec-expire-value">{{ formatDuration(item.durationSec) }}</span>
           </span>
         </button>
 
@@ -74,7 +99,7 @@ const active = computed(() => items.value.find((item) => item.id === activeId.va
             <button class="player-btn" type="button" title="播放">
               <AppIcon name="play" :size="16" />
             </button>
-            <span class="player-time">0:00 / {{ active.duration }}</span>
+            <span class="player-time">0:00 / {{ formatDuration(active.durationSec) }}</span>
             <span class="player-track"><i /></span>
             <button class="player-btn" type="button" title="音量">
               <AppIcon name="volume" :size="16" />
@@ -85,8 +110,8 @@ const active = computed(() => items.value.find((item) => item.id === activeId.va
           </div>
         </div>
 
-        <h2 class="rec-name">{{ active.title }}</h2>
-        <p class="rec-meta">{{ active.startedAt }}</p>
+        <h2 class="rec-name">{{ active.meetingTitle }}</h2>
+        <p class="rec-meta">{{ formatTime(active.startedAt) }}</p>
 
         <div class="rec-tabs detail-tabs">
           <span class="rec-tab on">会议记录</span>

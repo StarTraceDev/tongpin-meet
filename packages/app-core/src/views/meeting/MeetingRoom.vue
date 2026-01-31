@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { fetchMinutes, generateMinutes } from '../../apis/minutes'
+import { startRecording, stopRecording } from '../../apis/recording'
 import AppIcon from '../../components/AppIcon.vue'
 import { ROUTE_NAMES } from '../../router/names'
 import { usePlatform } from '../../platform'
@@ -124,9 +125,33 @@ function openWhiteboardWindow(): void {
   platform.window.openSub('whiteboard', { payload: { meetingId: meetingId.value } })
 }
 
+const recordingId = ref<string | null>(null)
+const recordingBusy = ref(false)
+
+/** 更多 → 会议录制：一次点击开始，再点停止 */
+async function toggleRecording(): Promise<void> {
+  if (meetingId.value === '' || recordingBusy.value) return
+  recordingBusy.value = true
+  try {
+    if (recordingId.value === null) {
+      const started = await startRecording(meetingId.value)
+      recordingId.value = started.id
+      ElMessage.success('已开始录制')
+    } else {
+      await stopRecording(meetingId.value, recordingId.value)
+      recordingId.value = null
+      ElMessage.success('录制已停止，可在「录制」页查看')
+    }
+  } catch {
+    ElMessage.error('录制操作失败，请确认你是主持人')
+  } finally {
+    recordingBusy.value = false
+  }
+}
+
 function openFromMore(panel: MorePick): void {
   if (panel === 'recording') {
-    ElMessage.info('会议录制将在 M13-8 接入')
+    void toggleRecording()
     return
   }
   openSidePanel(panel)
